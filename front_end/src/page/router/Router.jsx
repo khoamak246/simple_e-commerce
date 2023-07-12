@@ -1,0 +1,85 @@
+import React, { useEffect } from "react";
+import { Route, Routes, useLocation } from "react-router-dom";
+import Home from "../Home";
+import Login_Register from "../Login_Register";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  AUTH_STATE_SELECTOR,
+  TOGGLE_STATE_SELECTOR,
+} from "../../redux/selectors/Selectors";
+import { useCookies } from "react-cookie";
+import { post_login } from "../../thunk/AuthThunk";
+import { page_title } from "../../assets/js/Pagetitle";
+import Navbar from "../../components/navbar_footer/Navbar";
+import Footer from "../../components/navbar_footer/Footer";
+import Profile from "../Profile";
+import Seller from "../Seller";
+import LoadingEvent from "../../components/loadingEvent/LoadingEvent";
+import { get_address } from "../../thunk/AddressThunk";
+import AddressSelectModal from "../../components/modal/AddressSelectModal";
+
+export default function Router() {
+  const dispatch = useDispatch();
+  const authentication = useSelector(AUTH_STATE_SELECTOR);
+  const [cookies, setCookies] = useCookies();
+  const location = useLocation();
+  const toggleSelector = useSelector(TOGGLE_STATE_SELECTOR);
+
+  useEffect(() => {
+    let title = "EON";
+    page_title.forEach((element) => {
+      if (location.pathname.includes(element.pathname)) {
+        title = title + ` - ${element.title}`;
+      }
+    });
+    document.title = title;
+  }, [location]);
+
+  useEffect(() => {
+    if (!authentication) {
+      if (cookies.username && cookies.password) {
+        const { username, password } = cookies;
+        let inputLoginForm = {
+          username,
+          password,
+        };
+        dispatch(post_login(inputLoginForm)).then((res) => {
+          if (res) {
+            let usernameAndPasswordCookieExpired = Date.now() + 604800000;
+            setCookies("token", res.token, {
+              path: "/",
+              maxAge: res.expiredTime,
+            });
+            setCookies("username", inputLoginForm.username, {
+              path: "/",
+              maxAge: usernameAndPasswordCookieExpired,
+            });
+            setCookies("password", inputLoginForm.password, {
+              path: "/",
+              maxAge: usernameAndPasswordCookieExpired,
+            });
+          }
+        });
+      }
+    }
+
+    dispatch(get_address());
+  }, []);
+
+  return (
+    <>
+      <Navbar />
+      {toggleSelector === "loading" && <LoadingEvent />}
+      {toggleSelector === "selectAddress" && <AddressSelectModal />}
+      <Routes>
+        <Route path="/" Component={Home} />
+        <Route path="/profile" Component={Profile} />
+        <Route path="/seller/register" Component={Seller} />
+        <Route path="/seller/dashboard" Component={Seller} />
+        <Route path="/login" Component={Login_Register} />
+        <Route path="/register" Component={Login_Register} />
+      </Routes>
+      <Footer />
+    </>
+  );
+}
