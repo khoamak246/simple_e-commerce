@@ -1,4 +1,8 @@
-import { POST_SAVE_NEW_SHOP } from "../api/service/ShopService";
+import {
+  GET_FIND_BY_USER_ID,
+  POST_SAVE_NEW_SHOP,
+} from "../api/service/ShopService";
+import { setShop } from "../redux/reducers/ShopSlice";
 
 export const post_save_new_shop = (createInfoForm) => {
   return async function post_save_new_shop_thunk(dispatch, getState) {
@@ -18,11 +22,25 @@ export const post_save_new_shop = (createInfoForm) => {
       userId: user.id,
     };
 
-    let reponse = await POST_SAVE_NEW_SHOP(createShopForm);
-    if (reponse.status === 200) {
+    let response = await POST_SAVE_NEW_SHOP(createShopForm);
+    if (response.status === 200) {
       return true;
     } else {
-      console.log(reponse);
+      console.log(response);
+      return false;
+    }
+  };
+};
+
+export const get_shop_by_user_id = () => {
+  return async function get_shop_by_user_id_thunk(dispatch, getState) {
+    let { user } = getState();
+    let response = await GET_FIND_BY_USER_ID(user.id);
+    if (response.status === 200) {
+      dispatch(setShop(response.data.data));
+      return true;
+    } else {
+      console.log(response);
       return false;
     }
   };

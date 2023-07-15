@@ -34,4 +34,9 @@ public class ShopServiceIMPL implements IShopService {
     public void deleteById(Long id) {
         shopRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<Shop> findByUserId(Long userId) {
+        return shopRepository.findByUserId(userId);
+    }
 }

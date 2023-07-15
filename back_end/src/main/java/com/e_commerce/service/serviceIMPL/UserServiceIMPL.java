@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -146,5 +147,17 @@ public class UserServiceIMPL implements IUserService {
                 return null;
             }
         }
+    }
+
+    @Override
+    public boolean isUserIdEqualUserPrincipalId(Long userId) {
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return currentUser.getId().equals(userId);
+    }
+
+    @Override
+    public boolean isMatcherWithCurrentPassword(Long userId, String currentPassword) {
+        User user = findById(userId).orElseThrow(() -> new IllegalArgumentException("Not found user at id: " + userId));
+        return passwordEncoder.matches(currentPassword,user.getPassword());
     }
 }

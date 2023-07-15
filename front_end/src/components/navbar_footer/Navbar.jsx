@@ -1,19 +1,45 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ProfileModal from "../modal/ProfileModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  TOGGLE_STATE_SELECTOR,
+  USER_STATE_SELECTOR,
+} from "../../redux/selectors/Selectors";
+import { setToggle } from "../../redux/reducers/ToggleSlice";
 
 export default function Navbar() {
+  const currentUserAuth = useSelector(USER_STATE_SELECTOR);
+  const toggleSelector = useSelector(TOGGLE_STATE_SELECTOR);
+  const location = useLocation();
+  const dispatch = useDispatch();
+
   return (
-    <div className="bg-[#e6c191] h-[8vh] w-screen flex flex-col sm:flex-row justify-around items-center">
-      <Link to={"/"} className="">
-        <img
-          src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/Logo-no-bg.png?alt=media&token=b44f9a8f-8ca5-4392-8859-6cc5af37f3fc"
-          alt="home-page-logo"
-          className="h-[10vh]"
-          draggable={false}
-        />
-      </Link>
-      <div className="w-[60%] h-[6vh] flex items-center">
+    <div className="bg-[#e6c191] h-[8vh] w-screen flex flex-col sm:flex-row justify-between px-5 items-center">
+      <div className="flex items-center justify-center">
+        <Link to={"/"} className="">
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/Logo-no-bg.png?alt=media&token=b44f9a8f-8ca5-4392-8859-6cc5af37f3fc"
+            alt="home-page-logo"
+            className="h-[10vh]"
+            draggable={false}
+          />
+        </Link>
+        <Link
+          to={"/seller/dashboard"}
+          className={`${
+            !location.pathname.match("/seller/dashboard/*") && "hidden"
+          } text-xl pb-1 cursor-pointer`}
+        >
+          {" "}
+          | Dashboard
+        </Link>
+      </div>
+      <div
+        className={`${
+          location.pathname.match("/seller/dashboard/*") && "hidden"
+        } w-[60%] h-[6vh] flex items-center`}
+      >
         <input
           type="text"
           placeholder="Search EON"
@@ -72,36 +98,42 @@ export default function Navbar() {
           </svg>
           <p className="text-white text-xl sm:hidden">Cart</p>
         </div>
-        <div className="cursor-pointer flex items-center gap-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6 text-white"
+        {currentUserAuth ? (
+          <div
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => dispatch(setToggle("profileModal"))}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
-            />
-          </svg>
-          <p className="text-white text-xl sm:hidden">Log in</p>
-        </div>
-        {/* <div className="flex items-center gap-1 cursor-pointer">
             <p className="text-white text-[0.8rem]">Anh Khoa</p>
             <div className="rounded-full overflow-hidden w-6 h-6">
               <img
-                src="https://firebasestorage.googleapis.com/v0/b/insta-fullstack.appspot.com/o/defaultAvatar.jpg?alt=media&token=156e7504-89ab-41e0-b185-864196000f98"
-                alt=""
+                src={currentUserAuth.userInfo.avatar}
+                alt="user-avatar"
                 className="w-full h-full"
                 draggable={false}
               />
             </div>
-          </div> */}
+          </div>
+        ) : (
+          <div className="cursor-pointer flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6 text-white"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+              />
+            </svg>
+            <p className="text-white text-xl sm:hidden">Log in</p>
+          </div>
+        )}
       </div>
-      {/* <ProfileModal /> */}
+      {toggleSelector === "profileModal" && <ProfileModal />}
     </div>
   );
 }

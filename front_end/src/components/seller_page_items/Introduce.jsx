@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Introduce() {
   return (
@@ -16,9 +17,12 @@ export default function Introduce() {
         <h2 className="font-serif text-lg text-center">
           To do business with EON, you need to do a few things!
         </h2>
-        <button className="bg-orange-300 rounded-full py-1 px-3 font-semibold text-white">
+        <Link
+          to={"/seller/register"}
+          className="bg-orange-300 rounded-full py-1 px-3 font-semibold text-white"
+        >
           Explored now
-        </button>
+        </Link>
       </div>
     </div>
   );

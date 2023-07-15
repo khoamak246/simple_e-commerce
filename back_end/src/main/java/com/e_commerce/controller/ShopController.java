@@ -3,20 +3,15 @@ package com.e_commerce.controller;
 import com.e_commerce.dto.request.CreateShopForm;
 import com.e_commerce.dto.response.ResponseMessage;
 import com.e_commerce.model.*;
-import com.e_commerce.security.userPrincipal.UserPrincipal;
 import com.e_commerce.service.*;
 import com.e_commerce.utils.constant.ValidationRegex;
 import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -31,14 +26,28 @@ public class ShopController {
     private final IDistrictService districtService;
     private final IWardService wardService;
 
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ResponseMessage> findShopByUserId(@PathVariable Long userId){
+        if (!userService.isUserIdEqualUserPrincipalId(userId)){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
+        }
+
+        Optional<Shop> shop = shopService.findByUserId(userId);
+        return shop.map(
+                value -> ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", value)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at user id: " + userId)));
+
+    }
+
     @PostMapping("")
     public ResponseEntity<ResponseMessage> saveShop(@Validated @RequestBody CreateShopForm createShopForm, BindingResult result){
         if (result.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE));
         }
 
-        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!userPrincipal.getId().equals(createShopForm.getUserId())){
+
+        if (!userService.isUserIdEqualUserPrincipalId(createShopForm.getUserId())){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
         }
 

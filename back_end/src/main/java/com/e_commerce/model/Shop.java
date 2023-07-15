@@ -1,11 +1,14 @@
 package com.e_commerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Setter
@@ -55,10 +58,15 @@ public class Shop {
 
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
     private User user;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<User> followers;
+
+    @OneToMany(mappedBy = "shop")
+    @JsonIgnoreProperties({"shop"})
+    private Set<Product> products;
 
 
 

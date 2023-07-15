@@ -10,6 +10,7 @@ public final class ValidationRegex {
         public static final String NUMBER_FORMAT_REGEX = "^[0-9]+$";
         public static final String LOGIN_USERNAME_REGEX = "(^[a-zA-z0-9]{6,30}$)|(^[0-9]{10}$)|([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)|(^[0-9]{10}$)";
         public static final String SHOP_NAME_REGEX = "^([A-za-z0-9]+\\s|([A-za-z0-9]))+[a-zA-z0-9]+$";
+        public static final String DATE_YEAR_REGEX = "^\\d{4}(-)(((0)[0-9])|((1)[0-2]))(-)([0-2][0-9]|(3)[0-1])$";
         public static boolean isMatcherRegex(String regex, String value) {
                 return value.matches(regex);
         }
