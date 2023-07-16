@@ -20,6 +20,7 @@ import AddressSelectModal from "../../components/modal/AddressSelectModal";
 import { SellerDashboardItems } from "../../assets/js/SellerDashboardNavBarItem";
 import { get_business } from "../../thunk/BusinessThunk";
 import ShopDetail from "../ShopDetail";
+import ProductDetail from "../ProductDetail";
 
 export default function Router() {
   const dispatch = useDispatch();
@@ -95,6 +96,7 @@ export default function Router() {
           })}
         </Route>
         <Route path="/shop/detail/:shopId" Component={ShopDetail} />
+        <Route path="/product/detail/:productId" Component={ProductDetail} />
         <Route path="/login" Component={Login_Register} />
         <Route path="/register" Component={Login_Register} />
       </Routes>

@@ -198,7 +198,45 @@ export default function ShopDetail() {
           </div>
         </div>
       </div>
-      {/* CATALOG */}
+      {/* TODO: create function render - with delete button  */}
+      {/* DECOR */}
+      <div className="w-full px-5 py-2 relative">
+        <div className="cursor-pointer">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <div className="absolute top-[25%] left-[4%] flex z-[30]">
+          <div className="bg-white shadow-xl flex flex-col gap-2 rounded-lg border-solid border-[1px] border-slate-300 px-2 py-2">
+            <p className="hover:bg-slate-200 cursor-pointer">Slide</p>
+            <p className="hover:bg-slate-200 cursor-pointer">Image/video</p>
+            <p className="hover:bg-slate-200 cursor-pointer">
+              Text with image/video
+            </p>
+            <p className="hover:bg-slate-200 cursor-pointer">Collection</p>
+          </div>
+          <div className="bg-white shadow-xl flex flex-col gap-2 rounded-lg border-solid border-[1px] border-slate-300 px-2 py-2">
+            <p className="hover:bg-slate-200 cursor-pointer">Slide</p>
+            <p className="hover:bg-slate-200 cursor-pointer">Image/video</p>
+            <p className="hover:bg-slate-200 cursor-pointer">
+              Text with image/video
+            </p>
+            <p className="hover:bg-slate-200 cursor-pointer">Collection</p>
+          </div>
+        </div>
+      </div>
+      {/* COLLECTION */}
       <div className="mt-5 w-screen flex flex-col px-5">
         <div className="w-full flex gap-3">
           <div className="w-[20%] bg-white">

@@ -142,6 +142,33 @@ export default function DshShopProfile() {
               </svg>
             </div>
           </div>
+          {/* ADDRESS */}
+          <div className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200">
+            <p className="text-sm text-slate-400">
+              Thon bau Kim Chung, Dong Anh, Ha Noi
+            </p>
+            <div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4 text-red-400"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* INFO */}

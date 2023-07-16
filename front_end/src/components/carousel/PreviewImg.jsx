@@ -3,39 +3,17 @@ import React, { useState } from "react";
 export default function PreviewImg({ previewArr }) {
   const [selectPreviewIndex, setPreviewIndex] = useState(0);
   return (
-    <div className="w-full h-full flex justify-center items-center">
-      <div className=" w-[80%] h-[90%]">
-        <div className="h-[90%] flex justify-center items-center">
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              if (selectPreviewIndex > 0) {
-                setPreviewIndex((prev) => prev - 1);
-              }
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-10 h-10 text-slate-400"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5L8.25 12l7.5-7.5"
-              />
-            </svg>
-          </div>
+    <div className="w-full h-[90%] flex justify-center items-center">
+      {/* PREVIEW */}
+      <div className="w-full h-[90%]">
+        <div className="h-[90%] w-full flex justify-center items-center">
           {previewArr.map((val, index) => {
             return (
               <div
                 key={index}
                 className={`${
-                  selectPreviewIndex === index ? "w-[50%]" : "w-0"
-                }  h-[95%] bg-black bg-opacity-70 flex items-center justify-center overflow-hidden duration-500 transition-all`}
+                  selectPreviewIndex === index ? "w-full" : "w-0"
+                } h-[95%] bg-black bg-opacity-70 flex items-center justify-center overflow-hidden duration-500 transition-all`}
               >
                 {val.assetType === "img" ? (
                   <img src={val.url} alt="" className="w-full" />
@@ -45,37 +23,16 @@ export default function PreviewImg({ previewArr }) {
                     controls={true}
                     playsInline={true}
                     muted={true}
-                    className="h-full"
+                    autoPlay={true}
+                    className="h-full object-contain"
                   ></video>
                 )}
               </div>
             );
           })}
-
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              if (selectPreviewIndex < previewArr.length - 1) {
-                setPreviewIndex((prev) => prev + 1);
-              }
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-10 h-10 text-slate-400"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </div>
         </div>
+
+        {/* IMAGE LIST */}
         <div className="h-[10%] flex gap-2 justify-center">
           {previewArr.map((val, index) => {
             return (
