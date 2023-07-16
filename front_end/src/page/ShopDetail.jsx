@@ -1,4 +1,5 @@
 import React from "react";
+import ProductCard from "../components/card/ProductCard";
 
 export default function ShopDetail() {
   const firstInfoBar = [
@@ -89,7 +90,7 @@ export default function ShopDetail() {
       {/* NAV */}
       <div className="h-[33vh] bg-white">
         <div className="h-[80%] w-full flex justify-center items-center">
-          <div className="w-[90%] h-[70%] grid grid-cols-3 gap-5">
+          <div className="w-[90%] h-[70%] grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="w-full h-full bg-orange-300 overflow-hidden relative rounded-md">
               <img
                 src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/userAssets%2F360_F_562993122_e7pGkeY8yMfXJcRmclsoIjtOoVDDgIlh.jpg7b6b140d-b22e-4a5f-a5ed-2829d1cd6fdd?alt=media&token=97140e93-1841-4a14-8172-180a7d4edced"
@@ -102,29 +103,49 @@ export default function ShopDetail() {
                   alt=""
                   className="w-24 h-24 rounded-full"
                 />
-                <div className="flex flex-col justify-start items-start w-[40%] gap-2">
+                <div className="flex flex-col justify-start items-start w-full gap-2">
                   <h2 className="text-white text-xl w-full">Anh khoa</h2>
-                  <button className="text-white flex justify-center items-center border-white border-[1px] border-solid w-full gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 4.5v15m7.5-7.5h-15"
-                      />
-                    </svg>
-                    <p>follow</p>
-                  </button>
+                  <div className="w-full flex flex-col sm:flex-row gap-2">
+                    <button className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4.5v15m7.5-7.5h-15"
+                        />
+                      </svg>
+                      <p>Follow</p>
+                    </button>
+                    <button className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"
+                        />
+                      </svg>
+
+                      <p>Chat</p>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="w-full h-full flex flex-col gap-2 justify-center">
+            <div className="hidden w-full h-full md:flex flex-col gap-2 justify-center">
               {firstInfoBar.map((val, index) => {
                 if (index <= 1) {
                   return (
@@ -144,7 +165,7 @@ export default function ShopDetail() {
                 }
               })}
             </div>
-            <div className="w-full h-full flex flex-col gap-2 justify-center">
+            <div className="hidden w-full h-full md:flex flex-col gap-2 justify-center">
               {firstInfoBar.map((val, index) => {
                 if (index > 1) {
                   return (
@@ -226,20 +247,20 @@ export default function ShopDetail() {
           </div>
           <div className="w-[80%] bg-white">
             {/* SORT NAV */}
-            <div className="w-full flex gap-2 py-2 bg-[#EDEDED] justify-between px-5">
-              <div className="flex items-center gap-3">
+            <div className="w-full flex gap-2 py-2 bg-[#EDEDED] justify-between sm:px-5">
+              <div className="scale-[80%] sm:scale-100 w-[70%] flex items-center gap-3">
                 <p>Sort by: </p>
                 {[1, 1, 1].map((val, index) => {
                   return (
                     <div
-                      className="h-full bg-white py-1 w-[7vw] flex justify-center items-center rounded-sm cursor-pointer"
+                      className="h-full w-[15%] bg-white py-1 flex justify-center items-center rounded-sm cursor-pointer"
                       key={index}
                     >
-                      <p>Hello</p>
+                      <p className="text-[0.7rem] sm:text-base">Hello</p>
                     </div>
                   );
                 })}
-                <div className="h-full bg-white py-1 w-[15vw] flex justify-between items-center rounded-sm cursor-pointer px-2">
+                <div className="h-full bg-white py-1 w-[30%] flex justify-between items-center rounded-sm cursor-pointer px-2">
                   <p>Hello</p>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -255,7 +276,7 @@ export default function ShopDetail() {
                   </svg>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="scale-[80%] sm:scale-100 w-[30%] flex justify-end items-center gap-2">
                 <p>1/19</p>
                 <div className="h-full bg-white w-[5vw] flex justify-between items-center rounded-sm cursor-pointer">
                   <div className="w-[50%] h-full flex justify-center items-center border-r-[1px] border-solid border-slate-300 cursor-pointer bg-slate-300">
@@ -289,24 +310,14 @@ export default function ShopDetail() {
                 </div>
               </div>
             </div>
-            <div className="w-full grid grid-cols-5 p-2">
-              <div className="h-[40vh] flex flex-col w-full shadow-lg border-slate-200 border-solid border-[1px] cursor-pointer">
-                <div className="w-full h-[50%]">
-                  <img
-                    src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/userAssets%2Fdownload%20(1).jpgbb43db16-f6c0-4647-a3aa-7f152078c54c?alt=media&token=9cdbed89-3099-4750-af48-b980882a113d"
-                    alt=""
-                    className="w-full h-full"
-                  />
-                </div>
-                <div className="w-full h-[50%] flex flex-col">
-                  <p className="text-sm h-1/3 text-ellipsis overflow-hidden whitespace-normal justify-between">
-                    Capo chuyen dung cho dan heheheh lafm the nao ma ngan can
-                    duoc tui
-                  </p>
-                  <p className="text-lg h-1/3 text-[#F06246]">39.000</p>
-                  <p className="text-sm h-1/3">Da ban 100</p>
-                </div>
-              </div>
+            <div className="w-full grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 p-2 gap-3">
+              {[1, 1, 1, 1, 1, 1].map((val, index) => {
+                return (
+                  <div className="w-full h-full" key={index}>
+                    <ProductCard />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

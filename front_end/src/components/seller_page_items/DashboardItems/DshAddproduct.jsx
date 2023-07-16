@@ -348,7 +348,7 @@ export default function DshAddproduct() {
             className="w-full flex flex-col sm:flex-row"
             onClick={() => setIsSelectCatalog(true)}
           >
-            <div className="w-[50%] sm:w-[14%] text-sm">Product catalog:</div>
+            <div className="w-[50%] sm:w-[14%] text-sm">Product business:</div>
             <div className="w-[90%] sm:w-[70%] border-[1px] border-solid border-slate-400 rounded-md overflow-hidden flex items-center justify-center">
               <p
                 className={`p-2 text-sm w-[90%] outline-none cursor-pointer ${

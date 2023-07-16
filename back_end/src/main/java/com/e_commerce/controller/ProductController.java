@@ -33,8 +33,6 @@ public class ProductController {
     private final IAssetService assetService;
 
 
-
-
     @PostMapping("")
     public ResponseEntity<ResponseMessage> saveNewProduct(@Validated @RequestBody CreateProductForm createProductForm,
                                                           BindingResult result){

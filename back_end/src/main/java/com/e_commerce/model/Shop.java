@@ -31,6 +31,9 @@ public class Shop {
     @Column(columnDefinition = "bit")
     private Boolean status;
 
+    @Lob
+    private String avatar;
+
     @NotBlank
     private String description;
 

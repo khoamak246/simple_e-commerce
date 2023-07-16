@@ -1,3 +1,10 @@
+import DshPaymentSetting from "../../components/seller_page_items/DashboardItems/DshPaymentSetting";
+import DshShopProfile from "../../components/seller_page_items/DashboardItems/DshShopProfile";
+import DshAddproduct from "../../components/seller_page_items/DashboardItems/DshAddproduct";
+import DshTodolist from "../../components/seller_page_items/DashboardItems/DshTodolist";
+import DshShopCollection from "../../components/seller_page_items/DashboardItems/DshShopCollection";
+import DshAllProduct from "../../components/seller_page_items/DashboardItems/DshAllProduct";
+
 export const SellerDashboardItems = [
   {
     tab: "Order Management",
@@ -128,10 +135,6 @@ export const SellerDashboardItems = [
     url: "shopMng",
     subTab: [
       {
-        name: "Decor",
-        url: "decor",
-      },
-      {
         name: "Shop collection",
         url: "shopCollection",
       },
@@ -157,4 +160,25 @@ export const SellerDashboardItems = [
       </svg>
     ),
   },
+];
+
+export const matcherUrlComponent = [
+  {
+    url: "",
+    component: <DshTodolist />,
+  },
+  {
+    url: "/productMng/allProduct",
+    component: <DshAllProduct />,
+  },
+  {
+    url: "/productMng/addProduct",
+    component: <DshAddproduct />,
+  },
+  {
+    url: "/finance/paymentSettings",
+    component: <DshPaymentSetting />,
+  },
+  { url: "/shopMng/shopCollection", component: <DshShopCollection /> },
+  { url: "/shopMng/shopProfile", component: <DshShopProfile /> },
 ];

@@ -1,26 +1,21 @@
 import React from "react";
-import { SellerDashboardItems } from "../../assets/js/SellerDashboardNavBarItem";
+import {
+  SellerDashboardItems,
+  matcherUrlComponent,
+} from "../../assets/js/SellerDashboardNavBarItem";
 import { Link, useLocation } from "react-router-dom";
 import DshTodolist from "./DashboardItems/DshTodolist";
 import DshAddproduct from "./DashboardItems/DshAddproduct";
 import { useDispatch } from "react-redux";
 import { resetSelectBusiness } from "../../redux/reducers/BusinessSlice";
+import DshShopProfile from "./DashboardItems/DshShopProfile";
+import DshPaymentSetting from "./DashboardItems/DshPaymentSetting";
 
 export default function SellerDashboard() {
   const location = useLocation();
   const dispatch = useDispatch();
   const handleRenderSubComponent = () => {
     const baseUrl = "/seller/dashboard";
-    const matcherUrlComponent = [
-      {
-        url: "",
-        component: <DshTodolist />,
-      },
-      {
-        url: "/productMng/addProduct",
-        component: <DshAddproduct />,
-      },
-    ];
     return matcherUrlComponent.map((val, index) => {
       if (location.pathname === baseUrl + val.url) {
         return (
