@@ -21,6 +21,8 @@ import { SellerDashboardItems } from "../../assets/js/SellerDashboardNavBarItem"
 import { get_business } from "../../thunk/BusinessThunk";
 import ShopDetail from "../ShopDetail";
 import ProductDetail from "../ProductDetail";
+import Cart from "../Cart";
+import Chat from "../../components/chat/Chat";
 
 export default function Router() {
   const dispatch = useDispatch();
@@ -97,10 +99,12 @@ export default function Router() {
         </Route>
         <Route path="/shop/detail/:shopId" Component={ShopDetail} />
         <Route path="/product/detail/:productId" Component={ProductDetail} />
+        <Route path="/cart/detail" Component={Cart} />
         <Route path="/login" Component={Login_Register} />
         <Route path="/register" Component={Login_Register} />
       </Routes>
       <Footer />
+      <Chat />
     </>
   );
 }

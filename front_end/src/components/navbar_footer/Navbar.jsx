@@ -7,6 +7,7 @@ import {
   USER_STATE_SELECTOR,
 } from "../../redux/selectors/Selectors";
 import { setToggle } from "../../redux/reducers/ToggleSlice";
+import FavoriteModal from "../modal/FavoriteModal";
 
 export default function Navbar() {
   const currentUserAuth = useSelector(USER_STATE_SELECTOR);
@@ -63,8 +64,12 @@ export default function Navbar() {
           </svg>
         </div>
       </div>
+      {/* HEART */}
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-        <div className="cursor-pointer flex items-center gap-2">
+        <div
+          className="cursor-pointer flex items-center gap-2"
+          onClick={() => dispatch(setToggle("favorite"))}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -134,6 +139,7 @@ export default function Navbar() {
         )}
       </div>
       {toggleSelector === "profileModal" && <ProfileModal />}
+      {toggleSelector === "favorite" && <FavoriteModal />}
     </div>
   );
 }

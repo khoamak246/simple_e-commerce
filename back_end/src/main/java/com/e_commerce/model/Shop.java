@@ -71,6 +71,12 @@ public class Shop {
     @JsonIgnoreProperties({"shop"})
     private Set<Product> products;
 
+    @OneToMany(mappedBy = "shop")
+    @JsonIgnoreProperties({"shop"})
+    private Set<PaymentWay> paymentWays;
 
+    @OneToMany(mappedBy = "shop")
+    @JsonIgnoreProperties({"shop"})
+    private Set<Collection> collections;
 
 }

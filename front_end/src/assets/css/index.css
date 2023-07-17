@@ -15,3 +15,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.button-theme {
+  @apply text-[#EE4D2D] border-[#EE4D2D] border-[1px] border-solid;
+}
