@@ -3,6 +3,7 @@ package com.e_commerce.service.serviceIMPL;
 import com.e_commerce.dto.request.LoginForm;
 import com.e_commerce.dto.request.RegisterForm;
 import com.e_commerce.dto.response.JwtResponse;
+import com.e_commerce.model.Cart;
 import com.e_commerce.model.Role;
 import com.e_commerce.model.User;
 import com.e_commerce.model.UserInfo;
@@ -16,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -102,6 +104,7 @@ public class UserServiceIMPL implements IUserService {
         UserInfo userInfo = UserInfo.builder()
                 .createdDate(LocalDate.now().toString())
                 .avatar("https://firebasestorage.googleapis.com/v0/b/insta-fullstack.appspot.com/o/defaultAvatar.jpg?alt=media&token=156e7504-89ab-41e0-b185-864196000f98&_gl=1*1d2dync*_ga*OTg5NTExNTUxLjE2ODYzMjQzMDE.*_ga_CW55HF8NVT*MTY4NjM3MjI1NC4zLjEuMTY4NjM3MjMyNi4wLjAuMA..")
+                .cart(Cart.builder().build())
                 .build();
 
         User user = User.builder()
@@ -146,5 +149,17 @@ public class UserServiceIMPL implements IUserService {
                 return null;
             }
         }
+    }
+
+    @Override
+    public boolean isUserIdEqualUserPrincipalId(Long userId) {
+        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return currentUser.getId().equals(userId);
+    }
+
+    @Override
+    public boolean isMatcherWithCurrentPassword(Long userId, String currentPassword) {
+        User user = findById(userId).orElseThrow(() -> new IllegalArgumentException("Not found user at id: " + userId));
+        return passwordEncoder.matches(currentPassword,user.getPassword());
     }
 }

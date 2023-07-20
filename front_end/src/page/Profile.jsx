@@ -3,12 +3,52 @@ import Personal from "../components/profile_page_items/Personal";
 import Password from "../components/profile_page_items/Password";
 import Address from "../components/profile_page_items/Address";
 import Order from "../components/profile_page_items/Order";
+import { useDispatch, useSelector } from "react-redux";
+import { USER_STATE_SELECTOR } from "../redux/selectors/Selectors";
+import { toast } from "react-hot-toast";
+import { firebase_single_upload } from "../firebase/FirebaseService";
+import { patch_update_user } from "../thunk/UserThunk";
 
 export default function Profile() {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState("personal");
+  const currentUserAuth = useSelector(USER_STATE_SELECTOR);
+  const [prewviewAvatar, setPreviewAvatar] = useState();
 
   const handleOnClickActiveTab = (e) => {
     setActiveTab(e.target.getAttribute("name"));
+  };
+
+  const handlePreviewImg = (e) => {
+    if (prewviewAvatar) {
+      URL.revokeObjectURL(prewviewAvatar.previewUrl);
+    }
+    if (e.target.files) {
+      let file = e.target.files[0];
+      if (!file.type.includes("image")) {
+        toast.error("OOP! You need to select an image!");
+      } else {
+        setPreviewAvatar({
+          previewUrl: URL.createObjectURL(file),
+          file,
+        });
+      }
+    }
+  };
+
+  const handleOnSubmit = async () => {
+    if (prewviewAvatar) {
+      await firebase_single_upload(prewviewAvatar.file).then((res) => {
+        let avatar = res.split("_assetType:")[0];
+        dispatch(patch_update_user({ avatar })).then((res) => {
+          if (res) {
+            URL.revokeObjectURL(prewviewAvatar.previewUrl);
+            setPreviewAvatar();
+            toast.success("Update successfully!");
+          }
+        });
+      });
+    }
   };
 
   return (
@@ -20,15 +60,27 @@ export default function Profile() {
               <input
                 type="file"
                 className="w-full h-full absolute top-0 left-0 opacity-0 cursor-pointer"
+                onChange={handlePreviewImg}
               />
               <img
-                src="https://firebasestorage.googleapis.com/v0/b/insta-fullstack.appspot.com/o/defaultAvatar.jpg?alt=media&token=156e7504-89ab-41e0-b185-864196000f98"
-                alt=""
+                src={
+                  prewviewAvatar
+                    ? prewviewAvatar.previewUrl
+                    : currentUserAuth
+                    ? currentUserAuth.userInfo.avatar
+                    : ""
+                }
+                alt="user-avatar"
                 className="w-full h-full"
               />
             </div>
             <div className="text-white text-xl font-semibold">Anh Khoa</div>
-            <button className="bg-[#F3A847] px-5 py-1 font-semibold text-white rounded-2xl">
+            <button
+              className={`${
+                !prewviewAvatar && "hidden"
+              } bg-[#F3A847] hover:bg-[#d99f53] px-5 py-1 font-semibold text-white rounded-2xl`}
+              onClick={handleOnSubmit}
+            >
               Save
             </button>
           </div>

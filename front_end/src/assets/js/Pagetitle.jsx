@@ -1,3 +1,5 @@
+
+
 export const page_title = [
   {
     pathname: "/login",
@@ -16,3 +18,5 @@ export const page_title = [
     title: "Profile",
   },
 ];
+
+

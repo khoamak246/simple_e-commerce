@@ -4,7 +4,12 @@ export default function Footer() {
   return (
     <div className="w-screen mt-10">
       <div className="bg-[#232F3E] w-full">
-        <div className="w-full bg-[#485769] h-[6vh] flex justify-center items-center cursor-pointer">
+        <div
+          className="w-full bg-[#485769] h-[6vh] flex justify-center items-center cursor-pointer"
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
           <p className="text-white font-semibold">Back to top</p>
         </div>
         <div className="flex justify-evenly w-full py-5">

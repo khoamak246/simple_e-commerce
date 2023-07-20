@@ -20,5 +20,8 @@ public interface IUserService extends IGenericService<User> {
     boolean existsByPhoneNumber(String email);
     void registerNewUser(RegisterForm registerForm);
     JwtResponse loginUser(LoginForm loginForm);
+    boolean isUserIdEqualUserPrincipalId(Long userId);
+
+    boolean isMatcherWithCurrentPassword(Long userId, String currentPassword);
 
 }

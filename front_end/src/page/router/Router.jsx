@@ -17,6 +17,12 @@ import Seller from "../Seller";
 import LoadingEvent from "../../components/loadingEvent/LoadingEvent";
 import { get_address } from "../../thunk/AddressThunk";
 import AddressSelectModal from "../../components/modal/AddressSelectModal";
+import { SellerDashboardItems } from "../../assets/js/SellerDashboardNavBarItem";
+import { get_business } from "../../thunk/BusinessThunk";
+import ShopDetail from "../ShopDetail";
+import ProductDetail from "../ProductDetail";
+import Cart from "../Cart";
+import Chat from "../../components/chat/Chat";
 
 export default function Router() {
   const dispatch = useDispatch();
@@ -64,6 +70,7 @@ export default function Router() {
     }
 
     dispatch(get_address());
+    dispatch(get_business());
   }, []);
 
   return (
@@ -71,15 +78,33 @@ export default function Router() {
       <Navbar />
       {toggleSelector === "loading" && <LoadingEvent />}
       {toggleSelector === "selectAddress" && <AddressSelectModal />}
+
       <Routes>
         <Route path="/" Component={Home} />
         <Route path="/profile" Component={Profile} />
+        <Route path="/seller/introduce" Component={Seller} />
         <Route path="/seller/register" Component={Seller} />
-        <Route path="/seller/dashboard" Component={Seller} />
+        <Route path="/seller/dashboard" Component={Seller}>
+          {SellerDashboardItems.map((val, index) => {
+            return (
+              <Route path={val.url} Component={Seller} key={index}>
+                {val.subTab.map((subTab, index) => {
+                  return (
+                    <Route path={subTab.url} Component={Seller} key={index} />
+                  );
+                })}
+              </Route>
+            );
+          })}
+        </Route>
+        <Route path="/shop/detail/:shopId" Component={ShopDetail} />
+        <Route path="/product/detail/:productId" Component={ProductDetail} />
+        <Route path="/cart/detail" Component={Cart} />
         <Route path="/login" Component={Login_Register} />
         <Route path="/register" Component={Login_Register} />
       </Routes>
       <Footer />
+      <Chat />
     </>
   );
 }

@@ -1,6 +1,11 @@
 import { POST_LOGIN, POST_REGISTER } from "../api/service/AuthService";
-import { setAuth } from "../redux/reducers/AuthSlice";
-import { setUser } from "../redux/reducers/UserSlice";
+import { resetAddress } from "../redux/reducers/AddressSlice";
+import { resetAuth, setAuth } from "../redux/reducers/AuthSlice";
+import { resetBusiness } from "../redux/reducers/BusinessSlice";
+import { resetShop } from "../redux/reducers/ShopSlice";
+import { resetToggle } from "../redux/reducers/ToggleSlice";
+import { resetUser, setUser } from "../redux/reducers/UserSlice";
+import Cookie from "universal-cookie";
 
 export const post_register = (registerForm) => {
   return async function post_register_thunk(dispatch) {
@@ -27,5 +32,22 @@ export const post_login = (loginForm) => {
       console.log(response);
       return null;
     }
+  };
+};
+
+export const handle_log_out = () => {
+  return async function handle_log_out_thunk(dispatch) {
+    const cookies = new Cookie();
+    cookies.remove("token");
+    cookies.remove("username");
+    cookies.remove("password");
+    dispatch(resetAuth());
+    dispatch(resetUser());
+    dispatch(resetAddress());
+    dispatch(resetToggle());
+    dispatch(resetShop());
+    dispatch(resetBusiness());
+
+    return true;
   };
 };
