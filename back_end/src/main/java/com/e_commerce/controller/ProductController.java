@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -31,6 +28,16 @@ public class ProductController {
     private final IProductService productService;
     private final IProductOptionsService productOptionsService;
     private final IAssetService assetService;
+
+    @GetMapping("/search/{searchValue}")
+    public ResponseEntity<ResponseMessage> getProductByName(@PathVariable("searchValue") String searchValue){
+        Set<Product> products = productService.findByNameContainingIgnoreCase(searchValue);
+        if (products.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Utils.buildSuccessMessage("Query successfully!", products));
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", products));
+        }
+    }
 
 
     @PostMapping("")

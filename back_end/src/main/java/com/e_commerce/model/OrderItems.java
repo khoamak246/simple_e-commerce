@@ -1,8 +1,6 @@
 package com.e_commerce.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,22 +11,22 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductOptions {
+public class OrderItems {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private ProductOptions productOptions;
+
     private double price;
-    private int stock;
+    private int quantity;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "option_product")
-    @JsonIgnoreProperties({"productOptions"})
-    private Product product;
-
-    @OneToOne(mappedBy = "productOptions")
-    @JsonIgnoreProperties({"productOptions"})
-    private CartItems cartItem;
+    @JoinColumn(name = "order_item_order")
+    @JsonIgnoreProperties({"orderItems"})
+    private Order order;
 
 }
+

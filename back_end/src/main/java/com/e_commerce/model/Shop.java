@@ -71,8 +71,7 @@ public class Shop {
     @JsonIgnoreProperties({"shop"})
     private Set<Product> products;
 
-    @OneToMany(mappedBy = "shop")
-    @JsonIgnoreProperties({"shop"})
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<PaymentWay> paymentWays;
 
     @OneToMany(mappedBy = "shop")

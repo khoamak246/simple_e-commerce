@@ -1,6 +1,7 @@
 package com.e_commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -43,4 +44,15 @@ public class UserInfo {
 
     @OneToMany(mappedBy = "userInfo")
     private Set<Notifications> notifications;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "cart_id")
+    @JsonIgnoreProperties({"userInfo"})
+    private Cart cart;
+
+    @OneToMany(mappedBy = "userInfo")
+    @JsonIgnoreProperties({"userInfo"})
+    private Set<Order> order;
+
+
 }

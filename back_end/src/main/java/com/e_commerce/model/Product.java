@@ -1,6 +1,7 @@
 package com.e_commerce.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
 
@@ -38,15 +39,16 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "shop_id")
-    @JsonIncludeProperties({"products"})
+    @JsonIgnoreProperties({"products"})
     private Shop shop;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product")
+    @JsonIgnoreProperties({"product"})
     private Set<ProductOptions> productOptions;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "business_id")
-    @JsonIncludeProperties({"product"})
+    @JsonIgnoreProperties({"product"})
     private Business business;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

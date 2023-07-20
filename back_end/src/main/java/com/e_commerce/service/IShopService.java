@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface IShopService extends IGenericService<Shop> {
     Optional<Shop> findByUserId(Long userId);
+    boolean isCurrentUserMatchShopUserid(Long shopId);
 }

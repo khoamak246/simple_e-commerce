@@ -3,11 +3,16 @@ package com.e_commerce.service.serviceIMPL;
 import com.e_commerce.model.Product;
 import com.e_commerce.repository.IProductRepository;
 import com.e_commerce.service.IProductService;
+import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +38,30 @@ public class ProductServiceIMPL implements IProductService {
     @Override
     public void deleteById(Long id) {
         productRepository.deleteById(id);
+    }
+
+
+    @Override
+    public Set<Product> findByNameContainingIgnoreCase(String name) {
+        return productRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    @Override
+    public Set<Product> createSetProductFromDtoForm(Set<Long> productsDtoForm) {
+        Set<Product> products = new HashSet<>();
+
+        if (productsDtoForm == null){
+            return products;
+        }
+
+        for (Long productId : productsDtoForm) {
+            Optional<Product> product = findById(productId);
+            if (!product.isPresent()) {
+                return null;
+            } else {
+                products.add(product.get());
+            }
+        }
+        return products;
     }
 }

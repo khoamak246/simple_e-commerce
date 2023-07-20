@@ -3,6 +3,7 @@ package com.e_commerce.service.serviceIMPL;
 import com.e_commerce.dto.request.LoginForm;
 import com.e_commerce.dto.request.RegisterForm;
 import com.e_commerce.dto.response.JwtResponse;
+import com.e_commerce.model.Cart;
 import com.e_commerce.model.Role;
 import com.e_commerce.model.User;
 import com.e_commerce.model.UserInfo;
@@ -103,6 +104,7 @@ public class UserServiceIMPL implements IUserService {
         UserInfo userInfo = UserInfo.builder()
                 .createdDate(LocalDate.now().toString())
                 .avatar("https://firebasestorage.googleapis.com/v0/b/insta-fullstack.appspot.com/o/defaultAvatar.jpg?alt=media&token=156e7504-89ab-41e0-b185-864196000f98&_gl=1*1d2dync*_ga*OTg5NTExNTUxLjE2ODYzMjQzMDE.*_ga_CW55HF8NVT*MTY4NjM3MjI1NC4zLjEuMTY4NjM3MjMyNi4wLjAuMA..")
+                .cart(Cart.builder().build())
                 .build();
 
         User user = User.builder()
