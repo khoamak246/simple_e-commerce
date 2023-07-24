@@ -6,12 +6,13 @@ import {
   TOGGLE_STATE_SELECTOR,
   USER_STATE_SELECTOR,
 } from "../../redux/selectors/Selectors";
-import { setToggle } from "../../redux/reducers/ToggleSlice";
+import { resetToggle, setToggle } from "../../redux/reducers/ToggleSlice";
 import FavoriteModal from "../modal/FavoriteModal";
 
 export default function Navbar() {
   const currentUserAuth = useSelector(USER_STATE_SELECTOR);
   const toggleSelector = useSelector(TOGGLE_STATE_SELECTOR);
+  const userSelector = useSelector(USER_STATE_SELECTOR);
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -68,7 +69,13 @@ export default function Navbar() {
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
         <div
           className="cursor-pointer flex items-center gap-2"
-          onClick={() => dispatch(setToggle("favorite"))}
+          onClick={() => {
+            if (toggleSelector !== "favorite") {
+              dispatch(setToggle("favorite"));
+            } else {
+              dispatch(resetToggle());
+            }
+          }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +93,21 @@ export default function Navbar() {
           </svg>
           <p className="text-white text-xl sm:hidden">Favorite</p>
         </div>
-        <div className="cursor-pointer flex items-center gap-2">
+        <Link
+          to={"/cart/detail"}
+          className="cursor-pointer flex items-center gap-2 relative"
+        >
+          {userSelector &&
+            userSelector.userInfo.cart.cartItems.length !== 0 && (
+              <div
+                className={`rounded-full w-3 h-3 absolute top-0 right-0 bg-red-500 flex justify-center items-center`}
+              >
+                <p className="text-white text-[0.6rem] text-center">
+                  {userSelector.userInfo.cart.cartItems.length}
+                </p>
+              </div>
+            )}
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -102,11 +123,17 @@ export default function Navbar() {
             />
           </svg>
           <p className="text-white text-xl sm:hidden">Cart</p>
-        </div>
+        </Link>
         {currentUserAuth ? (
           <div
             className="flex items-center gap-1 cursor-pointer"
-            onClick={() => dispatch(setToggle("profileModal"))}
+            onClick={() => {
+              if (toggleSelector !== "profileModal") {
+                dispatch(setToggle("profileModal"));
+              } else {
+                dispatch(resetToggle());
+              }
+            }}
           >
             <p className="text-white text-[0.8rem]">Anh Khoa</p>
             <div className="rounded-full overflow-hidden w-6 h-6">

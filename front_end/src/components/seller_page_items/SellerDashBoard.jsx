@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SellerDashboardItems,
   matcherUrlComponent,
@@ -6,10 +6,12 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import DshTodolist from "./DashboardItems/DshTodolist";
 import DshAddproduct from "./DashboardItems/DshAddproduct";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resetSelectBusiness } from "../../redux/reducers/BusinessSlice";
 import DshShopProfile from "./DashboardItems/DshShopProfile";
 import DshPaymentSetting from "./DashboardItems/DshPaymentSetting";
+import { ADDRESS_STATE_SELECTOR } from "../../redux/selectors/Selectors";
+import { setAddress } from "../../redux/reducers/AddressSlice";
 
 export default function SellerDashboard() {
   const location = useLocation();
@@ -26,6 +28,7 @@ export default function SellerDashboard() {
       }
     });
   };
+
   return (
     <div className="w-screen h-screen flex mt-2">
       <div className="w-1/5 bg-white border-r-[1px] border-solid border-slate-300 shadow-xl flex flex-col gap-5 p-3">

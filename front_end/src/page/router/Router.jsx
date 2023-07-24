@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useParams } from "react-router-dom";
 import Home from "../Home";
 import Login_Register from "../Login_Register";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +23,7 @@ import ShopDetail from "../ShopDetail";
 import ProductDetail from "../ProductDetail";
 import Cart from "../Cart";
 import Chat from "../../components/chat/Chat";
+import UnknowPage from "../UnknowPage";
 
 export default function Router() {
   const dispatch = useDispatch();
@@ -39,6 +40,7 @@ export default function Router() {
       }
     });
     document.title = title;
+    window.scrollTo(0, 0);
   }, [location]);
 
   useEffect(() => {
@@ -98,10 +100,12 @@ export default function Router() {
           })}
         </Route>
         <Route path="/shop/detail/:shopId" Component={ShopDetail} />
+        <Route path="/categories/:categories" Component={ShopDetail} />
         <Route path="/product/detail/:productId" Component={ProductDetail} />
         <Route path="/cart/detail" Component={Cart} />
         <Route path="/login" Component={Login_Register} />
         <Route path="/register" Component={Login_Register} />
+        <Route path="*" Component={UnknowPage} />
       </Routes>
       <Footer />
       <Chat />

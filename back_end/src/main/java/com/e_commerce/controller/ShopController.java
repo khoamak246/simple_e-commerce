@@ -1,8 +1,10 @@
 package com.e_commerce.controller;
 
+import com.e_commerce.dto.request.AssetCreateForm;
 import com.e_commerce.dto.request.CreateShopForm;
 import com.e_commerce.dto.request.UpdateShopForm;
 import com.e_commerce.dto.response.ResponseMessage;
+import com.e_commerce.dto.response.ShopResponse;
 import com.e_commerce.model.*;
 import com.e_commerce.service.*;
 import com.e_commerce.utils.constant.ValidationRegex;
@@ -29,6 +31,7 @@ public class ShopController {
     private final IDistrictService districtService;
     private final IWardService wardService;
     private final IPaymentWayService paymentWayService;
+    private final IAssetService assetService;
 
     @PatchMapping("/{shopId}")
     public ResponseEntity<ResponseMessage> patchUpdateShop(@PathVariable Long shopId, @RequestBody UpdateShopForm updateShopForm) {
@@ -51,6 +54,24 @@ public class ShopController {
 
         if (updateShopForm.getAvatar() != null) {
             shop.get().setAvatar(updateShopForm.getAvatar());
+        }
+
+        if (updateShopForm.getCoverImg() != null) {
+            shop.get().setCoverImg(updateShopForm.getCoverImg());
+        }
+
+        if (updateShopForm.getIntroduce() != null && updateShopForm.getIntroduce().size() != 0) {
+            Set<Assets> introduce = new HashSet<>();
+            for (AssetCreateForm asset : updateShopForm.getIntroduce()) {
+                Assets newAsset = Assets.builder()
+                        .url(asset.getUrl())
+                        .assetType(asset.getAssetType())
+                        .build();
+
+                Assets justSavedAsset = assetService.save(newAsset);
+                introduce.add(justSavedAsset);
+            }
+            shop.get().setIntroduce(introduce);
         }
 
         if (updateShopForm.getDescription() != null) {
@@ -117,7 +138,10 @@ public class ShopController {
         }
 
         Shop justSavedShop = shopService.save(shop.get());
-        return ResponseEntity.ok().body(Utils.buildSuccessMessage("update shop successfully!", justSavedShop));
+
+        ShopResponse shopResponse = shopService.createShopResponse(justSavedShop);
+
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("update shop successfully!", shopResponse));
     }
 
     @GetMapping("/user/{userId}")
@@ -127,10 +151,13 @@ public class ShopController {
         }
 
         Optional<Shop> shop = shopService.findByUserId(userId);
-        return shop.map(
-                        value -> ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", value)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at user id: " + userId)));
+        if (!shop.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at user id: " + userId));
+        }
 
+        ShopResponse shopResponse = shopService.createShopResponse(shop.get());
+
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", shopResponse));
     }
 
     @PostMapping("")
@@ -181,13 +208,16 @@ public class ShopController {
                 .streetDetail(createShopForm.getStreetDetail())
                 .provinceCity(provinceCity.get())
                 .district(district.get())
+                .avatar("https://firebasestorage.googleapis.com/v0/b/insta-fullstack.appspot.com/o/defaultAvatar.jpg?alt=media&token=156e7504-89ab-41e0-b185-864196000f98")
+                .coverImg("https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/default-cover-4.jpeg?alt=media&token=67ccde44-bd3e-4798-88c1-a3670a9e0100")
                 .ward(ward.get())
                 .paymentWays(new HashSet<>(paymentWayService.findAll()))
                 .user(user.get())
                 .build();
 
         Shop justSavedShop = shopService.save(newShop);
-        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Create new shop successfully!", justSavedShop));
+        ShopResponse shopResponse = shopService.createShopResponse(justSavedShop);
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Create new shop successfully!", shopResponse));
     }
 
 }

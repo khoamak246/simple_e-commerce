@@ -1,30 +1,31 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import PreviewImg from "../components/carousel/previewImg";
 import ProductCard from "../components/card/ProductCard";
 import StarRated from "../components/card/StarRated";
 import CommentItems from "../components/shopDetail_page_items/CommentItems";
+import { useEffect } from "react";
+import { GET_FIND_PRODUCT_BY_ID } from "../api/service/ProductService";
+import {
+  getMaxPrice,
+  getMinPrice,
+  handleRenderBusiness,
+  renderAddress,
+  handleRenderCurrentSelectAddress,
+  getProductOptionById,
+} from "../utils/Utils";
+import { useDispatch, useSelector } from "react-redux";
+import { ADDRESS_STATE_SELECTOR } from "../redux/selectors/Selectors";
+import { setToggle } from "../redux/reducers/ToggleSlice";
+import { post_create_new_cart_item } from "../thunk/CartThunk";
+import { toast } from "react-hot-toast";
 
 export default function ProductDetail() {
-  const [selectPreviewIndex, setPreviewIndex] = useState(0);
-  const previewArr = [
-    {
-      url: "https://firebasestorage.googleapis.com/v0/b/insta-fullstack.appspot.com/o/image%2Fy2mate.com%20-%20The%20FUNNIEST%20Animals%20Being%20Absolute%20Jerks%20Pets%20Dogs%20Cats%20Shorts_480p.mp4094bfb82-475b-401b-951c-4828a61dbd4f?alt=media&token=08f7dfb8-9cac-4c09-ad11-73c4c667e29d",
-      assetType: "video",
-    },
-    {
-      url: "https://englishlikeanative.co.uk/wp-content/uploads/2021/09/Animal-idioms-for-ESL-students-learning-English..jpg",
-      assetType: "img",
-    },
-    {
-      url: "https://englishlikeanative.co.uk/wp-content/uploads/2021/09/Animal-idioms-for-ESL-students-learning-English..jpg",
-      assetType: "img",
-    },
-    {
-      url: "https://englishlikeanative.co.uk/wp-content/uploads/2021/09/Animal-idioms-for-ESL-students-learning-English..jpg",
-      assetType: "img",
-    },
-  ];
+  const [product, setProduct] = useState();
+  const param = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const addressSelector = useSelector(ADDRESS_STATE_SELECTOR);
   const shopInfo = [
     {
       title: "Product: ",
@@ -44,7 +45,7 @@ export default function ProductDetail() {
           />
         </svg>
       ),
-      data: 615,
+      data: product ? product.shop.productNumber : 0,
     },
     {
       title: "Follower: ",
@@ -64,7 +65,7 @@ export default function ProductDetail() {
           />
         </svg>
       ),
-      data: 615,
+      data: product ? product.shop.followers.length : 0,
     },
     {
       title: "Rate: ",
@@ -84,7 +85,7 @@ export default function ProductDetail() {
           />
         </svg>
       ),
-      data: "4 / 5",
+      data: `${product ? product.shop.rate : 0} / 5`,
     },
     {
       title: "Join: ",
@@ -104,41 +105,116 @@ export default function ProductDetail() {
           />
         </svg>
       ),
-      data: "5 năm trươc",
+      data: product ? product.shop.createdDate : "",
     },
   ];
+  const [selectedProduct, setSelectedProduct] = useState({
+    productOptionId: 0,
+    quantity: 1,
+  });
+
+  useEffect(() => {
+    if (product) {
+      handleSelectFirstProductOptionHaveStock();
+    }
+  }, [product]);
+
+  const handleSelectFirstProductOptionHaveStock = () => {
+    if (product) {
+      const { productOptions } = product;
+      let productOption = productOptions.find((e) => e.stock > 0);
+      if (productOption) {
+        setSelectedProduct({
+          quantity: 1,
+          productOptionId: productOption.id,
+        });
+      } else {
+        navigate("*");
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      await GET_FIND_PRODUCT_BY_ID(param.productId).then((res) => {
+        if (
+          res.status === 200 &&
+          res.data.data.onSale &&
+          !res.data.data.block
+        ) {
+          setProduct(res.data.data);
+        } else {
+          navigate("*");
+        }
+      });
+    }
+
+    fetchData();
+  }, []);
+
+  const handleChangeQuantity = (action) => {
+    let nexQuantity = 1;
+    if (action === "down") {
+      if (selectedProduct.quantity > 1) {
+        nexQuantity = selectedProduct.quantity - 1;
+      }
+    } else {
+      let stock = getProductOptionById(
+        product,
+        selectedProduct.productOptionId
+      ).stock;
+      if (selectedProduct.quantity < stock) {
+        nexQuantity = selectedProduct.quantity + 1;
+      } else {
+        nexQuantity = stock;
+      }
+    }
+
+    setSelectedProduct({ ...selectedProduct, quantity: nexQuantity });
+  };
+
+  const handleRenderBusinessWithLink = () => {
+    if (product) {
+      let currentBusiness = handleRenderBusiness(product.business);
+      let currentBusinessArr = currentBusiness.split(" > ");
+      return currentBusinessArr.map((val, index) => {
+        return (
+          <Link key={index} to={"/"} className="text-blue-600">
+            {`${val} >`}
+          </Link>
+        );
+      });
+    } else {
+      return "";
+    }
+  };
+
+  const handleAddToCart = (isNavigate) => {
+    dispatch(post_create_new_cart_item(selectedProduct)).then((res) => {
+      if (res) {
+        toast.success("Add to cart successfully!");
+        if (isNavigate === true) {
+          navigate("/cart/detail");
+        }
+      }
+    });
+  };
+
   return (
     <div className="w-screen flex flex-col px-5 gap-5">
       {/* BUSINESS */}
-      <div className="w-full flex items-center py-2 text-sm sm:text-base">
+      <div className="w-full flex gap-1 items-center py-2 text-sm sm:text-base">
         <Link to={"/"} className="text-blue-600">
-          EON
+          EON {" > "}
         </Link>
-        <div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
-          </svg>
-        </div>
-        <Link to={"/"} className="text-blue-600">
-          Noi that va doi song
-        </Link>
+        {handleRenderBusinessWithLink()}
       </div>
       {/* PRODUCT PREVIEW */}
       <div className="w-full bg-white rounded-sm flex flex-col sm:flex-row gap-5">
         {/* PREVIEW  */}
         <div className="w-full sm:w-1/3 h-[80vh] border-solid border-r-[1px] border-slate-200">
-          <PreviewImg previewArr={previewArr} />
+          {product && <PreviewImg previewArr={product.assets} />}
           <div className="h-[10%] flex justify-center items-center border-t-[1px] border-slate-200 border-solid text-red-500 gap-1">
             <div className="cursor-pointer">
               <svg
@@ -156,47 +232,47 @@ export default function ProductDetail() {
                 />
               </svg>
             </div>
-            <p>Like (9.2k)</p>
+            <p>{`Like (${product && product.likeNumber})`}</p>
           </div>
         </div>
         {/* SALE */}
         <div className="w-full sm:w-2/3 flex flex-col py-2 justify-around">
           {/* NAME */}
-          <h1 className="text-xl w-full">
-            ZIFRIEND KA6406 Bàn Phím Cơ 63 Phím Có Đèn Nền RGB 60% Dành Cho Game
-            Thủ Văn phòng chơi game Led Rainbow
-          </h1>
+          <h1 className="text-xl w-full">{product && product.name}</h1>
           {/* SALE INFO */}
           <div className="grid grid-cols-2 lg:grid-cols-6 gap-2">
             {/* RATED */}
             <div className="col-span-1 flex items-center gap-1 border-r-[1px] border-slate-300 border-solid text-[#D0011B]">
-              <p>4.7</p>
+              <p>{product && product.rate}</p>
               <div className="flex">
                 <StarRated scale={1} />
               </div>
             </div>
             {/* COMMENT NUMBER */}
             <div className="col-span-1 flex items-center gap-1 border-r-[1px] border-slate-300 border-solid text-[#D0011B]">
-              <p>130</p>
+              <p>{product && product.reviewNumber}</p>
               <p>Comment</p>
             </div>
             {/* SALES */}
             <div className="col-span-1 flex items-center gap-1 text-[#D0011B]">
-              <p>362</p>
+              <p>{product && product.saleNumber}</p>
               <p>Sales</p>
             </div>
-            <div className="col-span-3 flex justify-end pr-5 text-[#757575]">
+            <div className="col-span-3 flex justify-end pr-5 text-[#757575] cursor-pointer">
               <p>Report</p>
             </div>
           </div>
           {/* PRICE */}
           <div className="w-full flex bg-[#FAFAFA] py-2">
-            <p className="text-2xl text-[#D0011B]">{`400$ - 600$`}</p>
+            <p className="text-2xl text-[#D0011B]">{`${getMinPrice(
+              product
+            )}$ - ${getMaxPrice(product)}$`}</p>
           </div>
           {/* DELIVER */}
           <div className="grid grid-cols-12">
             <div className="col-span-2 text-sm text-[#757575]">Address</div>
             <div className="col-span-10 flex flex-col gap-1">
+              {/* FROM */}
               <div className="flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -215,18 +291,26 @@ export default function ProductDetail() {
                 <p className="text-[#757575] text-sm">
                   From:{" "}
                   <span className="text-black">
-                    Thi Tran Dong Anh, Dong Anh, Ha Noi
+                    {product && renderAddress(product.shop)}
                   </span>
                 </p>
               </div>
-              <p className="text-[#757575] text-sm pl-6">
+              <p
+                className="text-[#757575] text-sm pl-6 cursor-pointer"
+                onClick={() => dispatch(setToggle("selectAddress"))}
+              >
                 To:{" "}
                 <span className="text-black">
-                  Thi Tran Dong Anh, Dong Anh, Ha Noi
+                  {product &&
+                    addressSelector &&
+                    handleRenderCurrentSelectAddress(addressSelector, true)}
                 </span>
               </p>
               <p className="text-[#757575] text-sm pl-6">
-                Transportation: <span className="text-black">30$</span>
+                Transportation:{" "}
+                <span className="text-black">
+                  {product && (getMinPrice(product) * 110) / 100}$
+                </span>
               </p>
             </div>
           </div>
@@ -234,13 +318,27 @@ export default function ProductDetail() {
           <div className="grid grid-cols-12">
             <div className="col-span-2 text-sm text-[#757575]">Option</div>
             <div className="col-span-10 grid grid-cols-3 gap-2">
-              {[1, 1, 1, 1, 1].map((val, index) => {
+              {product?.productOptions.map((val, index) => {
                 return (
                   <p
-                    key={index}
-                    className="text-black text-sm border-solid border-slate-400 border-[1px] p-1 hover:text-[#D0011B] cursor-pointer hover:border-[#D0011B]"
+                    key={val.id}
+                    className={` ${
+                      selectedProduct.productOptionId == val.id
+                        ? "text-[#D0011B] border-[#D0011B]"
+                        : "text-black border-slate-400"
+                    } text-sm border-solid border-[1px] p-1 hover:text-[#D0011B] cursor-pointer hover:border-[#D0011B] ${
+                      val.stock <= 0 && "opacity-50"
+                    }`}
+                    onClick={() => {
+                      if (val.stock > 0) {
+                        setSelectedProduct({
+                          ...selectedProduct,
+                          productOptionId: val.id,
+                        });
+                      }
+                    }}
                   >
-                    Thi Tran Dong Anh, Dong Anh
+                    {val.name}
                   </p>
                 );
               })}
@@ -252,7 +350,10 @@ export default function ProductDetail() {
             <div className="col-span-10 flex gap-2 items-center">
               <div className="w-1/4">
                 <div className="w-[80%] h-full grid grid-cols-4 border-solid border-[1px] border-slate-400 py-1">
-                  <div className="col-span-1 flex justify-center items-center cursor-pointer border-solid border-r-[1px] border-slate-400">
+                  <div
+                    className="col-span-1 flex justify-center items-center cursor-pointer border-solid border-r-[1px] border-slate-400"
+                    onClick={() => handleChangeQuantity("down")}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -269,9 +370,12 @@ export default function ProductDetail() {
                     </svg>
                   </div>
                   <div className="col-span-2 text-sm flex justify-center items-center border-solid border-r-[1px] border-slate-400">
-                    1
+                    {product && selectedProduct.quantity}
                   </div>
-                  <div className="col-span-1 flex justify-center items-center cursor-pointer">
+                  <div
+                    className="col-span-1 flex justify-center items-center cursor-pointer"
+                    onClick={() => handleChangeQuantity("up")}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -290,13 +394,28 @@ export default function ProductDetail() {
                 </div>
               </div>
               <div className="w-1/4">
-                <p className="text-sm">9541 products available</p>
+                <p className="text-sm">{`${
+                  product
+                    ? getProductOptionById(
+                        product,
+                        selectedProduct.productOptionId
+                      )
+                      ? getProductOptionById(
+                          product,
+                          selectedProduct.productOptionId
+                        ).stock
+                      : 0
+                    : 0
+                } products available`}</p>
               </div>
             </div>
           </div>
           {/* BUTTON */}
           <div className="w-full flex gap-2">
-            <button className="bg-[#FDF3F4] py-2 px-3 text-[#D41830] border-[#D41830] border-solid border-[1px] flex gap-1">
+            <button
+              className="bg-[#FDF3F4] py-2 px-3 text-[#D41830] border-[#D41830] border-solid border-[1px] flex gap-1"
+              onClick={handleAddToCart}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -313,7 +432,10 @@ export default function ProductDetail() {
               </svg>
               Add to cart
             </button>
-            <button className="bg-[#D41830] py-2 px-3 text-white">
+            <button
+              className="bg-[#D41830] py-2 px-3 text-white"
+              onClick={() => handleAddToCart(true)}
+            >
               Buy now
             </button>
           </div>
@@ -341,12 +463,12 @@ export default function ProductDetail() {
         {/* AVATAR */}
         <div className="w-full h-full flex items-center gap-3 border-solid border-slate-300 border-r-[1px]">
           <img
-            src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/userAssets%2F360_F_562993122_e7pGkeY8yMfXJcRmclsoIjtOoVDDgIlh.jpg7b6b140d-b22e-4a5f-a5ed-2829d1cd6fdd?alt=media&token=97140e93-1841-4a14-8172-180a7d4edced"
+            src={product ? product.shop.avatar : ""}
             alt=""
             className="w-24 h-24 rounded-full"
           />
           <div className="w-[50%] flex flex-col gap-2">
-            <h2>Anh Khoa</h2>
+            <h2>{product && product.shop.name}</h2>
             <div className="flex gap-2">
               <button className="bg-[#FFEEE8] button-theme w-[50%] flex justify-center items-center  gap-2">
                 <svg
@@ -436,74 +558,25 @@ export default function ProductDetail() {
             <div className="w-full lg:w-[50%] grid grid-cols-3 gap-2 text-sm">
               <div className="col-span-1 text-[#A3A3B3]">Business</div>
               <div className="col-span-2">
-                EON {">"} Noi That {">"} Gia dinh
+                {product && handleRenderBusiness(product.business)}
               </div>
             </div>
             <div className="w-full lg:w-[50%] grid grid-cols-3 gap-2 text-sm">
               <div className="col-span-1 text-[#A3A3B3]">Name:</div>
-              <div className="col-span-2">
-                ZIFRIEND KA6406 Bàn Phím Cơ 63 Phím Có Đèn Nền RGB 60% Dành Cho
-                Game Thủ Văn phòng chơi game Led Rainbow
-              </div>
+              <div className="col-span-2">{product && product.name}</div>
             </div>
             <div className="w-full lg:w-[50%] grid grid-cols-3 gap-2 text-sm">
               <div className="col-span-1 text-[#A3A3B3]">Send from:</div>
-              <div className="col-span-2">Ha Noi</div>
+              <div className="col-span-2">
+                {product && product.shop.provinceCity.name}
+              </div>
             </div>
           </div>
         </div>
         <div className="w-full flex flex-col gap-3">
           <p className="text-xl bg-[#FAFAFA] py-1">DESCRIPTION</p>
           <div>
-            <p className="text-sm ">{`Switch phím cơ Coputa trục cơ bàn phím Blue Switch/Red Switch/Brown Switch/Black Switch ${"\n"}
-
-Switch là bộ phận có dạng công tắc nằm dưới mỗi phím bấm. Mỗi chiếc công tắc switch được tạo thành từ nhiều phần chuyển động, dùng lò xo để tạo đàn hồi và có 2 (hoặc nhiều) chân tiếp xúc bằng kim loại.
-Đối với bàn phím cơ, Switch có tác dụng đem lại độ phản hồi tốt, lực nhấn phím nhẹ hơn 1 chiếc bàn phím thông thường.
-
-Thông tin sản phẩm: Switch phím cơ Coputa trục cơ bàn phím Blue Switch/Red Switch/Brown Switch/Black Switch
-- Dòng Switch được sử dụng rất nhiều cho các mẫu phím cơ trên thị trường hiện nay với độ bền lên tới 50 triệu lượt nhấn
-
-Switch Blue (xanh dương ) :
- + khi bấm có tiếng Click
- + có khấc
- + Hành trình phím 4.0mm
- + Lực nhấn 50g
-
-Switch Red ( Đỏ ) :
- + khi bấm không có tiếng click
- + Không có khấc
- + Hành trình phím 4.0mm
- + Lực nhấn 45g
-
-Switch Brown ( Nâu ) :
- + khi bấm không có tiếng click
- + có khấc
- + Hành trình phím 4.0mm
- + Lực nhấn 45g
-
-Switch Black ( Đen ) :
- + khi bấm không có tiếng click
- + Không có khấc
- + Hành trình phím 4.0mm
- + Lực nhấn 60g
-
-Hướng dẫn sử dụng: Switch phím cơ Coputa trục cơ bàn phím Blue Switch/Red Switch/Brown Switch/Black Switch
-- Tháo Keycap để lộ ra phần Switch.
-- Tháo Switch bằng các công cụ kẹp.
-- Lắp Switch mới đúng chiều.
-- Lắp Keycap và sử dụng.
-
-Coputa đảm bảo:
-- Hình ảnh sản phẩm giống 100%.
-- Chất lượng sản phẩm tốt 100%.
-- Sản phẩm được kiểm tra kĩ càng, nghiêm ngặt trước khi giao hàng.
-- Sản phẩm luôn có sẵn trong kho hàng. 
-- Hoàn tiền ngay nếu sản phẩm không giống với mô tả.
-- Đổi trả ngay theo quy định nếu bất kì lí do gì khiến bạn không hài lòng.
-- Giao hàng toàn quốc. 
-- Gửi hàng siêu tốc: Coputa cam kết dịch vụ đóng gói siêu nhanh.
-
-Còn chần chờ gì nữa, hãy nhanh tay đặt mua cho mình những sản phẩm này về tủ đồ của mình nhé!`}</p>
+            <p className="text-sm ">{`${product && product.description}`}</p>
           </div>
         </div>
       </div>
@@ -527,7 +600,7 @@ Còn chần chờ gì nữa, hãy nhanh tay đặt mua cho mình những sản p
                   d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
                 />
               </svg>
-              4.9 on 5
+              {`${product && product.rate} on 5`}
             </p>
             <div className="hidden sm:block">
               <StarRated scale={2} />

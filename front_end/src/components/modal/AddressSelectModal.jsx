@@ -92,10 +92,6 @@ export default function AddressSelectModal() {
     }, 50);
   }, []);
 
-  useEffect(() => {
-    console.log(selectAddress);
-  }, [selectAddress]);
-
   return (
     <div
       className={`${

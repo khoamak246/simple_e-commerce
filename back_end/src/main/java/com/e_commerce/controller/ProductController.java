@@ -1,6 +1,7 @@
 package com.e_commerce.controller;
 
 import com.e_commerce.dto.request.CreateProductForm;
+import com.e_commerce.dto.request.UpdateProductForm;
 import com.e_commerce.dto.response.ResponseMessage;
 import com.e_commerce.model.*;
 import com.e_commerce.security.userPrincipal.UserPrincipal;
@@ -37,6 +38,13 @@ public class ProductController {
         } else {
             return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", products));
         }
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ResponseMessage> getProductById(@PathVariable Long productId) {
+        Optional<Product> product = productService.findById(productId);
+        return product.map(value -> ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", value)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found product at id: " + productId)));
     }
 
 
@@ -85,9 +93,56 @@ public class ProductController {
 
 
         Product justSavedProduct = productService.save(newProduct);
+        Shop newShop = justSavedProduct.getShop();
+        newShop.setProductNumber(newShop.getProductNumber() + 1);
+        shopService.save(newShop);
         return ResponseEntity.ok().body(Utils.buildSuccessMessage("Create new product successfully!", justSavedProduct));
 
     }
 
+    @PatchMapping("/{productId}")
+    public ResponseEntity<ResponseMessage> updateProduct(@PathVariable Long productId, @RequestBody UpdateProductForm updateProductForm) {
+        Optional<Product> product = productService.findById(productId);
+        if (!product.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found product at id: " + productId));
+        }
 
+        Shop shop = product.get().getShop();
+        if (!shopService.isCurrentUserMatchShopUserid(shop.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with shop!"));
+        }
+
+        if (updateProductForm.getName() != null) {
+            product.get().setName(updateProductForm.getName());
+        }
+
+        if (updateProductForm.getDescription() != null) {
+            product.get().setDescription(updateProductForm.getDescription());
+        }
+
+        if (updateProductForm.getOnSale() != null) {
+            product.get().setOnSale(updateProductForm.getOnSale());
+        }
+
+        if (updateProductForm.getBlock() != null) {
+            product.get().setBlock(updateProductForm.getBlock());
+        }
+
+        if (updateProductForm.getVisitNumber() != null) {
+            product.get().setVisitNumber(updateProductForm.getVisitNumber());
+        }
+
+        if (updateProductForm.getBusinessId() != null) {
+            Optional<Business> business = businessService.findById(updateProductForm.getBusinessId());
+            if (!business.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found business at id: " + updateProductForm.getBusinessId()));
+            }
+
+            product.get().setBusiness(business.get());
+        }
+
+        productService.save(product.get());
+        Set<Product> newSetProduct = productService.findByShopId(shop.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update product successfully!", newSetProduct));
+    }
 }

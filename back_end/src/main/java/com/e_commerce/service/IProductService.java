@@ -8,4 +8,5 @@ import java.util.Set;
 public interface IProductService extends IGenericService<Product> {
     Set<Product> findByNameContainingIgnoreCase(String name);
     Set<Product> createSetProductFromDtoForm(Set<Long> productsDtoForm);
+    Set<Product> findByShopId(Long shopId);
 }

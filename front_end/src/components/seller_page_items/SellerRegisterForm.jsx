@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ADDRESS_STATE_SELECTOR } from "../../redux/selectors/Selectors";
 import { setToggle } from "../../redux/reducers/ToggleSlice";
 import { post_save_new_shop } from "../../thunk/ShopThunk";
+import { handleRenderCurrentSelectAddress } from "../../utils/Utils";
 
 export default function SellerRegisterForm() {
   const dispatch = useDispatch();
@@ -50,19 +51,6 @@ export default function SellerRegisterForm() {
           navigate("/seller/dashboard");
         }
       });
-    }
-  };
-
-  const handleRenderCurrentSelectAddress = () => {
-    if (addressSelector) {
-      const { address, selectAddress } = addressSelector;
-      const { provinceCity, district, ward } = selectAddress;
-      const provinceCitySelected = address[provinceCity];
-      const districtSelected = provinceCitySelected.district[district];
-      const wardSelected = districtSelected.ward[ward];
-      return `${wardSelected.name} - ${districtSelected.name} - ${provinceCitySelected.name}`;
-    } else {
-      return "";
     }
   };
 
@@ -159,7 +147,7 @@ export default function SellerRegisterForm() {
             className="flex gap-2 items-center justify-center cursor-pointer"
             onClick={() => dispatch(setToggle("selectAddress"))}
           >
-            <p>{handleRenderCurrentSelectAddress()}</p>
+            <p>{handleRenderCurrentSelectAddress(addressSelector)}</p>
             <div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

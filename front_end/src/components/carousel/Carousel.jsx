@@ -1,36 +1,36 @@
 import { Splide, SplideTrack, SplideSlide } from "@splidejs/react-splide";
 import React, { useState } from "react";
+import { useEffect } from "react";
+import { caroselUrl } from "../../assets/js/HomePageBanner";
 
 export default function Carousel() {
   const [displaySlide, setDisplaySlide] = useState(0);
-  const imgArr = [
-    "https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/page_img%2FhomePage%2Fkitchen_banner.jpg?alt=media&token=4f2c092e-3bf1-44a5-95d9-c10b51469f37",
-    "https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/page_img%2FhomePage%2FshopBook_banner.jpg?alt=media&token=5d52ea31-f1d7-4e81-8199-d6520cb67dff",
-    "https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/page_img%2FhomePage%2FshopGaming_banner.jpg?alt=media&token=e477f4c5-3867-4820-b137-e57404e20536",
-  ];
 
   const handleChangeSlide = (action) => {
-    let maxSlideIndex = imgArr.length - 1;
-    let nextSlideIndex;
+    let maxSlideIndex = caroselUrl.length - 1;
+    let nextSlideIndex = 0;
     if (action === "up") {
-      if (displaySlide === maxSlideIndex) {
-        nextSlideIndex = 0;
-      } else {
+      if (displaySlide < maxSlideIndex) {
         nextSlideIndex = displaySlide + 1;
       }
     } else if (action === "down") {
-      if (displaySlide === 0) {
-        nextSlideIndex = maxSlideIndex;
-      } else {
+      if (displaySlide > 0) {
         nextSlideIndex = displaySlide - 1;
       }
     }
     setDisplaySlide(nextSlideIndex);
   };
 
+  useEffect(() => {
+    let id = setTimeout(() => {
+      handleChangeSlide("up");
+    }, 5000);
+    return () => clearTimeout(id);
+  }, [displaySlide]);
+
   return (
     <div className="w-full relative flex">
-      {imgArr.map((val, index) => {
+      {caroselUrl.map((val, index) => {
         return (
           <img
             key={index}

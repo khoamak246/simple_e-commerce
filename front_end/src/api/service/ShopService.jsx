@@ -15,3 +15,11 @@ export const GET_FIND_BY_USER_ID = async (userId) => {
   );
   return response;
 };
+
+export const PATCH_UPDATE_SHOP_PROFILE = async ({ shopId, updateShopForm }) => {
+  let response = instance(new Cookie().get("token")).patch(
+    `/api/v1/shop/${shopId}`,
+    updateShopForm
+  );
+  return response;
+};

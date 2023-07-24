@@ -36,6 +36,8 @@ public class Product {
     private int rate;
     private int returnRefundNumber;
     private int cancelNumber;
+    private int likeNumber;
+    private int saleNumber;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "shop_id")
@@ -53,9 +55,4 @@ public class Product {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Assets> assets;
-
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_collection")
-    @JsonIgnore
-    private Collection collection;
 }

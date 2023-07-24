@@ -64,4 +64,9 @@ public class ProductServiceIMPL implements IProductService {
         }
         return products;
     }
+
+    @Override
+    public Set<Product> findByShopId(Long shopId) {
+        return productRepository.findByShopId(shopId);
+    }
 }

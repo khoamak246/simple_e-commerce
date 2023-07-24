@@ -34,10 +34,22 @@ public class Shop {
     @Lob
     private String avatar;
 
+    @Lob
+    private String coverImg;
+
     @NotBlank
     private String description;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Assets> introduce;
+
+    private int productNumber;
+
     private String streetDetail;
+
+    @OneToMany(mappedBy = "shop")
+    @JsonIgnore
+    private Set<OrderItems> orderItems;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "provinceCity_id")
@@ -52,12 +64,7 @@ public class Shop {
     private Ward ward;
 
     private int visitNumber;
-    private int reviewNumber;
-    private int productNumber;
     private int rate;
-    private long orderNumber;
-    private int cancelOrderNumber;
-    private int returnOrder;
 
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -77,5 +84,6 @@ public class Shop {
     @OneToMany(mappedBy = "shop")
     @JsonIgnoreProperties({"shop"})
     private Set<Collection> collections;
+
 
 }

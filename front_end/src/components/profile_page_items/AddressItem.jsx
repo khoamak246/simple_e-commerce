@@ -1,6 +1,10 @@
 import React from "react";
 
-export default function AddressItem() {
+export default function AddressItem({
+  address,
+  selectAddress,
+  setSelectAddress,
+}) {
   return (
     <div className="w-full flex border-solid border-[1px] border-red-300 py-2 px-3 rounded-lg items-center justify-between">
       <div className="flex items-center gap-3">
@@ -18,12 +22,17 @@ export default function AddressItem() {
         </svg>
 
         <div>
-          <p>Kim Chung - Dong Anh - Ha Noi</p>
-          <p className="text-sm">So 5 duong cong ra - Thon Bau Kim Chung</p>
+          <p>{`${address.ward.name} - ${address.district.name} - ${address.provinceCity.name}`}</p>
+          <p className="text-sm">{address.streetDetail}</p>
         </div>
       </div>
       <div>
-        <input type="radio" className="accent-red-500" />
+        <input
+          type="radio"
+          className="accent-red-500"
+          checked={address.id === selectAddress.id}
+          onChange={() => setSelectAddress(address.id)}
+        />
       </div>
     </div>
   );

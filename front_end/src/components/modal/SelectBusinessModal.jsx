@@ -13,7 +13,10 @@ import {
   setSubinessIndex,
 } from "../../redux/reducers/BusinessSlice";
 
-export default function SelectBusinessModal({ toggleModal }) {
+export default function SelectBusinessModal({
+  toggleModal,
+  selectBusinessMethod,
+}) {
   const [isActive, setIsActive] = useState(false);
   const dispatch = useDispatch();
   const businessSelector = useSelector(BUSINESS_LIST_SELECTOR);
@@ -131,7 +134,13 @@ export default function SelectBusinessModal({ toggleModal }) {
                     return (
                       <div
                         key={index}
-                        onClick={() => dispatch(setSubinessIndex(index))}
+                        onClick={() => {
+                          dispatch(setSubinessIndex(index));
+                          if (selectBusinessMethod) {
+                            console.log("in");
+                            selectBusinessMethod(val);
+                          }
+                        }}
                         className={`${
                           selectBusiness.subBusinessIndex !== null &&
                           selectBusiness.subBusinessIndex === index &&
@@ -154,7 +163,13 @@ export default function SelectBusinessModal({ toggleModal }) {
                   return (
                     <div
                       key={index}
-                      onClick={() => dispatch(setChildrenBusinessIndex(index))}
+                      onClick={() => {
+                        dispatch(setChildrenBusinessIndex(index));
+                        
+                        if (selectBusinessMethod) {
+                          selectBusinessMethod(val);
+                        }
+                      }}
                       className={`${
                         selectBusiness.childrenBusinessIndex !== null &&
                         selectBusiness.childrenBusinessIndex === index &&

@@ -31,10 +31,6 @@ public class Order {
     @JsonIgnoreProperties({"order"})
     private UserInfo userInfo;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "payment_way_id")
-    private PaymentWay paymentWay;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonIgnoreProperties({"order"})
     private Set<OrderItems> orderItems;

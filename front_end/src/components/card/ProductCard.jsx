@@ -1,7 +1,8 @@
 import React from "react";
 import StarRated from "./StarRated";
+import { getMinPrice } from "../../utils/Utils";
 
-export default function ProductCard() {
+export default function ProductCard({ product }) {
   return (
     <div className="h-[40vh] flex flex-col w-full shadow-lg border-slate-200 border-solid border-[1px] cursor-pointer duration-300 transition-all hover:scale-95">
       <div className="w-full h-[50%] shadow-sm ">
@@ -13,12 +14,10 @@ export default function ProductCard() {
       </div>
       <div className="w-full h-[50%] flex flex-col px-3 py-1 rounded-sm overflow-hidden">
         <div className="h-1/3 block-ellipsis text-[0.7rem] lg:text-sm">
-          <p>
-            Capo chuyen dung cho dan heheheh lafm the nao ma ngan can duoc tui
-          </p>
+          <p>{product ? product.name : ""}</p>
         </div>
         <div className="text-lg w-full h-1/3 text-[#F06246] flex items-center">
-          <p>39.000 $</p>
+          <p>{`${getMinPrice(product)} $`}</p>
         </div>
         <div className="text-sm h-1/3 flex flex-col lg:flex-row items-start lg:items-center justify-between">
           <StarRated scale={1} />

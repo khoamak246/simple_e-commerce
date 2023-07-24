@@ -1,8 +1,11 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { resetToggle } from "../../redux/reducers/ToggleSlice";
 
 export default function FavoriteModal() {
+  const dispatch = useDispatch();
   const [isActive, setActive] = useState(false);
   useEffect(() => {
     setTimeout(() => {
@@ -18,7 +21,7 @@ export default function FavoriteModal() {
     >
       {/* NAV */}
       <div className="w-full flex justify-between items-center border-slate-400 border-b-[1px] border-solid py-1 px-2 bg-[#d41831c7] text-white">
-        <div className="cursor-pointer">
+        <div className="cursor-pointer" onClick={() => dispatch(resetToggle())}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
