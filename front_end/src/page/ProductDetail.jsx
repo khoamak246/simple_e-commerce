@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import PreviewImg from "../components/carousel/previewImg";
 import ProductCard from "../components/card/ProductCard";
 import StarRated from "../components/card/StarRated";
-import CommentItems from "../components/shopDetail_page_items/CommentItems";
+import ReviewItem from "../components/shopDetail_page_items/ReviewItem";
 import { useEffect } from "react";
 import { GET_FIND_PRODUCT_BY_ID } from "../api/service/ProductService";
 import {
@@ -15,13 +15,20 @@ import {
   getProductOptionById,
 } from "../utils/Utils";
 import { useDispatch, useSelector } from "react-redux";
-import { ADDRESS_STATE_SELECTOR } from "../redux/selectors/Selectors";
+import {
+  ADDRESS_STATE_SELECTOR,
+  USER_STATE_SELECTOR,
+} from "../redux/selectors/Selectors";
 import { setToggle } from "../redux/reducers/ToggleSlice";
 import { post_create_new_cart_item } from "../thunk/CartThunk";
 import { toast } from "react-hot-toast";
+import { post_save_favorites } from "../thunk/ProductThunk";
 
 export default function ProductDetail() {
   const [product, setProduct] = useState();
+  const userSelector = useSelector(USER_STATE_SELECTOR);
+  console.log(product);
+  const [selectComment, setSelectComment] = useState(6);
   const param = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -68,7 +75,7 @@ export default function ProductDetail() {
       data: product ? product.shop.followers.length : 0,
     },
     {
-      title: "Rate: ",
+      title: "Visit: ",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +92,7 @@ export default function ProductDetail() {
           />
         </svg>
       ),
-      data: `${product ? product.shop.rate : 0} / 5`,
+      data: `${product ? product.visitNumber : 0}`,
     },
     {
       title: "Join: ",
@@ -215,25 +222,36 @@ export default function ProductDetail() {
         {/* PREVIEW  */}
         <div className="w-full sm:w-1/3 h-[80vh] border-solid border-r-[1px] border-slate-200">
           {product && <PreviewImg previewArr={product.assets} />}
-          <div className="h-[10%] flex justify-center items-center border-t-[1px] border-slate-200 border-solid text-red-500 gap-1">
-            <div className="cursor-pointer">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6 "
+          {product && (
+            <div className="h-[10%] flex justify-center items-center border-t-[1px] border-slate-200 border-solid text-red-500 gap-1">
+              <div
+                className="cursor-pointer"
+                onClick={() => dispatch(post_save_favorites(product.id))}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-                />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className={`w-6 h-6 ${
+                    userSelector &&
+                    userSelector.userInfo.favoritesProduct.findIndex(
+                      (e) => e.id === product.id
+                    ) >= 0 &&
+                    "fill-red-500 text-red-500"
+                  }`}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                  />
+                </svg>
+              </div>
+              <p>{`Like (${product && product.favorites.length})`}</p>
             </div>
-            <p>{`Like (${product && product.likeNumber})`}</p>
-          </div>
+          )}
         </div>
         {/* SALE */}
         <div className="w-full sm:w-2/3 flex flex-col py-2 justify-around">
@@ -245,7 +263,7 @@ export default function ProductDetail() {
             <div className="col-span-1 flex items-center gap-1 border-r-[1px] border-slate-300 border-solid text-[#D0011B]">
               <p>{product && product.rate}</p>
               <div className="flex">
-                <StarRated scale={1} />
+                {product && <StarRated scale={1} fillStar={product.rate} />}
               </div>
             </div>
             {/* COMMENT NUMBER */}
@@ -603,12 +621,21 @@ export default function ProductDetail() {
               {`${product && product.rate} on 5`}
             </p>
             <div className="hidden sm:block">
-              <StarRated scale={2} />
+              {product && <StarRated scale={2} fillStar={product.rate} />}
             </div>
           </div>
           <div className="col-span-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-0">
             <div className="w-full h-full flex justify-center items-center">
-              <button className="button-theme px-12 py-1">All</button>
+              <button
+                className={`${
+                  selectComment === 6
+                    ? "button-theme"
+                    : "border-solid border-slate-300 border-[1px]"
+                }  px-12 py-1`}
+                onClick={() => setSelectComment(6)}
+              >
+                All
+              </button>
             </div>
             {[5, 4, 3, 2, 1].map((val, index) => {
               return (
@@ -616,7 +643,14 @@ export default function ProductDetail() {
                   key={index}
                   className="w-full h-full flex justify-center items-center"
                 >
-                  <button className="border-solid border-slate-300 border-[1px] px-10 py-1">
+                  <button
+                    className={` ${
+                      selectComment === val
+                        ? "button-theme"
+                        : "border-solid border-slate-300 border-[1px]"
+                    } px-10 py-1`}
+                    onClick={() => setSelectComment(val)}
+                  >
                     {`${val} star`}
                   </button>
                 </div>
@@ -624,11 +658,13 @@ export default function ProductDetail() {
             })}
           </div>
         </div>
-        {/* COMMENT ITEMS */}
+        {/* REVIEW ITEMS */}
         <div className="w-full flex flex-col gap-10 py-2">
-          {[1, 1, 1, 1, 1].map((val, index) => {
-            return <CommentItems key={index} />;
-          })}
+          {product?.reviews
+            ?.filter((e) => e.rated <= selectComment)
+            .map((val, index) => {
+              return <ReviewItem key={index} review={val} />;
+            })}
         </div>
       </div>
     </div>

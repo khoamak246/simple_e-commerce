@@ -24,8 +24,6 @@ public class Order {
     @Column(columnDefinition = "date")
     private String createdDate;
 
-    private String status;
-
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_info_id")
     @JsonIgnoreProperties({"order"})

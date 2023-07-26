@@ -17,6 +17,22 @@ export const SellerDashboardItems = [
         url: "allOrder",
       },
       {
+        name: "",
+        url: "waitingConfirm",
+      },
+      {
+        name: "",
+        url: "waitingShipper",
+      },
+      {
+        name: "",
+        url: "delivery",
+      },
+      {
+        name: "",
+        url: "doneOrder",
+      },
+      {
         name: "Cancellation form",
         url: "cancellationForm",
       },
@@ -175,6 +191,30 @@ export const matcherUrlComponent = [
   },
   {
     url: "/orderMng/allOrder",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/waitingConfirm",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/waitingShipper",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/delivery",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/doneOrder",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/cancellationForm",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/return-refund",
     component: <DshAllOrder />,
   },
   {

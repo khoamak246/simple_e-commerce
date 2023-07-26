@@ -7,7 +7,7 @@ export const firebase_single_upload = async (file) => {
   let snapshot = await uploadBytes(imageRef, file);
   let uploadUrl = await getDownloadURL(snapshot.ref);
   return (
-    uploadUrl + `_assetType:${file.type.includes("image") ? "img" : "video"}`
+    uploadUrl + `_assetType:${file.type.includes("image") ? "image" : "video"}`
   );
 };
 

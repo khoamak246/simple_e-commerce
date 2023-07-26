@@ -13,13 +13,17 @@ import {
 } from "../../redux/selectors/Selectors";
 import AddressItem from "../profile_page_items/AddressItem";
 import { toast } from "react-hot-toast";
-import { post_create_new_user_address } from "../../thunk/AddressThunk";
+import {
+  patch_update_user_address,
+  post_create_new_user_address,
+} from "../../thunk/AddressThunk";
 
 export default function AddAndEditUserAddressModal({
   editItem,
   setOpenModal,
   setSelectAddress,
   selectAddress,
+  setSelectEditAddress,
 }) {
   const [isActive, setIsActive] = useState(false);
   const [formState, setFormState] = useState("create");
@@ -41,6 +45,9 @@ export default function AddAndEditUserAddressModal({
       } else {
         setFormState("selectAdress");
       }
+    } else if (editItem) {
+      setFormState("edit");
+      setStreetDetail(editItem.streetDetail);
     }
   }, [addressSelector, userSelector]);
 
@@ -51,25 +58,51 @@ export default function AddAndEditUserAddressModal({
 
   const handleSubmit = () => {
     if (formState === "create") {
-      if (streetDetail.length === 0) {
-        return toast.error("OOP! Please check your street detail again!");
-      }
-
-      let addressSelectedId = handleTakeIdFromSelectAddress(addressSelector);
-      let createUserAddressForm = {
-        ...addressSelectedId,
-        streetDetail,
-      };
-      console.log(createUserAddressForm);
-      dispatch(post_create_new_user_address(createUserAddressForm)).then(
-        (res) => {
-          if (res) {
-            toast.success("Create address successfully!");
-            setFormState("selectAdress");
-          }
-        }
-      );
+      handleCreateUserAddress();
+    } else if (formState === "edit") {
+      handleEditUserAddress();
     }
+  };
+
+  const handleCreateUserAddress = () => {
+    if (streetDetail.length === 0) {
+      return toast.error("OOP! Please check your street detail again!");
+    }
+
+    let addressSelectedId = handleTakeIdFromSelectAddress(addressSelector);
+    let createUserAddressForm = {
+      ...addressSelectedId,
+      streetDetail,
+    };
+
+    dispatch(post_create_new_user_address(createUserAddressForm)).then(
+      (res) => {
+        if (res) {
+          toast.success("Create address successfully!");
+          setFormState("selectAdress");
+        }
+      }
+    );
+  };
+
+  const handleEditUserAddress = () => {
+    if (streetDetail.length === 0) {
+      return toast.error("OOP! Please check your street detail again!");
+    }
+    let addressSelectedId = handleTakeIdFromSelectAddress(addressSelector);
+    let data = {
+      ...addressSelectedId,
+      streetDetail,
+    };
+    dispatch(
+      patch_update_user_address({ userAddressId: editItem.id, data })
+    ).then((res) => {
+      if (res) {
+        toast.success("Edit successfully!");
+        setSelectEditAddress();
+        handleOnCloseModal();
+      }
+    });
   };
 
   const handleOnCloseModal = () => {

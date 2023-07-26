@@ -31,9 +31,8 @@ public class ShopResponse {
     private Ward ward;
 
     private int visitNumber;
-    private int rate;
-//    TODO: add comment product
-//    private int reviewNumber;
+    private double rate;
+    private int reviewNumber;
     @JsonIgnoreProperties({"shop"})
     private Set<OrderItems> orderItems;
 

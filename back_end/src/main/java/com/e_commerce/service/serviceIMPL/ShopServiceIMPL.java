@@ -2,6 +2,7 @@ package com.e_commerce.service.serviceIMPL;
 
 import com.e_commerce.dto.response.ShopResponse;
 import com.e_commerce.model.OrderItems;
+import com.e_commerce.model.Product;
 import com.e_commerce.model.Shop;
 import com.e_commerce.repository.IShopRepository;
 import com.e_commerce.security.userPrincipal.UserPrincipal;
@@ -66,7 +67,7 @@ public class ShopServiceIMPL implements IShopService {
         Set<OrderItems> returnOrderItems = new HashSet<>();
         Set<OrderItems> deliveryOrderItems = new HashSet<>();
         for (OrderItems orderItem : orderItems) {
-            switch (orderItem.getOrder().getStatus()) {
+            switch (orderItem.getStatus()) {
                 case "PREPARE":
                     waitingConfirmations.add(orderItem);
                     break;
@@ -88,7 +89,17 @@ public class ShopServiceIMPL implements IShopService {
             }
         }
 
-        ShopResponse shopResponse = ShopResponse.builder()
+        double rate = 0;
+        int reviewNumber = 0;
+        for (Product product : shop.getProducts()) {
+            rate = rate + product.getRate();
+            reviewNumber = reviewNumber + product.getReviewNumber();
+        }
+
+
+
+
+        return ShopResponse.builder()
                 .id(shop.getId())
                 .name(shop.getName())
                 .createdDate(shop.getCreatedDate())
@@ -102,7 +113,8 @@ public class ShopServiceIMPL implements IShopService {
                 .district(shop.getDistrict())
                 .ward(shop.getWard())
                 .visitNumber(shop.getVisitNumber())
-                .rate(shop.getRate())
+                .rate(rate / shop.getProducts().size())
+                .reviewNumber(reviewNumber)
                 .orderItems(orderItems)
                 .cancelOrderItems(cancelOrderItems)
                 .returnOrderItems(returnOrderItems)
@@ -115,6 +127,6 @@ public class ShopServiceIMPL implements IShopService {
                 .paymentWays(shop.getPaymentWays())
                 .collections(shop.getCollections())
                 .build();
-        return shopResponse;
+
     }
 }

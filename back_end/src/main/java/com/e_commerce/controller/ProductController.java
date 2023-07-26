@@ -16,8 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/product")
@@ -29,6 +28,7 @@ public class ProductController {
     private final IProductService productService;
     private final IProductOptionsService productOptionsService;
     private final IAssetService assetService;
+    private final IUserService userService;
 
     @GetMapping("/search/{searchValue}")
     public ResponseEntity<ResponseMessage> getProductByName(@PathVariable("searchValue") String searchValue){
@@ -144,5 +144,34 @@ public class ProductController {
         productService.save(product.get());
         Set<Product> newSetProduct = productService.findByShopId(shop.getId());
         return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update product successfully!", newSetProduct));
+    }
+
+
+    @PostMapping("/{productId}/favorites/{userId}")
+    public ResponseEntity<ResponseMessage> saveFavorites(@PathVariable Long productId, @PathVariable Long userId) {
+        if (!userService.isUserIdEqualUserPrincipalId(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildSuccessMessage("Not match user"));
+        }
+
+        Optional<Product> product = productService.findById(productId);
+        if (!product.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found product at id: " + productId));
+        }
+
+        Optional<User> user = userService.findById(userId);
+        if (!user.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found user at id: " + userId));
+        }
+
+        List<UserInfo> currentFavorites = new ArrayList<>(product.get().getFavorites());
+        if (currentFavorites.contains(user.get().getUserInfo())) {
+            currentFavorites.remove(user.get().getUserInfo());
+        } else {
+            currentFavorites.add(user.get().getUserInfo());
+        }
+
+        product.get().setFavorites(new HashSet<>(currentFavorites));
+        Product justSavedProduct = productService.save(product.get());
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Save favorites successfully!", justSavedProduct));
     }
 }

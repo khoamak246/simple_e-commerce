@@ -32,6 +32,28 @@ export const handleTakeIdFromSelectAddress = (addressSelector) => {
   }
 };
 
+export const handleTakeIndexFromUserAddress = (
+  userAddress,
+  addressSelector
+) => {
+  if ((userAddress, addressSelector)) {
+    const { provinceCity, district, ward } = userAddress;
+    const { address } = addressSelector;
+    let provincityIndex = address.findIndex((e) => e.id === provinceCity.id);
+    let currentDistrict = address[provincityIndex].district;
+    let districtIndex = currentDistrict.findIndex((e) => e.id === district.id);
+    let currentWard = currentDistrict[districtIndex].ward;
+    let wardIndex = currentWard.findIndex((e) => e.id === ward.id);
+    return {
+      provinceCity: provincityIndex,
+      district: districtIndex,
+      ward: wardIndex,
+    };
+  } else {
+    return null;
+  }
+};
+
 export const handleRenderBusiness = (business) => {
   let result = "";
   if (business) {
@@ -92,4 +114,15 @@ export const handleRenderUserAddress = (userAddress) => {
     const { streetDetail, provinceCity, district, ward } = userAddress;
     return `${streetDetail} - ${ward.name} - ${district.name} - ${provinceCity.name}`;
   }
+};
+
+export const handleFindFirstImgAssetInOrderItem = (orderItem) => {
+  if (orderItem) {
+    let assets = orderItem.productOptions.product.assets;
+    let img = assets.find((e) => e.assetType === "image");
+    if (img) {
+      return img.url;
+    }
+  }
+  return "";
 };

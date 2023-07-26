@@ -64,8 +64,6 @@ public class Shop {
     private Ward ward;
 
     private int visitNumber;
-    private int rate;
-
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore

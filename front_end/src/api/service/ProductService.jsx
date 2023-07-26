@@ -30,9 +30,17 @@ export const PATCH_UPDATE_PRODUCT = async ({
   );
   return response;
 };
+
 export const GET_FIND_PRODUCT_BY_ID = async (productId) => {
   let response = instance(new Cookie().get("token")).get(
     `/api/v1/product/${productId}`
+  );
+  return response;
+};
+
+export const POST_SAVE_FAVORITES = async ({ productId, userId }) => {
+  let response = instance(new Cookie().get("token")).post(
+    `/api/v1/product/${productId}/favorites/${userId}`
   );
   return response;
 };

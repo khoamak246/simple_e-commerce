@@ -33,10 +33,9 @@ public class Product {
 
     private int visitNumber;
     private int reviewNumber;
-    private int rate;
+    private double rate;
     private int returnRefundNumber;
     private int cancelNumber;
-    private int likeNumber;
     private int saleNumber;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -55,4 +54,15 @@ public class Product {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Assets> assets;
+
+    @OneToMany(mappedBy = "product")
+    @JsonIgnoreProperties({"product"})
+    private Set<Review> reviews;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "favorites",
+            joinColumns = {@JoinColumn(name = "product_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_info_id")})
+    @JsonIgnoreProperties({"order", "cart", "notifications", "userAddresses", "favoritesProduct"})
+    private Set<UserInfo> favorites;
 }

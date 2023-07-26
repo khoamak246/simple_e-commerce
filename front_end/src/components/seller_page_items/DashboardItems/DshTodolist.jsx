@@ -17,22 +17,25 @@ export default function DshTodolist() {
         {
           number: waitingConfirmations.length,
           title: "Waiting confirmation",
+          url: "/waitingConfirm",
         },
         {
           number: goodsWaitingConfirmations.length,
           title: "Goods watting",
+          url: "/waitingShipper",
         },
         {
           number: doneProcessingOrderItems.length,
           title: "Done processing",
+          url: "/doneOrder",
         },
       ];
     }
-
+    let baseUrl = "/seller/dashboard/orderMng";
     return orderTodo.map((val, index) => {
       return (
         <Link
-          to={"/seller/dashboard/orderMng/allOrder"}
+          to={`/seller/dashboard/orderMng${val.url}`}
           className={`${
             index !== 2 && "border-r-[1px] border-solid border-slate-400"
           } w-full flex justify-center flex-col items-center hover:bg-slate-100`}

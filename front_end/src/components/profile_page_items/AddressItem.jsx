@@ -22,17 +22,25 @@ export default function AddressItem({
         </svg>
 
         <div>
-          <p>{`${address.ward.name} - ${address.district.name} - ${address.provinceCity.name}`}</p>
-          <p className="text-sm">{address.streetDetail}</p>
+          {address && (
+            <>
+              <p>{`${address.ward.name} - ${address.district.name} - ${address.provinceCity.name}`}</p>
+              <p className="text-sm">{address.streetDetail}</p>
+            </>
+          )}
         </div>
       </div>
       <div>
-        <input
-          type="radio"
-          className="accent-red-500"
-          checked={address.id === selectAddress.id}
-          onChange={() => setSelectAddress(address.id)}
-        />
+        {address &&
+          selectAddress &&
+          setSelectAddress(
+            <input
+              type="radio"
+              className="accent-red-500"
+              checked={address.id === selectAddress.id}
+              onChange={() => setSelectAddress(address.id)}
+            />
+          )}
       </div>
     </div>
   );

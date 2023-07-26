@@ -18,10 +18,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/order")
@@ -38,25 +37,56 @@ public class OrderController {
     private final IWardService wardService;
     private final IUserService userService;
     private final IProductOptionsService productOptionsService;
+    private final IShopService shopService;
 
-    @PatchMapping("/{orderId}/status")
-    public ResponseEntity<ResponseMessage> updateOrderStatus(@PathVariable Long orderId, @Validated @RequestBody OrderStatusForm orderStatusForm, BindingResult result) {
+    @PatchMapping("/orderItem/{orderItemId}/status")
+    public ResponseEntity<ResponseMessage> updateStatusOrderItem(@PathVariable Long orderItemId,
+                                                                 @Validated @RequestBody OrderStatusForm orderStatusForm,
+                                                                 BindingResult result) {
+
         if (result.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE));
         }
-        Optional<Order> order = orderService.findById(orderId);
-        if (!order.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found order at id: " + orderId));
+
+        final List<String> statusSet = new ArrayList<>(Arrays.asList("PREPARE", "DONE_PREPARE", "CANCEL", "DELIVERY", "PAYMENT_SUCCESS", "RETURN"));
+        Optional<OrderItems> orderItem = orderItemService.findById(orderItemId);
+        if (!orderItem.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found order item at id: " + orderItemId));
         }
 
-        UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!order.get().getUserInfo().getUser().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user and order"));
+        Shop shop = orderItem.get().getShop();
+        if (!shopService.isCurrentUserMatchShopUserid(shop.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with shop"));
         }
 
-        order.get().setStatus(orderStatusForm.getStatus());
-        Order justSavedOrder1 = orderService.save(order.get());
-        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update order status successfully!", justSavedOrder1));
+
+        int orderItemStatusIndex = statusSet.indexOf(orderItem.get().getStatus());
+        int orderStatusFormStatusIndex = statusSet.indexOf(orderStatusForm.getStatus());
+
+        boolean isFormStatusHigherOrEqualThanCurrentStatus = orderStatusFormStatusIndex >= orderItemStatusIndex;
+        boolean isDelivery = orderStatusFormStatusIndex < 0 && orderItemStatusIndex == 3;
+        boolean isCancelAbove = orderItemStatusIndex < 0 && orderStatusFormStatusIndex > 3;
+        boolean check = isDelivery || isCancelAbove || isFormStatusHigherOrEqualThanCurrentStatus ;
+        if (check) {
+            if (orderStatusFormStatusIndex == 2 || orderStatusFormStatusIndex == 5) {
+                if (orderStatusForm.getNotReceivingReason() == null || orderStatusForm.getNotReceivingReason().length() < 20) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Utils.buildFailMessage("Not match reason!"));
+                } else {
+                   orderItem.get().setNotReceivingReason(orderStatusForm.getNotReceivingReason());
+                }
+            }
+            orderItem.get().setStatus(orderStatusForm.getStatus());
+        }
+
+        Product product = orderItem.get().getProductOptions().getProduct();
+        if (orderStatusFormStatusIndex == 2){
+            product.setCancelNumber(product.getCancelNumber() + 1);
+        } else {
+            product.setReturnRefundNumber(product.getReturnRefundNumber() + 1);
+        }
+
+        OrderItems justSavedOrderItem = orderItemService.save(orderItem.get());
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Update order item successfully!", justSavedOrderItem));
     }
 
     @PostMapping("")
@@ -101,6 +131,7 @@ public class OrderController {
                     .price(cartItem.get().getPrice())
                     .shop(cartItem.get().getProductOptions().getProduct().getShop())
                     .paymentWay(paymentWay.get())
+                    .status("PREPARE")
                     .quantity(cartItem.get().getQuantity())
                     .build();
 
@@ -121,7 +152,6 @@ public class OrderController {
         }
 
 //        ------------------
-
 
 
         Optional<ProvinceCity> provinceCity = provinceCityService.findById(createOrderForm.getProvinceCityId());
@@ -148,11 +178,10 @@ public class OrderController {
         }
 
         Order newOrder = Order.builder()
-                .total((orderTotal * 110)/100)
+                .total((orderTotal * 110) / 100)
                 .phoneNumber(createOrderForm.getPhoneNumber())
                 .receiverName(createOrderForm.getReceiverName())
                 .createdDate(LocalDate.now().toString())
-                .status("PREPARE")
                 .userInfo(userInfo)
                 .provinceCity(provinceCity.get())
                 .district(district.get())

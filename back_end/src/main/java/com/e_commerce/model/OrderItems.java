@@ -21,6 +21,7 @@ public class OrderItems {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private ProductOptions productOptions;
 
+    private String status;
     private double price;
     private int quantity;
 
@@ -37,6 +38,8 @@ public class OrderItems {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "payment_way_id")
     private PaymentWay paymentWay;
+
+    private String notReceivingReason;
 
 
 }
