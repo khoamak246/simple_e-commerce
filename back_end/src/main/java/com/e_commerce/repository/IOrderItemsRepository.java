@@ -9,4 +9,5 @@ import java.util.Set;
 @Repository
 public interface IOrderItemsRepository extends JpaRepository<OrderItems, Long> {
     Set<OrderItems> findByShopId(Long shopId);
+    Set<OrderItems> findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(Long shopId, String status);
 }

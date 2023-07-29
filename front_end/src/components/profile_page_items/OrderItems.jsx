@@ -174,7 +174,7 @@ export default function OrderItems({ orderItem }) {
         <CancelAndReturnOrderItemModal
           orderItem={orderItem}
           action={toggleAction}
-          resetAction={setToggleAction}
+          closeModal={() => setToggleAction()}
         />
       )}
       {toggleReviewForm && (

@@ -1,5 +1,7 @@
 package com.e_commerce.model;
 
+import com.e_commerce.dto.response.ProductResponse;
+import com.e_commerce.dto.response.ShopRevenueResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
@@ -16,6 +18,31 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@NamedStoredProcedureQuery(name = "count_number_follower_shop",
+        procedureName = "count_number_follower_shop", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class)}
+)
+
+@NamedStoredProcedureQuery(name = "find_total_revenue_shop",
+        procedureName = "find_total_revenue_shop", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class)}
+)
+
+@NamedStoredProcedureQuery(name = "find_revenue_each_month",
+        procedureName = "find_revenue_each_month", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class),
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "year", type = Integer.class),},
+        resultSetMappings = "shop_revenue_each_month"
+)
+@SqlResultSetMapping(name = "shop_revenue_each_month",
+        classes = @ConstructorResult(
+                targetClass = ShopRevenueResponse.class,
+                columns = {
+                        @ColumnResult(name = "month", type = Integer.class),
+                        @ColumnResult(name = "revenue", type = Double.class)
+                }
+        )
+)
 public class Shop {
 
     @Id
@@ -70,7 +97,8 @@ public class Shop {
     private User user;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<User> followers;
+    @JsonIgnoreProperties("userInfo")
+    private Set<User> followers;
 
     @OneToMany(mappedBy = "shop")
     @JsonIgnoreProperties({"shop"})

@@ -4,17 +4,21 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { patch_update_order_item_status } from "../../thunk/OrderThunk";
 import { toast } from "react-hot-toast";
-import { handleFindFirstImgAssetInOrderItem } from "../../utils/Utils";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+  handleFindFirstImgAssetInOrderItem,
+} from "../../utils/Utils";
 
 export default function OrderItemModal({ orderItem, closeModal }) {
   const [isActive, setActive] = useState(false);
   const dispatch = useDispatch();
-  const [changeStatus, setChangeStatus] = useState(orderItem.order.status);
+  const [changeStatus, setChangeStatus] = useState(orderItem.status);
+
   useEffect(() => {
-    setTimeout(() => {
-      setActive(true);
-    }, 50);
+    handleAnimateToggle(setActive);
   }, []);
+
   const handleRenderStatus = () => {
     if (orderItem) {
       let status = orderItem.status;
@@ -33,10 +37,7 @@ export default function OrderItemModal({ orderItem, closeModal }) {
     }
   };
   const handleCloseModal = () => {
-    setActive(false);
-    setTimeout(() => {
-      closeModal();
-    }, 400);
+    handleCloseAnimateToggle(setActive, closeModal);
   };
 
   const handleOnSubmit = () => {
@@ -124,6 +125,14 @@ export default function OrderItemModal({ orderItem, closeModal }) {
                 handleRenderStatus()
               )}
             </div>
+            {["CANCEL", "RETURN"].includes(orderItem.status) && (
+              <p className="text-sm">
+                <span className="font-semibold">Reason: </span>
+                <span className="text-[#EE4D2D] font-semibold">
+                  {orderItem && orderItem.notReceivingReason}
+                </span>
+              </p>
+            )}
             <p className="text-sm">
               <span className="font-semibold">Product ID: </span>
               {orderItem && orderItem.productOptions.product.id}
@@ -151,12 +160,17 @@ export default function OrderItemModal({ orderItem, closeModal }) {
             </div>
           </div>
           <div className="w-full h-[13%] flex justify-end border-solid border-t-[1px] border-slate-400 py-2 px-3 gap-3">
-            <button
-              className="button-theme px-2 rounded-md"
-              onClick={handleOnSubmit}
-            >
-              Confirm
-            </button>
+            {!["CANCEL", "PAYMENT_SUCCESS", "RETURN"].includes(
+              orderItem.status
+            ) && (
+              <button
+                className={`button-theme px-2 rounded-md`}
+                onClick={handleOnSubmit}
+              >
+                Confirm
+              </button>
+            )}
+
             <button
               className="px-2 rounded-md bg-slate-300"
               onClick={handleCloseModal}

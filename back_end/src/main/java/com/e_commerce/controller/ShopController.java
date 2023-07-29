@@ -3,8 +3,7 @@ package com.e_commerce.controller;
 import com.e_commerce.dto.request.AssetCreateForm;
 import com.e_commerce.dto.request.CreateShopForm;
 import com.e_commerce.dto.request.UpdateShopForm;
-import com.e_commerce.dto.response.ResponseMessage;
-import com.e_commerce.dto.response.ShopResponse;
+import com.e_commerce.dto.response.*;
 import com.e_commerce.model.*;
 import com.e_commerce.service.*;
 import com.e_commerce.utils.constant.ValidationRegex;
@@ -12,14 +11,14 @@ import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/shop")
@@ -32,6 +31,89 @@ public class ShopController {
     private final IWardService wardService;
     private final IPaymentWayService paymentWayService;
     private final IAssetService assetService;
+    private final IProductService productService;
+    private final IOrderItemsService orderItemsService;
+
+    @GetMapping("/{shopId}")
+    public ResponseEntity<ResponseMessage> findShopById(@PathVariable Long shopId) {
+        Optional<Shop> shop = shopService.findById(shopId);
+        return shop.map(value -> ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", shopService.createShopResponse(value))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at id: " + shopId)));
+
+
+    }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ResponseMessage> findShopByUserId(@PathVariable Long userId) {
+        if (!userService.isUserIdEqualUserPrincipalId(userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
+        }
+
+        Optional<Shop> shop = shopService.findByUserId(userId);
+        if (!shop.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at user id: " + userId));
+        }
+
+        ShopResponse shopResponse = shopService.createShopResponse(shop.get());
+
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", shopResponse));
+    }
+
+    @GetMapping("/sale-management/{shopId}")
+    @Transactional
+    public ResponseEntity<ResponseMessage> getSaleManagementByShopId(@PathVariable Long shopId) {
+        if (!shopService.isCurrentUserMatchShopUserid(shopId)) {
+            return ResponseEntity.badRequest().body(Utils.buildFailMessage("Not match user with shop"));
+        }
+        ProductResponse defaultProductResponse = ProductResponse.builder()
+                .id(-1L)
+                .data(0)
+                .name("")
+                .build();
+         int productNumber = productService.countByShopId(shopId);
+         ProductResponse maxCancelOrderPercentProduct = productService.findProductHaveMaxCancelOrderPercent(shopId).orElse(defaultProductResponse);
+         ProductResponse maxReturnOrderPercentProduct = productService.findProductHaveMaxReturnOrderPercent(shopId).orElse(defaultProductResponse);
+         int FollowerNumber = shopService.countNumberFollowerShop(shopId);
+         Set<ProductResponse> top10ProductMaxOrder = productService.findTop10ProductHaveMaxNumberOrder(shopId);
+         Set<ProductResponse> top10ProductMaxFavorites = productService.findTop10ProductHaveMaxFavorites(shopId);
+         Set<ProductResponse> top10ProductMaxVisitNumber = productService.findTop10ByShopIdOrderByVisitNumberDesc(shopId).stream()
+                 .map(e ->
+                         ProductResponse.builder()
+                                 .id(e.getId())
+                                 .name(e.getName())
+                                 .data(e.getVisitNumber())
+                 .build()).collect(Collectors.toSet());
+         Set<ProductResponse> top5ProductMaxRevenue = productService.findTopFiveProductHaveMaxRevenue(shopId);
+        SaleManagementResponse saleManagementResponse = SaleManagementResponse.builder()
+                .productNumber(productNumber)
+                .maxCancelOrderPercentProduct(maxCancelOrderPercentProduct)
+                .maxReturnOrderPercentProduct(maxReturnOrderPercentProduct)
+                .FollowerNumber(FollowerNumber)
+                .top10ProductMaxOrder(top10ProductMaxOrder)
+                .top10ProductMaxFavorites(top10ProductMaxFavorites)
+                .top10ProductMaxVisitNumber(top10ProductMaxVisitNumber)
+                .top5ProductMaxRevenue(top5ProductMaxRevenue)
+                .type("saleMng")
+                .build();
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Query successfully!", saleManagementResponse));
+    }
+
+    @GetMapping("/revenue-management/{shopId}/{year}")
+    @Transactional
+    public ResponseEntity<ResponseMessage> getRevenueManagementShop(@PathVariable Long shopId, @PathVariable int year) {
+        if (!shopService.isCurrentUserMatchShopUserid(shopId)) {
+            return ResponseEntity.badRequest().body(Utils.buildFailMessage("Not match user with shop"));
+        }
+        double totalRevenue = shopService.sumRevenueShop(shopId);
+        Set<OrderItems> top10Revenue = orderItemsService.findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(shopId, "PAYMENT_SUCCESS");
+        Set<ShopRevenueResponse> sumRevenueEachMonthShop = shopService.sumRevenueEachMonthShop(shopId, year);
+        RevenueManagementResponse revenueManagementResponse = RevenueManagementResponse.builder()
+                .totalRevenue(totalRevenue)
+                .top10Revenue(top10Revenue)
+                .sumRevenueEachMonthShop(sumRevenueEachMonthShop)
+                .type("revenueMng")
+                .build();
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Query successfully!", revenueManagementResponse));
+    }
 
     @PatchMapping("/{shopId}")
     public ResponseEntity<ResponseMessage> patchUpdateShop(@PathVariable Long shopId, @RequestBody UpdateShopForm updateShopForm) {
@@ -144,21 +226,6 @@ public class ShopController {
         return ResponseEntity.ok().body(Utils.buildSuccessMessage("update shop successfully!", shopResponse));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<ResponseMessage> findShopByUserId(@PathVariable Long userId) {
-        if (!userService.isUserIdEqualUserPrincipalId(userId)) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
-        }
-
-        Optional<Shop> shop = shopService.findByUserId(userId);
-        if (!shop.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at user id: " + userId));
-        }
-
-        ShopResponse shopResponse = shopService.createShopResponse(shop.get());
-
-        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", shopResponse));
-    }
 
     @PostMapping("")
     public ResponseEntity<ResponseMessage> saveShop(@Validated @RequestBody CreateShopForm createShopForm, BindingResult result) {
@@ -220,4 +287,31 @@ public class ShopController {
         return ResponseEntity.ok().body(Utils.buildSuccessMessage("Create new shop successfully!", shopResponse));
     }
 
+    @PostMapping("/follower/{shopId}/{userId}")
+    public ResponseEntity<ResponseMessage> saveFollower(@PathVariable Long userId, @PathVariable Long shopId) {
+        if (!userService.isUserIdEqualUserPrincipalId(userId)) {
+            return ResponseEntity.badRequest().body(Utils.buildFailMessage("Not match user!"));
+        }
+        Optional<User> user = userService.findById(userId);
+        if (!user.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found user at id: " + userId));
+        }
+        Optional<Shop> shop = shopService.findById(userId);
+        if (!shop.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found shop at id: " + shopId));
+        }
+
+        List<User> userList = new ArrayList<>(shop.get().getFollowers());
+        if (userList.contains(user.get())) {
+            userList.remove(user.get());
+        } else {
+            userList.add(user.get());
+        }
+
+        Set<User> newSetFollower = new HashSet<>(userList);
+        shop.get().setFollowers(newSetFollower);
+        Shop justSavedShop = shopService.save(shop.get());
+        ShopResponse shopResponse = shopService.createShopResponse(justSavedShop);
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Create new shop successfully!", shopResponse));
+    }
 }

@@ -6,6 +6,8 @@ import DshShopCollection from "../../components/seller_page_items/DashboardItems
 import DshAllProduct from "../../components/seller_page_items/DashboardItems/DshAllProduct";
 import DshShopAddress from "../../components/seller_page_items/DashboardItems/DshShopAddress";
 import DshAllOrder from "../../components/seller_page_items/DashboardItems/DshAllOrder";
+import DshSaleAnalysis from "../../components/seller_page_items/DashboardItems/DshSaleAnalysis";
+import DshRevenue from "../../components/seller_page_items/DashboardItems/DshRevenue";
 
 export const SellerDashboardItems = [
   {
@@ -95,10 +97,6 @@ export const SellerDashboardItems = [
       {
         name: "Revenue",
         url: "revenue",
-      },
-      {
-        name: "EON account balance",
-        url: "accountBalance",
       },
       {
         name: "Payment settings",
@@ -228,6 +226,14 @@ export const matcherUrlComponent = [
   {
     url: "/finance/paymentSettings",
     component: <DshPaymentSetting />,
+  },
+  {
+    url: "/finance/revenue",
+    component: <DshRevenue />,
+  },
+  {
+    url: "/data/salesAnalysis",
+    component: <DshSaleAnalysis />,
   },
   { url: "/shopMng/shopCollection", component: <DshShopCollection /> },
   { url: "/shopMng/shopProfile", component: <DshShopProfile /> },

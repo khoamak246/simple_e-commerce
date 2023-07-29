@@ -4,6 +4,7 @@ import {
   POST_SAVE_NEW_COLLECTION,
 } from "../api/service/CollectionService";
 import { setShop } from "../redux/reducers/ShopSlice";
+import { get_shop_by_user_id } from "./ShopThunk";
 
 export const post_save_new_collection = (name) => {
   return async function post_save_new_collection_thunk(dispatch, getState) {
@@ -14,8 +15,10 @@ export const post_save_new_collection = (name) => {
     };
     let response = await POST_SAVE_NEW_COLLECTION(createCollectionForm);
     if (response.status == 200) {
-      dispatch(setShop({ ...shop, collections: response.data.data }));
-      return response.data.data;
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
+        return true;
+      }
     } else {
       console.log(response);
       return false;
@@ -28,8 +31,10 @@ export const patch_update_collection = (payload) => {
     const { shop } = getState();
     let response = await PATCH_UPDATE_COLLECTION(payload);
     if (response.status === 200) {
-      dispatch(setShop({ ...shop, collections: response.data.data }));
-      return true;
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
+        return true;
+      }
     } else {
       console.log(response);
       return false;
@@ -42,8 +47,10 @@ export const delete_collection = (collectionId) => {
     const { shop } = getState();
     let response = await DELETE_COLLECTION(collectionId);
     if (response.status === 200) {
-      dispatch(setShop({ ...shop, collections: response.data.data }));
-      return true;
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
+        return true;
+      }
     } else {
       console.log(response);
       return false;

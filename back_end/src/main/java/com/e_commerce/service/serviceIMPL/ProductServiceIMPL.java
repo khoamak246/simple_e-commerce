@@ -1,6 +1,8 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.dto.response.ProductResponse;
 import com.e_commerce.model.Product;
+import com.e_commerce.model.ProductOptions;
 import com.e_commerce.repository.IProductRepository;
 import com.e_commerce.service.IProductService;
 import com.e_commerce.utils.util.Utils;
@@ -9,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -68,5 +67,45 @@ public class ProductServiceIMPL implements IProductService {
     @Override
     public Set<Product> findByShopId(Long shopId) {
         return productRepository.findByShopId(shopId);
+    }
+
+    @Override
+    public Set<ProductResponse> findTop10ProductHaveMaxNumberOrder(Long shopId) {
+        return productRepository.findTop10ProductHaveMaxNumberOrder(shopId);
+    }
+
+    @Override
+    public Set<ProductResponse> findTop10ProductHaveMaxFavorites(Long shopId) {
+        return productRepository.findTop10ProductHaveMaxFavorites(shopId);
+    }
+
+    @Override
+    public Optional<ProductResponse> findProductHaveMaxCancelOrderPercent(Long shopId) {
+        return productRepository.findProductHaveMaxCancelOrderPercent(shopId);
+    }
+
+    @Override
+    public Optional<ProductResponse> findProductHaveMaxReturnOrderPercent(Long shopId) {
+        return productRepository.findProductHaveMaxReturnOrderPercent(shopId);
+    }
+
+    @Override
+    public Set<ProductResponse> findTopFiveProductHaveMaxRevenue(Long shopId) {
+        return productRepository.findTopFiveProductHaveMaxRevenue(shopId);
+    }
+
+    @Override
+    public Set<Product> findTop10ByShopIdOrderByVisitNumberDesc(Long shopId) {
+        return productRepository.findTop10ByShopIdOrderByVisitNumberDesc(shopId);
+    }
+
+    @Override
+    public int countByShopId(Long shopId) {
+        return productRepository.countByShopId(shopId);
+    }
+
+    @Override
+    public double getMinPriceProductOption(Product product) {
+        return product.getProductOptions().stream().mapToDouble(ProductOptions::getPrice).min().orElseThrow(NoSuchElementException::new);
     }
 }

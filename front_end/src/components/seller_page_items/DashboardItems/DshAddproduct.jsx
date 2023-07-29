@@ -18,7 +18,7 @@ import { resetSelectBusiness } from "../../../redux/reducers/BusinessSlice";
 
 export default function DshAddproduct() {
   const dispatch = useDispatch();
-  const [isSelectCatalog, setIsSelectCatalog] = useState(false);
+  const [isSelectBusiness, setSelectBusiness] = useState(false);
   const businessSelector = useSelector(BUSINESS_LIST_SELECTOR);
   const selectBusiness = useSelector(BUSINESS_SELECTED_SELECTOR);
   const [isCreateOption, setCreateOption] = useState(false);
@@ -346,7 +346,7 @@ export default function DshAddproduct() {
           {/* PRODUCT BUSINESS */}
           <div
             className="w-full flex flex-col sm:flex-row"
-            onClick={() => setIsSelectCatalog(true)}
+            onClick={() => setSelectBusiness(true)}
           >
             <div className="w-[50%] sm:w-[14%] text-sm">Product business:</div>
             <div className="w-[90%] sm:w-[70%] border-[1px] border-solid border-slate-400 rounded-md overflow-hidden flex items-center justify-center">
@@ -630,8 +630,8 @@ export default function DshAddproduct() {
         </div>
       </div>
       {/* SELECT CATALOG MODAL */}
-      {isSelectCatalog && (
-        <SelectBusinessModal toggleModal={setIsSelectCatalog} />
+      {isSelectBusiness && (
+        <SelectBusinessModal closeModal={() => setSelectBusiness(false)} />
       )}
     </div>
   );

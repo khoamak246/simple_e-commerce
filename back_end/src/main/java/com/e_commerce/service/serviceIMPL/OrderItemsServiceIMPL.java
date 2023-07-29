@@ -40,4 +40,9 @@ public class OrderItemsServiceIMPL implements IOrderItemsService {
     public Set<OrderItems> findByShopId(Long shopId) {
         return orderItemsRepository.findByShopId(shopId);
     }
+
+    @Override
+    public Set<OrderItems> findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(Long shopId, String status) {
+        return orderItemsRepository.findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(shopId, status);
+    }
 }

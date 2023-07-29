@@ -126,3 +126,39 @@ export const handleFindFirstImgAssetInOrderItem = (orderItem) => {
   }
   return "";
 };
+
+export const handleFindFirstImgAssetInProduct = (product) => {
+  if (product) {
+    let assets = product.assets;
+    let img = assets.find((e) => e.assetType === "image");
+    if (img) {
+      return img.url;
+    }
+  }
+  return "";
+};
+
+export const handleDisableOVerflowY = (isDisable) => {
+  if (isDisable) {
+    document.body.style.overflowY = "hidden";
+    document.body.style.overflowX = "hidden";
+  } else {
+    document.body.style.overflowY = "auto";
+    document.body.style.overflowX = "hidden";
+  }
+};
+
+export const handleAnimateToggle = (setIsActive) => {
+  handleDisableOVerflowY(true);
+  setTimeout(() => {
+    setIsActive(true);
+  }, 50);
+};
+
+export const handleCloseAnimateToggle = (setIsActive, closeModal) => {
+  setIsActive(false);
+  handleDisableOVerflowY(false);
+  setTimeout(() => {
+    closeModal();
+  }, 400);
+};

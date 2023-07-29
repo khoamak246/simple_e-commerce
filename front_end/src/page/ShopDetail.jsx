@@ -1,7 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "../components/card/ProductCard";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { get_shop_by_id, post_save_new_follower } from "../thunk/ShopThunk";
+import { getMinPrice } from "../utils/Utils";
+import { USER_STATE_SELECTOR } from "../redux/selectors/Selectors";
+import { toast } from "react-hot-toast";
 
 export default function ShopDetail() {
+  const userSelector = useSelector(USER_STATE_SELECTOR);
+  const dispath = useDispatch();
+  const navigate = useNavigate();
+  const param = useParams();
+  const [shop, setShop] = useState();
+  const [activeTab, setActiveTab] = useState(-2);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [displayProduct, setDisplayProduct] = useState([]);
+  const [filterNav, setFilterNav] = useState({
+    type: "popular",
+    sort: "p-asc",
+    page: 1,
+  });
+
   const firstInfoBar = [
     {
       title: "Product: ",
@@ -21,7 +41,7 @@ export default function ShopDetail() {
           />
         </svg>
       ),
-      data: 615,
+      data: shop ? shop.products.length : 0,
     },
     {
       title: "Follower: ",
@@ -41,7 +61,7 @@ export default function ShopDetail() {
           />
         </svg>
       ),
-      data: 615,
+      data: shop ? shop.followers.length : 0,
     },
     {
       title: "Rate: ",
@@ -61,7 +81,7 @@ export default function ShopDetail() {
           />
         </svg>
       ),
-      data: "4 / 5",
+      data: `${shop ? shop.rate : 0}/5`,
     },
     {
       title: "Join: ",
@@ -81,9 +101,101 @@ export default function ShopDetail() {
           />
         </svg>
       ),
-      data: "5 năm trươc",
+      data: shop ? shop.createdDate : 0,
     },
   ];
+  console.log(shop);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = () => {
+    dispath(get_shop_by_id(param.shopId)).then((res) => {
+      if (res) {
+        setShop(res);
+        setDisplayProduct(res.products);
+      } else {
+        navigate("*");
+      }
+    });
+  };
+
+  const handleRenderCollections = () => {
+    if (shop) {
+      let { collections } = shop;
+      return [
+        {
+          id: -2,
+          name: "All product",
+          products: shop.products,
+        },
+        ...collections,
+      ];
+    } else {
+      return [];
+    }
+  };
+
+  const handleSeclectTab = (tab) => {
+    setActiveTab(tab.id);
+    setDisplayProduct(tab.products);
+  };
+
+  const handleRenderProduct = () => {
+    if (displayProduct) {
+      let renderProductArr = [];
+      displayProduct.map((e) => {
+        if (!e.block && e.onSale) {
+          renderProductArr.push(e);
+        }
+      });
+
+      if (filterNav.type == "bestSeller") {
+        renderProductArr.sort((a, b) => {
+          if (a.saleNumber > b.saleNumber) {
+            return 1;
+          } else if (a.saleNumber < b.saleNumber) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+      }
+
+      if (filterNav.sort === "p-acs") {
+        renderProductArr.sort((a, b) => {
+          if (getMinPrice(a) > getMinPrice(b)) {
+            return 1;
+          } else if (getMinPrice(a) < getMinPrice(b)) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+      }
+
+      let result = renderProductArr.filter(
+        (e) =>
+          (filterNav.page - 1) * 20 <= renderProductArr.indexOf(e) &&
+          renderProductArr.indexOf(e) < (filterNav.page - 1) * 20 + 20
+      );
+
+      return result;
+    } else {
+      return [];
+    }
+  };
+  const handleTotalPage = () => {
+    if (displayProduct.length <= 20) {
+      return 1;
+    } else {
+      if (displayProduct.length % 20 === 0) {
+        return displayProduct.length / 20;
+      } else {
+        return (displayProduct.length - (displayProduct.length % 20)) / 20 + 1;
+      }
+    }
+  };
 
   return (
     <div className=" w-screen">
@@ -92,21 +204,42 @@ export default function ShopDetail() {
         <div className="h-[80%] w-full flex justify-center items-center">
           <div className="w-[90%] h-[70%] grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="w-full h-full bg-orange-300 overflow-hidden relative rounded-md">
+              {/* COVER IMG */}
               <img
-                src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/userAssets%2F360_F_562993122_e7pGkeY8yMfXJcRmclsoIjtOoVDDgIlh.jpg7b6b140d-b22e-4a5f-a5ed-2829d1cd6fdd?alt=media&token=97140e93-1841-4a14-8172-180a7d4edced"
+                src={shop ? shop.coverImg : ""}
                 alt=""
                 className="w-full h-full"
               />
               <div className="absolute top-0 left-0 bg-black bg-opacity-40 w-full h-full flex items-center gap-3 px-5">
+                {/* AVATAR */}
                 <img
-                  src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/userAssets%2F360_F_562993122_e7pGkeY8yMfXJcRmclsoIjtOoVDDgIlh.jpg7b6b140d-b22e-4a5f-a5ed-2829d1cd6fdd?alt=media&token=97140e93-1841-4a14-8172-180a7d4edced"
+                  src={shop ? shop.avatar : ""}
                   alt=""
                   className="w-24 h-24 rounded-full"
                 />
                 <div className="flex flex-col justify-start items-start w-full gap-2">
-                  <h2 className="text-white text-xl w-full">Anh khoa</h2>
+                  <h2 className="text-white text-xl w-full">
+                    {shop && shop.name}
+                  </h2>
                   <div className="w-full flex flex-col sm:flex-row gap-2">
-                    <button className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2">
+                    <button
+                      className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2"
+                      onClick={() => {
+                        if (!userSelector) {
+                          toast("OOP! You need login to use this service!", {
+                            icon: "👏",
+                          });
+                        } else {
+                          dispath(post_save_new_follower(shop.id)).then(
+                            (res) => {
+                              if (res) {
+                                fetchData();
+                              }
+                            }
+                          );
+                        }
+                      }}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -121,7 +254,15 @@ export default function ShopDetail() {
                           d="M12 4.5v15m7.5-7.5h-15"
                         />
                       </svg>
-                      <p>Follow</p>
+                      <p>
+                        {shop &&
+                        userSelector &&
+                        shop.followers.findIndex(
+                          (e) => e.id === userSelector.id
+                        ) >= 0
+                          ? "Unfollow"
+                          : "Follow"}
+                      </p>
                     </button>
                     <button className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2">
                       <svg
@@ -187,20 +328,30 @@ export default function ShopDetail() {
             </div>
           </div>
         </div>
+        {/* COLLECTION */}
         <div className="h-[20%] w-full flex justify-center items-center">
           <div className="w-[90%] h-full flex gap-5">
-            <div className="w-[10vw] cursor-pointer border-b-[2px] border-solid border-[#EE4D2D]">
-              <p className="text-center">Hello</p>
-            </div>
-            <div className="w-[10vw] cursor-pointer">
-              <p className="text-center">hello</p>
-            </div>
+            {shop &&
+              handleRenderCollections().map((val, index) => {
+                return (
+                  <div
+                    key={val.id}
+                    className={`${
+                      val.id === activeTab &&
+                      "border-b-[2px] border-solid border-[#EE4D2D]"
+                    } w-[10vw] cursor-pointer`}
+                    onClick={() => handleSeclectTab(val)}
+                  >
+                    <p className="text-center">{val.name}</p>
+                  </div>
+                );
+              })}
           </div>
         </div>
       </div>
       {/* TODO: create function render - with delete button  */}
       {/* DECOR */}
-      <div className="w-full px-5 py-2 relative">
+      {/* <div className="w-full px-5 py-2 relative">
         <div className="cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -235,7 +386,122 @@ export default function ShopDetail() {
             <p className="hover:bg-slate-200 cursor-pointer">Collection</p>
           </div>
         </div>
+      </div> */}
+
+      {/* INTRODUCE */}
+      <div className="w-full overflow-hidden flex justify-center items-center cursor-pointer mt-5 ">
+        <div className="w-[95%] bg-white flex flex-col md:flex-row rounded-lg">
+          <div className="w-full md:w-[50%]">
+            <img src={shop ? shop.coverImg : ""} />
+          </div>
+          <div className="w-full md:w-[50%] flex flex-col justify-center items-center gap-2 ">
+            <h1 className="text-[2.4rem] italic text-[#F3A847] font-serif">
+              {shop && shop.name}
+            </h1>
+            <h2 className="text-xl italic font-serif w-[70%] text-center">
+              {shop && shop.description}
+            </h2>
+          </div>
+        </div>
       </div>
+
+      {shop && shop.introduce.length !== 0 && (
+        <div className="w-full h-[70vh] flex justify-center items-center">
+          <div
+            id="indicators-carousel"
+            className="relative w-[95%] h-[80%]"
+            data-carousel="static"
+          >
+            {/* Carousel wrapper */}
+            <div className="relative h-full overflow-hidden rounded-lg md:h-96">
+              {[...shop.introduce.map((e) => e.url)].map((val, index) => {
+                return (
+                  <div
+                    key={index}
+                    className={`${
+                      currentSlide === index ? "w-full h-full" : "w-0"
+                    } duration-700 ease-in-out overflow-hidden`}
+                    data-carousel-item="active"
+                  >
+                    <img
+                      src={val}
+                      className="absolute block w-full h-full"
+                      alt="..."
+                      draggable={false}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Slider controls */}
+            <button
+              type="button"
+              className="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+              data-carousel-prev=""
+              onClick={() => {
+                if (shop) {
+                  let slide = [...shop.introduce.map((e) => e.url)];
+                  if (currentSlide > 0) {
+                    setCurrentSlide((prev) => prev - 1);
+                  }
+                }
+              }}
+            >
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+                <svg
+                  className="w-4 h-4 text-white dark:text-gray-800"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 1 1 5l4 4"
+                  />
+                </svg>
+                <span className="sr-only">Previous</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
+              data-carousel-next=""
+              onClick={() => {
+                if (shop) {
+                  let slide = [...shop.introduce.map((e) => e.url)];
+                  if (currentSlide < slide.length - 1) {
+                    setCurrentSlide((prev) => prev + 1);
+                  }
+                }
+              }}
+            >
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
+                <svg
+                  className="w-4 h-4 text-white dark:text-gray-800"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 6 10"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="m1 9 4-4-4-4"
+                  />
+                </svg>
+                <span className="sr-only">Next</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
       {/* COLLECTION */}
       <div className="mt-5 w-screen flex flex-col px-5">
         <div className="w-full flex gap-3">
@@ -258,29 +524,33 @@ export default function ShopDetail() {
               <p>Danh muc</p>
             </div>
             <div className="w-full flex flex-col gap-2 py-4">
-              {[1, 1].map((val, index) => {
-                return (
-                  <div
-                    className="w-full flex gap-2 items-center text-[#EE606E] font-semibold"
-                    key={index}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-4 h-4"
+              {shop &&
+                handleRenderCollections().map((val, index) => {
+                  return (
+                    <div
+                      className={`w-full flex gap-2 items-center ${
+                        activeTab === val.id && "text-[#EE606E] font-semibold"
+                      } cursor-pointer`}
+                      key={val.id}
+                      onClick={() => handleSeclectTab(val)}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.72 3.97a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L11.69 12 4.72 5.03a.75.75 0 010-1.06zm6 0a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 11-1.06-1.06L17.69 12l-6.97-6.97a.75.75 0 010-1.06z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.72 3.97a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L11.69 12 4.72 5.03a.75.75 0 010-1.06zm6 0a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 11-1.06-1.06L17.69 12l-6.97-6.97a.75.75 0 010-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
 
-                    <p>Hello</p>
-                  </div>
-                );
-              })}
+                      <p>{val.name}</p>
+                    </div>
+                  );
+                })}
             </div>
           </div>
           <div className="w-[80%] bg-white">
@@ -288,36 +558,59 @@ export default function ShopDetail() {
             <div className="w-full flex gap-2 py-2 bg-[#EDEDED] justify-between sm:px-5">
               <div className="scale-[80%] sm:scale-100 w-[70%] flex items-center gap-3">
                 <p>Sort by: </p>
-                {[1, 1, 1].map((val, index) => {
+                {[
+                  { name: "Popular", value: "popular" },
+                  { name: "Best seller", value: "bestSeller" },
+                ].map((val, index) => {
                   return (
                     <div
-                      className="h-full w-[15%] bg-white py-1 flex justify-center items-center rounded-sm cursor-pointer"
+                      className={`${
+                        filterNav.type === val.value
+                          ? "bg-[#F05D40] text-white font-semibold"
+                          : "bg-white"
+                      } h-full w-[15%]  py-1 flex justify-center items-center rounded-sm cursor-pointer`}
                       key={index}
+                      onClick={() =>
+                        setFilterNav({ ...filterNav, type: val.value })
+                      }
                     >
-                      <p className="text-[0.7rem] sm:text-base">Hello</p>
+                      <p className="text-[0.7rem] sm:text-base">{val.name}</p>
                     </div>
                   );
                 })}
                 <div className="h-full bg-white py-1 w-[30%] flex justify-between items-center rounded-sm cursor-pointer px-2">
-                  <p>Hello</p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-4 h-4"
+                  <select
+                    name=""
+                    id=""
+                    className="w-full"
+                    value={filterNav.sort}
+                    onChange={(e) =>
+                      setFilterNav({ ...filterNav, sort: e.target.value })
+                    }
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.53 16.28a.75.75 0 01-1.06 0l-7.5-7.5a.75.75 0 011.06-1.06L12 14.69l6.97-6.97a.75.75 0 111.06 1.06l-7.5 7.5z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                    <option value="p-asc">Price asc</option>
+                    <option value="p-desc">Price desc</option>
+                  </select>
                 </div>
               </div>
               <div className="scale-[80%] sm:scale-100 w-[30%] flex justify-end items-center gap-2">
-                <p>1/19</p>
+                <p>1/{handleTotalPage()}</p>
                 <div className="h-full bg-white w-[5vw] flex justify-between items-center rounded-sm cursor-pointer">
-                  <div className="w-[50%] h-full flex justify-center items-center border-r-[1px] border-solid border-slate-300 cursor-pointer bg-slate-300">
+                  <button
+                    className={`${
+                      filterNav.page === 1 &&
+                      "border-slate-300 cursor-pointer bg-slate-300"
+                    } w-[50%] h-full flex justify-center items-center border-r-[1px] border-solid `}
+                    disabled={filterNav.page === 1}
+                    onClick={() => {
+                      if (filterNav.page > 1) {
+                        setFilterNav({
+                          ...filterNav,
+                          page: filterNav.page - 1,
+                        });
+                      }
+                    }}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -330,8 +623,22 @@ export default function ShopDetail() {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </div>
-                  <div className="w-[50%] h-full flex justify-center items-center cursor-pointer">
+                  </button>
+                  <button
+                    className={`${
+                      filterNav.page === handleTotalPage() &&
+                      "border-slate-300 cursor-pointer bg-slate-300"
+                    } w-[50%] h-full flex justify-center items-center cursor-pointer`}
+                    disabled={filterNav.page === handleTotalPage()}
+                    onClick={() => {
+                      if (filterNav.page < handleTotalPage()) {
+                        setFilterNav({
+                          ...filterNav,
+                          page: filterNav.page + 1,
+                        });
+                      }
+                    }}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -344,15 +651,15 @@ export default function ShopDetail() {
                         clipRule="evenodd"
                       />
                     </svg>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
             <div className="w-full grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 p-2 gap-3">
-              {[1, 1, 1, 1, 1, 1].map((val, index) => {
+              {handleRenderProduct().map((val, index) => {
                 return (
                   <div className="w-full h-full" key={index}>
-                    <ProductCard />
+                    <ProductCard product={val} />
                   </div>
                 );
               })}

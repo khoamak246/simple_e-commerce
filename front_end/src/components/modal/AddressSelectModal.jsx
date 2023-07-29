@@ -7,6 +7,10 @@ import {
 import { toast } from "react-hot-toast";
 import { resetToggle, setToggle } from "../../redux/reducers/ToggleSlice";
 import { setNewAddressState } from "../../redux/reducers/AddressSlice";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+} from "../../utils/Utils";
 
 export default function AddressSelectModal() {
   const [isActive, setIsActive] = useState(false);
@@ -87,10 +91,12 @@ export default function AddressSelectModal() {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
+    handleAnimateToggle(setIsActive);
   }, []);
+
+  const closeModal = () => {
+    dispatch(setToggle(null));
+  };
 
   return (
     <div
@@ -102,10 +108,7 @@ export default function AddressSelectModal() {
         <div
           className="absolute top-[-2.5%] right-[-2%] cursor-pointer"
           onClick={() => {
-            setIsActive(false);
-            setTimeout(() => {
-              dispatch(setToggle(null));
-            }, 400);
+            handleCloseAnimateToggle(setIsActive, closeModal);
           }}
         >
           <svg

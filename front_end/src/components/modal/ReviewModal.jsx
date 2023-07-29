@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { handleFindFirstImgAssetInOrderItem } from "../../utils/Utils";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+  handleFindFirstImgAssetInOrderItem,
+} from "../../utils/Utils";
 import { useDispatch } from "react-redux";
 import { post_create_new_review } from "../../thunk/ReviewThunk";
 import { firebase_multiple_upload } from "../../firebase/FirebaseService";
@@ -16,11 +20,12 @@ export default function ReviewModal({ orderItem, closeModal }) {
   });
   const [hoverStar, setHoverStar] = useState();
 
+  useEffect(() => {
+    handleAnimateToggle(setIsActive);
+  }, []);
+
   const handleCloseModal = () => {
-    setIsActive(false);
-    setTimeout(() => {
-      closeModal();
-    }, 400);
+    handleCloseAnimateToggle(setIsActive, closeModal);
   };
 
   const handleSubmit = async () => {
@@ -48,11 +53,6 @@ export default function ReviewModal({ orderItem, closeModal }) {
     });
   };
 
-  useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
-  }, []);
   return (
     <div
       className={`${

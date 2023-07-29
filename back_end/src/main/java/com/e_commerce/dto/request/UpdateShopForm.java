@@ -27,6 +27,7 @@ public class UpdateShopForm {
     private String avatar;
 
     private String coverImg;
+
     private Set<AssetCreateForm> introduce;
 
     private String description;

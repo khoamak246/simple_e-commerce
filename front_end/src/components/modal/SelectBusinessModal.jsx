@@ -12,9 +12,13 @@ import {
   setChildrenBusinessIndex,
   setSubinessIndex,
 } from "../../redux/reducers/BusinessSlice";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+} from "../../utils/Utils";
 
 export default function SelectBusinessModal({
-  toggleModal,
+  closeModal,
   selectBusinessMethod,
 }) {
   const [isActive, setIsActive] = useState(false);
@@ -23,16 +27,11 @@ export default function SelectBusinessModal({
   const selectBusiness = useSelector(BUSINESS_SELECTED_SELECTOR);
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
+    handleAnimateToggle(setIsActive);
   }, []);
 
   const handleOnCloseModal = () => {
-    setIsActive(false);
-    setTimeout(() => {
-      toggleModal(false);
-    }, 400);
+    handleCloseAnimateToggle(setIsActive, closeModal);
   };
 
   const handleRenderResultSelectBusiness = () => {
@@ -165,7 +164,7 @@ export default function SelectBusinessModal({
                       key={index}
                       onClick={() => {
                         dispatch(setChildrenBusinessIndex(index));
-                        
+
                         if (selectBusinessMethod) {
                           selectBusinessMethod(val);
                         }

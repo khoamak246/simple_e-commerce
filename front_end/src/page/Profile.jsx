@@ -8,12 +8,21 @@ import { USER_STATE_SELECTOR } from "../redux/selectors/Selectors";
 import { toast } from "react-hot-toast";
 import { firebase_single_upload } from "../firebase/FirebaseService";
 import { patch_update_user } from "../thunk/UserThunk";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("personal");
-  const currentUserAuth = useSelector(USER_STATE_SELECTOR);
+  const userSelector = useSelector(USER_STATE_SELECTOR);
   const [prewviewAvatar, setPreviewAvatar] = useState();
+
+  useEffect(() => {
+    if (!userSelector) {
+      navigate("/");
+    }
+  }, []);
 
   const handleOnClickActiveTab = (e) => {
     setActiveTab(e.target.getAttribute("name"));
@@ -66,8 +75,8 @@ export default function Profile() {
                 src={
                   prewviewAvatar
                     ? prewviewAvatar.previewUrl
-                    : currentUserAuth
-                    ? currentUserAuth.userInfo.avatar
+                    : userSelector
+                    ? userSelector.userInfo.avatar
                     : ""
                 }
                 alt="user-avatar"

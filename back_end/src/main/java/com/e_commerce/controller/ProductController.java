@@ -10,11 +10,14 @@ import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -39,6 +42,7 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", products));
         }
     }
+
 
     @GetMapping("/{productId}")
     public ResponseEntity<ResponseMessage> getProductById(@PathVariable Long productId) {

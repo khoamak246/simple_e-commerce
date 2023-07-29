@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import OrderItems from "./OrderItems";
 import { useSelector } from "react-redux";
 import { USER_STATE_SELECTOR } from "../../redux/selectors/Selectors";
-import CancelAndReturnOrderItemModal from "../modal/CancelAndReturnOrderItemModal";
 
 export default function Order() {
   const [isActive, setActive] = useState(false);

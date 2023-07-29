@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setToggle } from "../../redux/reducers/ToggleSlice";
 import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+  handleDisableOVerflowY,
   handleRenderCurrentSelectAddress,
   handleTakeIdFromSelectAddress,
 } from "../../utils/Utils";
@@ -20,10 +23,9 @@ import {
 
 export default function AddAndEditUserAddressModal({
   editItem,
-  setOpenModal,
+  closeModal,
   setSelectAddress,
   selectAddress,
-  setSelectEditAddress,
 }) {
   const [isActive, setIsActive] = useState(false);
   const [formState, setFormState] = useState("create");
@@ -33,10 +35,12 @@ export default function AddAndEditUserAddressModal({
 
   const dispatch = useDispatch();
   useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
+    handleAnimateToggle(setIsActive);
   }, []);
+
+  const handleOnCloseModal = () => {
+    handleCloseAnimateToggle(setIsActive, closeModal);
+  };
 
   useEffect(() => {
     if (userSelector && addressSelector && !editItem) {
@@ -50,11 +54,6 @@ export default function AddAndEditUserAddressModal({
       setStreetDetail(editItem.streetDetail);
     }
   }, [addressSelector, userSelector]);
-
-  const handleOnBackButton = () => {
-    if (formState == "edit") {
-    }
-  };
 
   const handleSubmit = () => {
     if (formState === "create") {
@@ -99,17 +98,9 @@ export default function AddAndEditUserAddressModal({
     ).then((res) => {
       if (res) {
         toast.success("Edit successfully!");
-        setSelectEditAddress();
         handleOnCloseModal();
       }
     });
-  };
-
-  const handleOnCloseModal = () => {
-    setIsActive(false);
-    setTimeout(() => {
-      setOpenModal(false);
-    }, 400);
   };
 
   const handleRenderAddOrEditAddress = () => {
@@ -219,6 +210,28 @@ export default function AddAndEditUserAddressModal({
       } bg-black bg-opacity-50  fixed top-0 left-0 flex items-center justify-center overflow-hidden duration-300 transition-all`}
     >
       <div className="w-[50%] h-[80%] bg-white flex flex-col items-center justify-center relative rounded-md">
+        {/* BACk */}
+        {formState !== "edit" && (
+          <div
+            className="absolute top-[5%] left-[5%] cursor-pointer"
+            onClick={() => setFormState("selectAdress")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        )}
+
+        {/* CLOSE */}
         <div
           className="absolute top-[5%] right-[5%] cursor-pointer"
           onClick={handleOnCloseModal}
@@ -236,20 +249,7 @@ export default function AddAndEditUserAddressModal({
             />
           </svg>
         </div>
-        <div className="absolute top-[5%] left-[5%] cursor-pointer">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.72 12.53a.75.75 0 010-1.06l7.5-7.5a.75.75 0 111.06 1.06L9.31 12l6.97 6.97a.75.75 0 11-1.06 1.06l-7.5-7.5z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
+
         {(formState === "create" || formState == "edit") &&
           handleRenderAddOrEditAddress()}
         {(formState === "selectAdress" || formState == "selectEditItem") &&

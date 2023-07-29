@@ -38,9 +38,9 @@ export const post_login = (loginForm) => {
 export const handle_log_out = () => {
   return async function handle_log_out_thunk(dispatch) {
     const cookies = new Cookie();
-    cookies.remove("token");
-    cookies.remove("username");
-    cookies.remove("password");
+    cookies.remove("token", { path: "/" });
+    cookies.remove("username", { path: "/" });
+    cookies.remove("password", { path: "/" });
     dispatch(resetAuth());
     dispatch(resetUser());
     dispatch(resetAddress());

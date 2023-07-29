@@ -25,6 +25,8 @@ export default function DshShopCollection() {
     selectEditCollection: null,
   });
 
+  console.log(shopSelector);
+
   const handleResetAll = () => {
     setAddCollection(false);
     setInputNewCollectionName("");
@@ -86,7 +88,8 @@ export default function DshShopCollection() {
     if (shopSelector) {
       const { products } = shopSelector;
       if (collectionNav.searchingValue !== "") {
-        result = products.filter((product) =>
+        let currentproductArr = [...products];
+        result = currentproductArr.filter((product) =>
           product.name.includes(collectionNav.searchingValue)
         );
       }
@@ -151,10 +154,16 @@ export default function DshShopCollection() {
             productArr.toReversed();
             break;
         }
+        console.log(productArr);
 
-        productArr.splice(collectionNav.currentPage - 1, 6);
+        return productArr.filter(
+          (e) =>
+            collectionNav.currentPage - 1 <= productArr.indexOf(e) &&
+            productArr.indexOf(e) <= collectionNav.currentPage + 6
+        );
       }
     }
+
     return productArr;
   };
 

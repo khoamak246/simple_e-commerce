@@ -437,14 +437,14 @@ export default function DshAllProduct() {
       {(isToggleEditModal === "option" || isToggleEditModal === "product") && (
         <UpdateProducModal
           editType={isToggleEditModal}
-          closeModal={setToggleEditModal}
+          closeModal={() => setToggleEditModal("")}
           editItem={editItem}
           setEditItem={setEditItem}
         />
       )}
       {isToggleSelectBusinessModal && (
         <SelectBusinessModal
-          toggleModal={setToggleSelectBusinessModal}
+          closeModal={() => setToggleSelectBusinessModal(false)}
           selectBusinessMethod={selectBusiness}
         />
       )}

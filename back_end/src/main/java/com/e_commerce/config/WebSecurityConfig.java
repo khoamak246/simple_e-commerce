@@ -59,8 +59,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     cfg.setExposedHeaders(Collections.singletonList("Authorization"));
                     return cfg;
                 }).and().csrf().disable()
-                .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/ws/** ").permitAll()
+                .authorizeRequests().antMatchers("/api/auth/**",
+                        "/ws/** ",
+                        "/api/v1/product/{productId}",
+                        "/api/v1/product/search/{searchValue}",
+                        "/api/v1/shop/{shopId}",
+                        "/api/v1/business",
+                        "/api/v1/business/product/{businessId}",
+                        "/api/v1/business/{businessId}",
+                        "/api/v1/business/search-product-business",
+                        "/api/v1/address").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)

@@ -2,8 +2,24 @@ import { instance } from "../Axios";
 import Cookie from "universal-cookie";
 
 export const FIND_ALL_BUSINESS = async () => {
-  let response = await instance(new Cookie().get("token")).get(
-    "/api/v1/business"
+  let response = await instance().get("/api/v1/business");
+  return response;
+};
+
+export const GET_FIND_BUSINESS_BY_ID = async (businessId) => {
+  let response = await instance().get(`/api/v1/business/${businessId}`);
+  return response;
+};
+
+export const GET_FIND_PRODUCT_BY_BUSINESS_ID = async (businessId) => {
+  let response = await instance().get(`/api/v1/business/product/${businessId}`);
+  return response;
+};
+
+export const GET_CATEGORIES_PRODUCT = async (categoriesSearchForm) => {
+  let response = await instance().post(
+    `/api/v1/business/search-product-business`,
+    categoriesSearchForm
   );
   return response;
 };

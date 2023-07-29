@@ -24,6 +24,9 @@ import ProductDetail from "../ProductDetail";
 import Cart from "../Cart";
 import Chat from "../../components/chat/Chat";
 import UnknowPage from "../UnknowPage";
+import { resetToggle } from "../../redux/reducers/ToggleSlice";
+import { handleDisableOVerflowY } from "../../utils/Utils";
+import Categories from "../Categories";
 
 export default function Router() {
   const dispatch = useDispatch();
@@ -41,6 +44,9 @@ export default function Router() {
     });
     document.title = title;
     window.scrollTo(0, 0);
+    if (toggleSelector !== null) {
+      dispatch(resetToggle());
+    }
   }, [location]);
 
   useEffect(() => {
@@ -75,6 +81,10 @@ export default function Router() {
     dispatch(get_business());
   }, []);
 
+  useEffect(() => {
+    handleDisableOVerflowY(toggleSelector);
+  }, [toggleSelector]);
+
   return (
     <>
       <Navbar />
@@ -100,7 +110,7 @@ export default function Router() {
           })}
         </Route>
         <Route path="/shop/detail/:shopId" Component={ShopDetail} />
-        <Route path="/categories/:categories" Component={ShopDetail} />
+        <Route path="/categories/:categories" Component={Categories} />
         <Route path="/product/detail/:productId" Component={ProductDetail} />
         <Route path="/cart/detail" Component={Cart} />
         <Route path="/login" Component={Login_Register} />

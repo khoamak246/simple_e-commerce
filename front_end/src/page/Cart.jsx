@@ -432,7 +432,7 @@ export default function Cart() {
         <AddAndEditUserAddressModal
           setSelectAddress={setSelectAddress}
           selectAddress={selectAddress}
-          setOpenModal={setToggleSelectAddressModal}
+          closeModal={() => setToggleSelectAddressModal(false)}
         />
       )}
     </div>

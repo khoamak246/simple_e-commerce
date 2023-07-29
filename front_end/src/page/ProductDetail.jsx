@@ -23,11 +23,11 @@ import { setToggle } from "../redux/reducers/ToggleSlice";
 import { post_create_new_cart_item } from "../thunk/CartThunk";
 import { toast } from "react-hot-toast";
 import { post_save_favorites } from "../thunk/ProductThunk";
+import { get_product_by_business_id } from "../thunk/BusinessThunk";
 
 export default function ProductDetail() {
   const [product, setProduct] = useState();
   const userSelector = useSelector(USER_STATE_SELECTOR);
-  console.log(product);
   const [selectComment, setSelectComment] = useState(6);
   const param = useParams();
   const navigate = useNavigate();
@@ -119,10 +119,17 @@ export default function ProductDetail() {
     productOptionId: 0,
     quantity: 1,
   });
+  const [recommnendProducts, setRecommendProducts] = useState([]);
 
   useEffect(() => {
     if (product) {
       handleSelectFirstProductOptionHaveStock();
+      console.log(product.business.id);
+      dispatch(get_product_by_business_id(product.business.id)).then((res) => {
+        if (res) {
+          setRecommendProducts(res);
+        }
+      });
     }
   }, [product]);
 
@@ -198,6 +205,13 @@ export default function ProductDetail() {
   };
 
   const handleAddToCart = (isNavigate) => {
+    if (!userSelector) {
+      return toast("OOP! You need login to use this service!", {
+        icon: "👏",
+        duration: 2000,
+      });
+    }
+
     dispatch(post_create_new_cart_item(selectedProduct)).then((res) => {
       if (res) {
         toast.success("Add to cart successfully!");
@@ -226,7 +240,15 @@ export default function ProductDetail() {
             <div className="h-[10%] flex justify-center items-center border-t-[1px] border-slate-200 border-solid text-red-500 gap-1">
               <div
                 className="cursor-pointer"
-                onClick={() => dispatch(post_save_favorites(product.id))}
+                onClick={() => {
+                  if (!userSelector) {
+                    return toast("OOP! You need login to use this service!", {
+                      icon: "👏",
+                      duration: 2000,
+                    });
+                  }
+                  dispatch(post_save_favorites(product.id));
+                }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -464,8 +486,10 @@ export default function ProductDetail() {
         <div className="w-[80%] h-full flex flex-col gap-3">
           <h2 className="text-xl">RECOMMEND FOR YOU</h2>
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 px-2 border-solid border-[#EF5739] border-r-[1px]">
-            {[1, 1, 1, 1, 1].map((val, index) => {
-              return <ProductCard key={index} />;
+            {recommnendProducts.map((val, index) => {
+              if (index < 5) {
+                return <ProductCard key={index} product={val} />;
+              }
             })}
           </div>
         </div>

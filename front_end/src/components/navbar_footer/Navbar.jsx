@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileModal from "../modal/ProfileModal";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,13 +8,14 @@ import {
 } from "../../redux/selectors/Selectors";
 import { resetToggle, setToggle } from "../../redux/reducers/ToggleSlice";
 import FavoriteModal from "../modal/FavoriteModal";
+import { toast } from "react-hot-toast";
 
 export default function Navbar() {
-  const currentUserAuth = useSelector(USER_STATE_SELECTOR);
   const toggleSelector = useSelector(TOGGLE_STATE_SELECTOR);
   const userSelector = useSelector(USER_STATE_SELECTOR);
   const location = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   return (
     <div className="bg-[#e6c191] h-[8vh] w-screen flex flex-col sm:flex-row justify-between px-5 items-center">
@@ -65,66 +66,84 @@ export default function Navbar() {
           </svg>
         </div>
       </div>
-      {/* HEART */}
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
-        <div
-          className="cursor-pointer flex items-center gap-2"
-          onClick={() => {
-            if (toggleSelector !== "favorite") {
-              dispatch(setToggle("favorite"));
-            } else {
-              dispatch(resetToggle());
-            }
-          }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6 text-white"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-            />
-          </svg>
-          <p className="text-white text-xl sm:hidden">Favorite</p>
-        </div>
-        <Link
-          to={"/cart/detail"}
-          className="cursor-pointer flex items-center gap-2 relative"
-        >
-          {userSelector &&
-            userSelector.userInfo.cart.cartItems.length !== 0 && (
-              <div
-                className={`rounded-full w-3 h-3 absolute top-0 right-0 bg-red-500 flex justify-center items-center`}
-              >
-                <p className="text-white text-[0.6rem] text-center">
-                  {userSelector.userInfo.cart.cartItems.length}
-                </p>
-              </div>
-            )}
 
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6 text-white"
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+        {/* HEART */}
+        {userSelector && (
+          <div
+            className="cursor-pointer flex items-center gap-2"
+            onClick={() => {
+              if (toggleSelector !== "favorite") {
+                dispatch(setToggle("favorite"));
+              } else {
+                dispatch(resetToggle());
+              }
+            }}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-            />
-          </svg>
-          <p className="text-white text-xl sm:hidden">Cart</p>
-        </Link>
-        {currentUserAuth ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6 text-white"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+              />
+            </svg>
+            <p className="text-white text-xl sm:hidden">Favorite</p>
+          </div>
+        )}
+
+        {/* CART */}
+        {userSelector && (
+          <div
+            onClick={() => {
+              if (userSelector.userInfo.cart.cartItems.length === 0) {
+                toast("OOP! Your cart is empty now!", {
+                  icon: "👏",
+                  duration: 2000,
+                });
+              } else {
+                navigate("/cart/detail");
+              }
+            }}
+            className="cursor-pointer flex items-center gap-2 relative"
+          >
+            {userSelector &&
+              userSelector.userInfo.cart.cartItems.length !== 0 && (
+                <div
+                  className={`rounded-full w-3 h-3 absolute top-0 right-0 bg-red-500 flex justify-center items-center`}
+                >
+                  <p className="text-white text-[0.6rem] text-center">
+                    {userSelector.userInfo.cart.cartItems.length}
+                  </p>
+                </div>
+              )}
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6 text-white"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+              />
+            </svg>
+            <p className="text-white text-xl sm:hidden">Cart</p>
+          </div>
+        )}
+
+        {/* PROFILE */}
+        {userSelector ? (
           <div
             className="flex items-center gap-1 cursor-pointer"
             onClick={() => {
@@ -135,10 +154,10 @@ export default function Navbar() {
               }
             }}
           >
-            <p className="text-white text-[0.8rem]">Anh Khoa</p>
+            <p className="text-white text-[0.8rem]">{userSelector.fullName}</p>
             <div className="rounded-full overflow-hidden w-6 h-6">
               <img
-                src={currentUserAuth.userInfo.avatar}
+                src={userSelector.userInfo.avatar}
                 alt="user-avatar"
                 className="w-full h-full"
                 draggable={false}
@@ -146,7 +165,10 @@ export default function Navbar() {
             </div>
           </div>
         ) : (
-          <div className="cursor-pointer flex items-center gap-2">
+          <Link
+            to={"/login"}
+            className="cursor-pointer flex items-center gap-2"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -162,7 +184,7 @@ export default function Navbar() {
               />
             </svg>
             <p className="text-white text-xl sm:hidden">Log in</p>
-          </div>
+          </Link>
         )}
       </div>
       {toggleSelector === "profileModal" && <ProfileModal />}

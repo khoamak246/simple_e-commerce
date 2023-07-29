@@ -1,7 +1,11 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { handleFindFirstImgAssetInOrderItem } from "../../utils/Utils";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+  handleFindFirstImgAssetInOrderItem,
+} from "../../utils/Utils";
 import { useDispatch } from "react-redux";
 import { patch_update_order_item_status } from "../../thunk/OrderThunk";
 import { toast } from "react-hot-toast";
@@ -9,7 +13,7 @@ import { toast } from "react-hot-toast";
 export default function CancelAndReturnOrderItemModal({
   orderItem,
   action,
-  resetAction,
+  closeModal,
 }) {
   const [isActive, setIsActive] = useState(false);
   const [reason, setReason] = useState("");
@@ -36,17 +40,13 @@ export default function CancelAndReturnOrderItemModal({
       }
     });
   };
+
   useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
+    handleAnimateToggle(setIsActive);
   }, []);
 
   const handleCloseModal = () => {
-    setIsActive(false);
-    setTimeout(() => {
-      resetAction();
-    }, 400);
+    handleCloseAnimateToggle(setIsActive, closeModal);
   };
 
   return (

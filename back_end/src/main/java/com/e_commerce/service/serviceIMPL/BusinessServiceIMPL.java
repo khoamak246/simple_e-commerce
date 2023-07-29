@@ -40,4 +40,6 @@ public class BusinessServiceIMPL implements IBusinessService {
     public Set<Business> findByBusinessIsEmpty() {
         return businessRepository.findByBusinessIsEmpty();
     }
+
+
 }

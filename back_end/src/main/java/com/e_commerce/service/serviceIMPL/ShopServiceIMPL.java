@@ -1,6 +1,7 @@
 package com.e_commerce.service.serviceIMPL;
 
 import com.e_commerce.dto.response.ShopResponse;
+import com.e_commerce.dto.response.ShopRevenueResponse;
 import com.e_commerce.model.OrderItems;
 import com.e_commerce.model.Product;
 import com.e_commerce.model.Shop;
@@ -129,4 +130,20 @@ public class ShopServiceIMPL implements IShopService {
                 .build();
 
     }
+
+    @Override
+    public int countNumberFollowerShop(Long shopId) {
+        return shopRepository.countNumberFollowerShop(shopId);
+    }
+
+    @Override
+    public double sumRevenueShop(Long shopId) {
+        return shopRepository.sumRevenueShop(shopId);
+    }
+
+    @Override
+    public Set<ShopRevenueResponse> sumRevenueEachMonthShop(Long shopId, int year) {
+        return shopRepository.sumRevenueEachMonthShop(shopId, year);
+    }
+
 }

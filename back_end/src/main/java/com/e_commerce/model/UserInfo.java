@@ -55,7 +55,7 @@ public class UserInfo {
     private Set<Order> order;
 
     @ManyToMany(mappedBy = "favorites")
-    @JsonIgnoreProperties({"favorites", "shop", "productOptions", "business", "reviews"})
+    @JsonIgnoreProperties({"favorites", "shop", "business", "reviews"})
     private Set<Product> favoritesProduct;
 
 

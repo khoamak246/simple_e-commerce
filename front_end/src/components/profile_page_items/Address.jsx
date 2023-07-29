@@ -69,10 +69,13 @@ export default function Address() {
         </svg>
         New address
       </button>
-      {isToggleCreateAndEditAddressModal && (
+      {selectEditAddress && (
         <AddAndEditUserAddressModal
           editItem={selectEditAddress}
-          setOpenModal={setToggleCreateAndEditModal}
+          closeModal={() => {
+            setSelectEditAddress();
+            setToggleCreateAndEditModal(false);
+          }}
           setSelectEditAddress={setSelectEditAddress}
         />
       )}

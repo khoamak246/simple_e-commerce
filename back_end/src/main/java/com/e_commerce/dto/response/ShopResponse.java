@@ -54,7 +54,7 @@ public class ShopResponse {
     @JsonIgnoreProperties({"shop"})
     private Set<OrderItems> deliveryOrderItems;
 
-    private List<User> followers;
+    private Set<User> followers;
 
     private Set<Product> products;
 

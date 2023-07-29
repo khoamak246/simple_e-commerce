@@ -1,7 +1,11 @@
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { handleRenderBusiness } from "../../utils/Utils";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+  handleRenderBusiness,
+} from "../../utils/Utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patch_update_product,
@@ -22,8 +26,22 @@ export default function UpdateProducModal({
   const [isActive, setAcvtive] = useState(false);
   const [inputUpdate, setInputUpdate] = useState();
   const dispatch = useDispatch();
-  const [isToggleSelectBusinessModal, setToggleSelctBusinessModal] =
+  const [isToggleSelectBusinessModal, setToggleSectBusinessModal] =
     useState(false);
+
+  useEffect(() => {
+    handleAnimateToggle(setAcvtive);
+  }, []);
+
+  const handleCloseModal = () => {
+    handleCloseAnimateToggle(resetAll, closeModal);
+  };
+
+  const resetAll = () => {
+    setAcvtive(false);
+    setEditItem();
+    dispatch(resetSelectBusiness());
+  };
 
   useEffect(() => {
     if (editType === "option" && editItem) {
@@ -34,7 +52,6 @@ export default function UpdateProducModal({
         stock,
       });
     } else if (editType === "product" && editItem) {
-
       const { name, business, onSale, description } = editItem;
 
       setInputUpdate({
@@ -45,11 +62,6 @@ export default function UpdateProducModal({
       });
     }
   }, [editItem, editType]);
-  useEffect(() => {
-    setTimeout(() => {
-      setAcvtive(true);
-    }, 50);
-  }, []);
 
   const selectBusiness = (business) => {
     setInputUpdate({ ...inputUpdate, business });
@@ -76,7 +88,7 @@ export default function UpdateProducModal({
             className="w-[60%] borde-solid border-[1px] border-slate-500 rounded-sm px-2 py-1  cursor-pointer"
             onClick={() => {
               dispatch(resetSelectBusiness());
-              setToggleSelctBusinessModal(true);
+              setToggleSectBusinessModal(true);
             }}
           >
             <p>
@@ -157,15 +169,6 @@ export default function UpdateProducModal({
         </div>
       </>
     );
-  };
-
-  const handleCloseModal = () => {
-    setAcvtive(false);
-    setEditItem();
-    dispatch(resetSelectBusiness());
-    setTimeout(() => {
-      closeModal("");
-    }, 400);
   };
 
   const onChangeInputUpdate = (e) => {
@@ -261,7 +264,7 @@ export default function UpdateProducModal({
       </div>
       {isToggleSelectBusinessModal && (
         <SelectBusinessModal
-          toggleModal={setToggleSelctBusinessModal}
+          closeModal={() => setToggleSectBusinessModal(false)}
           selectBusinessMethod={selectBusiness}
         />
       )}
