@@ -44,4 +44,8 @@ public class User {
     @JsonIgnoreProperties({"user"})
     private UserInfo userInfo;
 
+    @OneToOne(mappedBy = "user")
+    @JsonIgnoreProperties({"createdDate", "coverImg", "description", "introduce", "productNumber", "streetDetail", "orderItems", "provinceCity", "district", "ward", "visitNumber", "followers", "products", "paymentWays", "collections"})
+    private Shop shop;
+
 }

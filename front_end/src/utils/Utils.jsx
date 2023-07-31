@@ -162,3 +162,43 @@ export const handleCloseAnimateToggle = (setIsActive, closeModal) => {
     closeModal();
   }, 400);
 };
+
+export const updateSpecificRoom = (newRoomValue, currentRoomArr) => {
+  if (newRoomValue && currentRoomArr) {
+    let roomTemp = [...currentRoomArr];
+    let index = roomTemp.findIndex((e) => e.id === newRoomValue.id);
+    roomTemp[index] = newRoomValue;
+    return roomTemp;
+  }
+};
+
+export const isExistRoomWithShopId = (roomList, shopId) => {
+  let check = false;
+  if (roomList && shopId) {
+    roomList.map((e) => {
+      let userRoom = e.room.userRoom;
+      userRoom.map((i) => {
+        let shop = i.userInfo.user.shop;
+
+        if (shop && shop.id === shopId) {
+          return (check = true);
+        }
+      });
+    });
+  }
+  return check;
+};
+
+export const findUserRoomIndexInRoomList = (roomList, userRoom) => {
+  return roomList.findIndex((e) => e.id == userRoom.id);
+};
+
+export const handleFindSellerInUserRoom = (userRoom, type) => {
+  let tempUserRoom = userRoom.room.userRoom;
+  return tempUserRoom.find((e) => e.role.name === type);
+};
+
+export const handleFindUserInUserRoomById = (userRoom, userId) => {
+  let tempUserRoom = userRoom.room.userRoom;
+  return tempUserRoom.find((e) => e.userInfo.user.id === userId);
+};

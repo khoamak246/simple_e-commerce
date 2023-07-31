@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   AUTH_STATE_SELECTOR,
   TOGGLE_STATE_SELECTOR,
+  USER_STATE_SELECTOR,
 } from "../../redux/selectors/Selectors";
 import { useCookies } from "react-cookie";
 import { post_login } from "../../thunk/AuthThunk";
@@ -31,6 +32,7 @@ import Categories from "../Categories";
 export default function Router() {
   const dispatch = useDispatch();
   const authentication = useSelector(AUTH_STATE_SELECTOR);
+  const userSelector = useSelector(USER_STATE_SELECTOR);
   const [cookies, setCookies] = useCookies();
   const location = useLocation();
   const toggleSelector = useSelector(TOGGLE_STATE_SELECTOR);
@@ -118,7 +120,7 @@ export default function Router() {
         <Route path="*" Component={UnknowPage} />
       </Routes>
       <Footer />
-      <Chat />
+      {userSelector && <Chat />}
     </>
   );
 }

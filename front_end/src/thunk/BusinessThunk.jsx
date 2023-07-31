@@ -3,6 +3,7 @@ import {
   GET_CATEGORIES_PRODUCT,
   GET_FIND_BUSINESS_BY_ID,
   GET_FIND_PRODUCT_BY_BUSINESS_ID,
+  GET_FIND_RELATIVE_BUSINESS_BY_NAME,
 } from "../api/service/BusinessService";
 import { setBusiness } from "../redux/reducers/BusinessSlice";
 
@@ -14,6 +15,17 @@ export const get_business = () => {
       return true;
     } else {
       console.log(response);
+      return false;
+    }
+  };
+};
+
+export const get_relative_busines_by_name = (keyword) => {
+  return async function get_relative_busines_by_name_thunk(dispatch, getState) {
+    let response = await GET_FIND_RELATIVE_BUSINESS_BY_NAME(keyword);
+    if (response.status === 200) {
+      return response.data.data;
+    } else {
       return false;
     }
   };

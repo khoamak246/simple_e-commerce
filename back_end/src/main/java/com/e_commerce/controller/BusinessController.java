@@ -3,6 +3,7 @@ package com.e_commerce.controller;
 import com.e_commerce.dto.request.CategoriesSearchForm;
 import com.e_commerce.dto.request.CreateBusinessForm;
 import com.e_commerce.dto.response.ResponseMessage;
+import com.e_commerce.dto.response.SearchBusinessResponse;
 import com.e_commerce.model.Business;
 import com.e_commerce.model.Product;
 import com.e_commerce.service.IBusinessService;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/business")
@@ -27,6 +29,13 @@ public class BusinessController {
     @GetMapping("")
     public ResponseEntity<ResponseMessage> findByBusinessIsEmpty() {
         return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", businessService.findByBusinessIsEmpty()));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseMessage> findBusinessByName(@RequestParam String keyword) {
+        Set<Business> result = businessService.findByNameContainingIgnoreCase(keyword);
+        Set<SearchBusinessResponse> binding = result.stream().map(bus -> SearchBusinessResponse.builder().id(bus.getId()).name(bus.getName()).build()).collect(Collectors.toSet());
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", binding));
     }
 
     @GetMapping("/product/{businessId}")
@@ -46,9 +55,9 @@ public class BusinessController {
         });
 
         Set<Product> products = new HashSet<>();
-        allRelativeBusiness.forEach(business -> {
-            products.addAll(business.getProduct());
-        });
+        allRelativeBusiness.forEach(business ->
+                products.addAll(business.getProduct())
+        );
 
         List<Product> productList = new ArrayList<>(products);
         Collections.shuffle(productList);
@@ -63,7 +72,16 @@ public class BusinessController {
         }
 
 
-        Set<Product> products = new HashSet<>(business.get().getProduct());
+        Set<Product> products = new HashSet<>();
+        if (categoriesSearchForm.getSubBusinessId() == null) {
+            products.addAll(business.get().getProduct());
+            business.get().getSubBusiness().forEach(bus -> {
+                products.addAll(bus.getProduct());
+                if (bus.getSubBusiness().size() != 0) {
+                    bus.getSubBusiness().forEach(childrenBus -> products.addAll(childrenBus.getProduct()));
+                }
+            });
+        }
 
         if (categoriesSearchForm.getSubBusinessId() != null) {
             Optional<Business> subBusiness = businessService.findById(categoriesSearchForm.getSubBusinessId());
@@ -75,11 +93,10 @@ public class BusinessController {
             }
             products.addAll(subBusiness.get().getProduct());
             if (subBusiness.get().getSubBusiness().size() != 0) {
-                subBusiness.get().getSubBusiness().forEach(bus -> {
-                    products.addAll(bus.getProduct());
-                });
+                subBusiness.get().getSubBusiness().forEach(bus ->
+                        products.addAll(bus.getProduct())
+                );
             }
-
         }
 
         products.removeIf(p -> !p.getOnSale());

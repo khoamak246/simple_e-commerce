@@ -2,6 +2,7 @@ import { POST_LOGIN, POST_REGISTER } from "../api/service/AuthService";
 import { resetAddress } from "../redux/reducers/AddressSlice";
 import { resetAuth, setAuth } from "../redux/reducers/AuthSlice";
 import { resetBusiness } from "../redux/reducers/BusinessSlice";
+import { resetRoom } from "../redux/reducers/RoomSlice";
 import { resetShop } from "../redux/reducers/ShopSlice";
 import { resetToggle } from "../redux/reducers/ToggleSlice";
 import { resetUser, setUser } from "../redux/reducers/UserSlice";
@@ -47,6 +48,7 @@ export const handle_log_out = () => {
     dispatch(resetToggle());
     dispatch(resetShop());
     dispatch(resetBusiness());
+    dispatch(resetRoom());
 
     return true;
   };

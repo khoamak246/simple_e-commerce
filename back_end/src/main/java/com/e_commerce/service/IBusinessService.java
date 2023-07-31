@@ -8,4 +8,5 @@ import java.util.Set;
 
 public interface IBusinessService extends IGenericService<Business> {
     Set<Business> findByBusinessIsEmpty();
+    Set<Business> findByNameContainingIgnoreCase(String name);
 }

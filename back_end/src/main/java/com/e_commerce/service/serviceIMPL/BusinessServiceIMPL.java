@@ -41,5 +41,10 @@ public class BusinessServiceIMPL implements IBusinessService {
         return businessRepository.findByBusinessIsEmpty();
     }
 
+    @Override
+    public Set<Business> findByNameContainingIgnoreCase(String name) {
+        return businessRepository.findByNameContainingIgnoreCase(name);
+    }
+
 
 }

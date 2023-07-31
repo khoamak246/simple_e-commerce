@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ChatVideo({ isUser }) {
+export default function ChatVideo({ isUser, chat }) {
   return (
     <div
       className={`w-full flex ${isUser ? "justify-end" : "justify-start"}  p-2`}
@@ -10,7 +10,7 @@ export default function ChatVideo({ isUser }) {
           isUser ? "bg-[#D7E4FF]" : "bg-[#F5F6F8]"
         } `}
       >
-        <video src=""></video>
+        <video src={chat} controls></video>
       </div>
     </div>
   );

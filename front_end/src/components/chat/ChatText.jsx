@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ChatText({ isUser }) {
+export default function ChatText({ isUser, chat }) {
   return (
     <div
       className={`w-full flex ${isUser ? "justify-end" : "justify-start"}  p-2`}
@@ -10,10 +10,7 @@ export default function ChatText({ isUser }) {
           isUser ? "bg-[#D7E4FF]" : "bg-[#F5F6F8]"
         } `}
       >
-        <p>
-          Mình có đặt rồi shop nha, địa chỉ của mình cũng ở HN nên shop sắp xếp
-          gửi mình sớm nhá. Thích sản phẩm bên shop.
-        </p>
+        <p>{chat}</p>
       </div>
     </div>
   );

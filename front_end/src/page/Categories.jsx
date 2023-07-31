@@ -38,6 +38,22 @@ export default function Categories() {
     page: 1,
   });
 
+  const resetAll = () => {
+    setFilterNav({
+      type: "popular",
+      sort: "p-asc",
+      page: 1,
+    });
+
+    setSearchPrice({
+      minPrice: "",
+      maxPrice: "",
+    });
+
+    setSearchValue([]);
+    navigate(location.pathname);
+  };
+
   useEffect(() => {
     dispatch(get_business_by_id(param.categories)).then((res) => {
       if (res) {
@@ -291,13 +307,11 @@ export default function Categories() {
         <OptionCheckbox
           data={handleRenderBusinessObject}
           selectValue={handleOnSelectValue}
-          value={searchValue}
         />
         {/* ADDRESS */}
         <OptionCheckbox
           data={handleRenderAddressObject}
           selectValue={handleOnSelectValue}
-          value={searchValue}
         />
         {/* PRICE */}
         <div className="w-full flex flex-col py-6 text-sm gap-3 border-slate-400 border-b-[1px] border-solid">
@@ -333,9 +347,11 @@ export default function Categories() {
         <OptionCheckbox
           data={handleRenderStartRate}
           selectValue={handleOnSelectValue}
-          value={searchValue}
         />
-        <button className="bg-[#EE4D2D] text-white py-2 rounded mt-2">
+        <button
+          className="bg-[#EE4D2D] text-white py-2 rounded mt-2"
+          onClick={() => resetAll()}
+        >
           Reset all
         </button>
       </div>

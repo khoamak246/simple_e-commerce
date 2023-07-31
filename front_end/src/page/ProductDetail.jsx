@@ -17,6 +17,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import {
   ADDRESS_STATE_SELECTOR,
+  ROOM_ROOM_LIST_STATE_SELECTOR,
   USER_STATE_SELECTOR,
 } from "../redux/selectors/Selectors";
 import { setToggle } from "../redux/reducers/ToggleSlice";
@@ -24,6 +25,8 @@ import { post_create_new_cart_item } from "../thunk/CartThunk";
 import { toast } from "react-hot-toast";
 import { post_save_favorites } from "../thunk/ProductThunk";
 import { get_product_by_business_id } from "../thunk/BusinessThunk";
+import { post_create_room } from "../thunk/UserRoomThunk";
+import { isExistRoomWithShopId } from "../utils/Utils";
 
 export default function ProductDetail() {
   const [product, setProduct] = useState();
@@ -32,6 +35,7 @@ export default function ProductDetail() {
   const param = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const roomListSelector = useSelector(ROOM_ROOM_LIST_STATE_SELECTOR);
   const addressSelector = useSelector(ADDRESS_STATE_SELECTOR);
   const shopInfo = [
     {
@@ -124,7 +128,6 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product) {
       handleSelectFirstProductOptionHaveStock();
-      console.log(product.business.id);
       dispatch(get_product_by_business_id(product.business.id)).then((res) => {
         if (res) {
           setRecommendProducts(res);
@@ -220,6 +223,19 @@ export default function ProductDetail() {
         }
       }
     });
+  };
+
+  const handleOnToggleChat = (shopId) => {
+    if (isExistRoomWithShopId(roomListSelector, shopId)) {
+      dispatch(setToggle("chat"));
+    } else {
+      dispatch(post_create_room(shopId)).then((res) => {
+        if (res) {
+          toast.success("Hello");
+          dispatch(setToggle("chat"));
+        }
+      });
+    }
   };
 
   return (
@@ -512,7 +528,11 @@ export default function ProductDetail() {
           <div className="w-[50%] flex flex-col gap-2">
             <h2>{product && product.shop.name}</h2>
             <div className="flex gap-2">
-              <button className="bg-[#FFEEE8] button-theme w-[50%] flex justify-center items-center  gap-2">
+              {/* CHAT BTN */}
+              <button
+                className="bg-[#FFEEE8] button-theme w-[50%] flex justify-center items-center  gap-2"
+                onClick={() => handleOnToggleChat(product.shop.id)}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"

@@ -10,5 +10,5 @@ import java.util.Set;
 @Repository
 public interface IBusinessRepository extends JpaRepository<Business, Long> {
     Set<Business> findByBusinessIsEmpty();
-
+    Set<Business> findByNameContainingIgnoreCase(String name);
 }

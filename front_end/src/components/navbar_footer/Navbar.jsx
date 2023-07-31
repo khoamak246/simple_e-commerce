@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileModal from "../modal/ProfileModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import {
 import { resetToggle, setToggle } from "../../redux/reducers/ToggleSlice";
 import FavoriteModal from "../modal/FavoriteModal";
 import { toast } from "react-hot-toast";
+import SearchModal from "../modal/SearchModal";
 
 export default function Navbar() {
   const toggleSelector = useSelector(TOGGLE_STATE_SELECTOR);
@@ -16,6 +17,7 @@ export default function Navbar() {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState("");
 
   return (
     <div className="bg-[#e6c191] h-[8vh] w-screen flex flex-col sm:flex-row justify-between px-5 items-center">
@@ -41,12 +43,14 @@ export default function Navbar() {
       <div
         className={`${
           location.pathname.match("/seller/dashboard/*") && "hidden"
-        } w-[60%] h-[6vh] flex items-center`}
+        } w-[60%] h-[6vh] flex items-center relative`}
       >
         <input
           type="text"
           placeholder="Search EON"
           className="p-2 text-sm w-[90%] h-full rounded-l outline-none focus:border-gray-400 border-[1px] border-solid"
+          onChange={(e) => setSearchInput(e.target.value)}
+          value={searchInput}
         />
 
         <div className="w-[10%] flex justify-center items-center bg-[#F3A847] py-2 h-full rounded-r">
@@ -65,6 +69,8 @@ export default function Navbar() {
             />
           </svg>
         </div>
+
+        <SearchModal searchValue={searchInput} />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center">

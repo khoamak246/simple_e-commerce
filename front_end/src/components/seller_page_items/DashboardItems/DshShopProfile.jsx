@@ -94,7 +94,7 @@ export default function DshShopProfile() {
       coverImg = await firebase_single_upload(previewImg.coverImgFile);
     }
 
-    if (shopProfile.introduce.length !== 0) {
+    if (shopProfile.introduce !== null && shopProfile.introduce.length !== 0) {
       let tempUrlArr = await firebase_multiple_upload(shopProfile.introduce);
       for (let i = 0; i < tempUrlArr.length; i++) {
         const element = tempUrlArr[i];

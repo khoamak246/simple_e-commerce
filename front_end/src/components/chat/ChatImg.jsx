@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ChatImg({ isUser }) {
+export default function ChatImg({ isUser, chat }) {
   return (
     <div
       className={`w-full flex ${isUser ? "justify-end" : "justify-start"}  p-2`}
@@ -11,7 +11,7 @@ export default function ChatImg({ isUser }) {
         } `}
       >
         <img
-          src="https://media.wired.com/photos/593261cab8eb31692072f129/master/w_2560%2Cc_limit/85120553.jpg"
+          src={chat}
           alt=""
         />
       </div>
