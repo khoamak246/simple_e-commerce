@@ -38,7 +38,6 @@ export default function Home() {
       }
     );
   }, []);
-  console.log(recommendList);
 
   return (
     <div className="w-screen">

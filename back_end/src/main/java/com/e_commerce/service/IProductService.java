@@ -20,6 +20,5 @@ public interface IProductService extends IGenericService<Product> {
     Set<ProductResponse> findTopPaymentProduct(int offsetNumber, int limitNumber);
     Set<Product> findTop10ByShopIdOrderByVisitNumberDesc(Long shopId);
     int countByShopId(Long shopId);
-
     double getMinPriceProductOption(Product product);
 }
