@@ -224,6 +224,11 @@ export const handleFindUserInUserRoomById = (userRoom, userId) => {
   return tempUserRoom.find((e) => e.userInfo.user.id === userId);
 };
 
+export const handleFindPartnerInUserRoomById = (userRoom, userId) => {
+  let tempUserRoom = userRoom.room.userRoom;
+  return tempUserRoom.find((e) => e.userInfo.user.id !== userId);
+};
+
 export const sortByIdASC = (arr) => {
   if (arr && Array.isArray(arr)) {
     let newArr = [...arr];

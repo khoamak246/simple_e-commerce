@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  handleFindSellerInUserRoom,
+  handleFindPartnerInUserRoomById,
   handleFindUserInUserRoomById,
 } from "./../../utils/Utils";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,7 +8,6 @@ import {
   ROOM_SELECT_ROOM_STATE_SELECTOR,
   USER_STATE_SELECTOR,
 } from "../../redux/selectors/Selectors";
-import { setSelectRoom } from "../../redux/reducers/RoomSlice";
 import { patch_update_last_access } from "../../thunk/UserRoomThunk";
 
 export default function ChatBubble({ userRoom }) {
@@ -56,6 +55,25 @@ export default function ChatBubble({ userRoom }) {
     return count;
   };
 
+  const hanleFindPartner = () => {
+    let partnerUserRoom = handleFindPartnerInUserRoomById(
+      userRoom,
+      userSelector.id
+    );
+    let img = "";
+    let name = "";
+    let tempUser = partnerUserRoom.userInfo.user;
+    if (partnerUserRoom.role.name === "SELLER") {
+      img = tempUser.shop.avatar;
+      name = tempUser.shop.name;
+    } else {
+      img = partnerUserRoom.userInfo.avatar;
+      name = tempUser.fullName;
+    }
+
+    return { img, name };
+  };
+
   return (
     <div
       className={`${
@@ -67,13 +85,7 @@ export default function ChatBubble({ userRoom }) {
     >
       <div className="w-[20%]">
         <img
-          src={
-            handleFindSellerInUserRoom(userRoom, "SELLER").userInfo.user.id ===
-            userSelector.id
-              ? userSelector.userInfo.avatar
-              : handleFindSellerInUserRoom(userRoom, "SELLER").userInfo.user
-                  .shop.avatar
-          }
+          src={hanleFindPartner().img}
           alt=""
           className="w-10 h-10 rounded-full"
         />
@@ -81,11 +93,7 @@ export default function ChatBubble({ userRoom }) {
       <div className="w-[80%] flex flex-col relative">
         <div className="w-full flex justify-between">
           <div className="w-[60%] text-ellipsis whitespace-nowrap overflow-hidden">
-            {handleFindSellerInUserRoom(userRoom, "SELLER").userInfo.user.id ===
-            userSelector.id
-              ? userSelector.fullName
-              : handleFindSellerInUserRoom(userRoom, "SELLER").userInfo.user
-                  .shop.name}
+            {hanleFindPartner().name}
           </div>
         </div>
         <div className="w-full text-ellipsis overflow-hidden whitespace-nowrap text-sm text-[#878787]">

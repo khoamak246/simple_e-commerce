@@ -33,6 +33,7 @@ export default function Chat() {
   const roomListSelector = useSelector(ROOM_ROOM_LIST_STATE_SELECTOR);
   const selectRoomSelector = useSelector(ROOM_SELECT_ROOM_STATE_SELECTOR);
   const [inputChat, setInputChat] = useState("");
+  const [inputSearch, setInputSearch] = useState("");
   const [toggleWaiting, setToggleWaiting] = useState(false);
   const [toggleAvatar, setToggleAvatar] = useState(false);
   const [uploadFileList, setUploadFileList] = useState({
@@ -175,6 +176,32 @@ export default function Chat() {
     setToggleWaiting(false);
   };
 
+  // RENDER ROOM LIST
+  const handleRenderRoomList = () => {
+    let tempArr = [];
+    roomListSelector.map((e) => {
+      let tempUserRoom = e.room.userRoom;
+      let temp = tempUserRoom.find(
+        (o) =>
+          o.userInfo.user.id !== userSelector.id &&
+          ((o.role.name === "CUSTOMER" &&
+            o.userInfo.user.fullName
+              .toLowerCase()
+              .trim()
+              .includes(inputSearch.toLowerCase().trim())) ||
+            (o.role.name === "SELLER" &&
+              o.userInfo.user.shop.name
+                .toLowerCase()
+                .trim()
+                .includes(inputSearch.toLowerCase().trim())))
+      );
+      if (temp) {
+        tempArr.push(e);
+      }
+    });
+    return tempArr;
+  };
+
   // RESET ALL
   const resetAll = () => {
     setToggleAvatar(false);
@@ -272,11 +299,13 @@ export default function Chat() {
                   type="text"
                   placeholder="Search..."
                   className="w-full text-sm outline-none border-solid border-slate-400 border-[1px] rounded-sm py-1 px-2"
+                  value={inputSearch}
+                  onChange={(e) => setInputSearch(e.target.value)}
                 />
               </div>
               {/* BUBBLE */}
               <div className="w-full h-[90%] flex flex-col overflow-auto">
-                {roomListSelector.map((val, index) => {
+                {handleRenderRoomList().map((val, index) => {
                   return <ChatBubble key={index} userRoom={val} />;
                 })}
               </div>

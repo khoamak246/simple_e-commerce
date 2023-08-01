@@ -41,7 +41,7 @@ export default function SearchModal({ searchValue }) {
         isActive
           ? "max-h-[50vh] border-slate-200 border-solid border-[1px] shadow-lg"
           : "h-0"
-      } w-[50%] fixed top-[8vh] left-[20%] bg-white rounded overflow-auto flex flex-col justify-center items-center duration-200 transition-all z-[50]`}
+      } w-[50%] fixed top-[8vh] left-[20%] bg-white rounded overflow-auto flex flex-col items-center duration-200 transition-all z-[50]`}
     >
       {!isWaiting &&
         data &&
@@ -55,7 +55,7 @@ export default function SearchModal({ searchValue }) {
               className={`${
                 index !== arr.length - 1 &&
                 "border-slate-400 border-solid border-b-[1px]"
-              } w-full h-5  cursor-pointer flex items-center pl-2 py-4 hover:bg-slate-100`}
+              } w-full h-[5vh]  cursor-pointer flex items-center pl-2 py-4 hover:bg-slate-100`}
             >
               <p>{val.name}</p>
             </Link>

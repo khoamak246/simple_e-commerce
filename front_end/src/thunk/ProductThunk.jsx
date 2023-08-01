@@ -13,7 +13,6 @@ export const get_top_payment_product = ({ offsetNumber, limitNumber }) => {
     console.log({ offsetNumber, limitNumber });
     let response = await GET_TOP_PRODUCT_BY_ID(offsetNumber, limitNumber);
     if (response.status === 200) {
-      console.log(response);
       return response.data.data;
     } else {
       console.log(response);
