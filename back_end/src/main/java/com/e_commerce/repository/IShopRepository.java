@@ -15,10 +15,10 @@ import java.util.Set;
 public interface IShopRepository extends JpaRepository<Shop, Long> {
     Optional<Shop> findByUserId(Long userId);
     @Procedure(name = "count_number_follower_shop")
-    int countNumberFollowerShop(@Param("shopId") Long shopId);
+    Integer countNumberFollowerShop(@Param("shopId") Long shopId);
 
     @Procedure(name = "find_total_revenue_shop")
-    double sumRevenueShop(@Param("shopId") Long shopId);
+    Double sumRevenueShop(@Param("shopId") Long shopId);
 
     @Procedure(name = "find_revenue_each_month")
     Set<ShopRevenueResponse> sumRevenueEachMonthShop(@Param("shopId") Long shopId, @Param("year") int year);

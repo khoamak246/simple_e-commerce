@@ -1,32 +1,59 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import { getAvatar, getMinPrice } from "../../utils/Utils";
 
-export default function Slidetrack() {
+export default function Slidetrack({ data }) {
+  const [trackNumber, setTrackNumber] = useState(0);
+
+  const totalTrack = useMemo(() => {
+    let total = 1;
+    if (data.length % 5 !== 0) {
+      total = total + (data.length - (data.length % 5));
+    } else if (data.length % 5 === 0) {
+      total = data.length / 5;
+    }
+    return total;
+  }, [data]);
+
+  const handleRenderProduct = useMemo(() => {
+    let offset = trackNumber * 5;
+    let limit = (trackNumber + 1) * 5;
+    let displayData = [...data];
+    return displayData.splice(offset, limit);
+  }, [trackNumber, data]);
+
+  const handleOnChangeTrack = (action) => {
+    if (action === "UP" && trackNumber < totalTrack - 1) {
+      setTrackNumber((pre) => pre + 1);
+    } else if (action === "DOWN" && trackNumber > 0) {
+      setTrackNumber((pre) => pre - 1);
+    }
+  };
+
   return (
     <div className="w-full mt-10 overflow-hidden flex justify-center items-center px-5">
       <div className="w-[95%] bg-white flex flex-col p-2 gap-2 relative">
         <p className="text-xl font-semibold px-2">Popular</p>
         <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-          {[1, 1, 1, 1, 1].map((val, index) => {
+          {handleRenderProduct.map((val, index) => {
             return (
               <div
                 className="w-full flex justify-center items-center"
-                key={index}
+                key={val.id}
               >
                 <div className="w-[95%] h-[300px] rounded-sm overflow-hidden p-2 shadow-md border-slate-200 border-solid border-[1px]">
                   <div className="h-[70%] w-full flex justify-center items-center shadow-sm bg-white cursor-pointer">
                     <img
-                      src="https://m.media-amazon.com/images/I/41Wg3ic2F1L._AC_SY400_.jpg"
+                      src={getAvatar(val)}
                       alt=""
                       className="h-full rounded-sm"
                     />
                   </div>
                   <div className="h-[30%] flex flex-col w-full justify-end">
                     <p className="text-lg font-semibold">
-                      <sup className="text-md">$</sup> 260
+                      <sup className="text-md">$</sup> {getMinPrice(val)}
                     </p>
                     <p className="text-ellipsis overflow-hidden whitespace-nowrap">
-                      Covergirl Lash Blast Cleantopia Mascara, Volumizing,
-                      Smudge-Proof, Vegan Formula, Black 805, 0.32oz
+                      {val.name}
                     </p>
                     <div className="w-full flex justify-end">
                       <div className="max-w-fit flex justify-end items-center gap-1 py-1 group">
@@ -55,7 +82,12 @@ export default function Slidetrack() {
             );
           })}
         </div>
-        <div className="absolute top-[50%] left-0 cursor-pointer ml-5">
+        <div
+          className={`${
+            data.length <= 5 && "hidden"
+          } absolute top-[50%] left-0 cursor-pointer ml-5 bg-black/10 backdrop-blur-lg rounded-full overflow-hidden`}
+          onClick={() => handleOnChangeTrack("DOWN")}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -71,7 +103,12 @@ export default function Slidetrack() {
             />
           </svg>
         </div>
-        <div className="absolute top-[50%] right-0 cursor-pointer mr-5">
+        <div
+          className={` ${
+            data.length <= 5 && "hidden"
+          } absolute top-[50%] right-0 cursor-pointer mr-5 bg-black/10 backdrop-blur-lg rounded-full overflow-hidden`}
+          onClick={() => handleOnChangeTrack("UP")}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

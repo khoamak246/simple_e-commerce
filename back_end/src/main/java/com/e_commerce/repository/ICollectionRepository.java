@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Repository
 public interface ICollectionRepository extends JpaRepository<Collection, Long> {
-    boolean existsByName(String name);
+    boolean existsByNameIgnoreCaseAndShopId(String name, Long shopId);
 
     Set<Collection> findByShopId(Long shopId);
 

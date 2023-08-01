@@ -4,8 +4,12 @@ import CancelAndReturnOrderItemModal from "../modal/CancelAndReturnOrderItemModa
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import ReviewModal from "../modal/ReviewModal";
+import { useSelector } from "react-redux";
+import { USER_STATE_SELECTOR } from "../../redux/selectors/Selectors";
 
 export default function OrderItems({ orderItem }) {
+  console.log(orderItem);
+  const userSelector = useSelector(USER_STATE_SELECTOR);
   const [toggleAction, setToggleAction] = useState();
   const [toggleReviewForm, setToggleReviewModal] = useState(false);
   const handleRenderOrderItemStatus = () => {
@@ -77,7 +81,7 @@ export default function OrderItems({ orderItem }) {
         </div>
       </Link>
       <div className="flex justify-between flex-col items-end gap-4">
-        <div className="text-sm text-green-600 flex items-center gap-2">
+        <div className="text-sm text-green-600 flex items-center gap-2 cursor-default">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -95,7 +99,10 @@ export default function OrderItems({ orderItem }) {
           <p>{handleRenderOrderItemStatus()}</p>
         </div>
         <p className="text-red-400 font-semibold text-xl">
-          ${(orderItem.price * orderItem.quantity * 110) / 100}
+          $
+          {Math.round(
+            ((orderItem.price * orderItem.quantity * 110) / 100) * 100
+          ) / 100}
         </p>
         {/* CACNCEL */}
         {["PREPARE", "DONE_PREPARE"].includes(orderItem.status) && (
@@ -120,32 +127,40 @@ export default function OrderItems({ orderItem }) {
             </svg>
           </button>
         )}
-        {/* RETURN */}
+        {/* REVIEW */}
         {orderItem.status === "PAYMENT_SUCCESS" &&
           isInReturnTerm(orderItem.createdDate) && (
             <div className="flex items-center gap-1">
-              <button
-                className="button-theme flex items-center gap-1 py-1 px-2 rounded"
-                onClick={() => {
-                  setToggleReviewModal(true);
-                }}
-              >
-                Review
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-4 h-4"
+              {orderItem.productOptions.product.reviews.find(
+                (e) => userSelector && e.userInfo.user.id === userSelector.id
+              ) ? (
+                ""
+              ) : (
+                <button
+                  className="button-theme flex items-center gap-1 py-1 px-2 rounded"
+                  onClick={() => {
+                    setToggleReviewModal(true);
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-                  />
-                </svg>
-              </button>
+                  Review
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {/* RETURN */}
               <button
                 className="button-theme flex items-center gap-1 py-1 px-2 rounded"
                 onClick={() => setToggleAction("RETURN")}

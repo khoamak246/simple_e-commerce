@@ -38,4 +38,7 @@ public interface IProductRepository extends JpaRepository<Product, Long> {
 
     @Procedure(name = "find_top_five_product_have_max_revenue")
     Set<ProductResponse> findTopFiveProductHaveMaxRevenue(@Param("shopId") Long shopId);
+
+    @Procedure(name = "find_top_payment_product")
+    Set<ProductResponse> findTopPaymentProduct(@Param("offsetNumber") int offsetNumber, @Param("limitNumber") int limitNumber);
 }

@@ -2,6 +2,7 @@ import { Splide, SplideTrack, SplideSlide } from "@splidejs/react-splide";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { caroselUrl } from "../../assets/js/HomePageBanner";
+import { Link } from "react-router-dom";
 
 export default function Carousel() {
   const [displaySlide, setDisplaySlide] = useState(0);
@@ -32,15 +33,20 @@ export default function Carousel() {
     <div className="w-full relative flex">
       {caroselUrl.map((val, index) => {
         return (
-          <img
+          <Link
+            to={val.url}
             key={index}
-            src={val}
-            alt=""
-            draggable={false}
             className={`${
               displaySlide === index ? "w-full" : "w-0"
-            } duration-300 transition-all h-[500px]`}
-          />
+            } duration-300 transition-all `}
+          >
+            <img
+              src={val.img}
+              alt=""
+              draggable={false}
+              className={`h-[500px]`}
+            />
+          </Link>
         );
       })}
 

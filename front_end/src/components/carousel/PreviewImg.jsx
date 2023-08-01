@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function PreviewImg({ previewArr }) {
   const [selectPreviewIndex, setPreviewIndex] = useState(0);

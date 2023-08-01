@@ -36,9 +36,10 @@ public class CollectionServiceIMPL implements ICollectionService {
         collectionRepository.deleteById(id);
     }
 
+
     @Override
-    public boolean existsByName(String name) {
-        return collectionRepository.existsByName(name.trim());
+    public boolean existsByNameIgnoreCaseAndShopId(String name, Long shopId) {
+        return collectionRepository.existsByNameIgnoreCaseAndShopId(name.trim(), shopId);
     }
 
     @Override

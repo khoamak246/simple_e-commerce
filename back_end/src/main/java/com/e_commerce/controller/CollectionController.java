@@ -91,13 +91,13 @@ public class CollectionController {
             return ResponseEntity.badRequest().body(Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE));
         }
 
-        if (collectionService.existsByName(createCollectionForm.getName())){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildSuccessMessage("Collection with name: " + createCollectionForm.getName() + " are already exist!"));
-        }
-
         Optional<Shop> shop = shopService.findById(createCollectionForm.getShopId());
         if (!shop.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at id: " + createCollectionForm.getShopId()));
+        }
+
+        if (collectionService.existsByNameIgnoreCaseAndShopId(createCollectionForm.getName(), shop.get().getId())){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildSuccessMessage("Collection with name: " + createCollectionForm.getName() + " are already exist!"));
         }
 
         Collection collection = Collection.builder()

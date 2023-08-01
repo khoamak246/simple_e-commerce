@@ -25,7 +25,6 @@ export default function AddAndEditUserAddressModal({
   editItem,
   closeModal,
   setSelectAddress,
-  selectAddress,
 }) {
   const [isActive, setIsActive] = useState(false);
   const [formState, setFormState] = useState("create");
@@ -43,7 +42,7 @@ export default function AddAndEditUserAddressModal({
   };
 
   useEffect(() => {
-    if (userSelector && addressSelector && !editItem) {
+    if (userSelector && !editItem) {
       if (userSelector.userInfo.userAddresses.length === 0) {
         setFormState("create");
       } else {
@@ -53,7 +52,7 @@ export default function AddAndEditUserAddressModal({
       setFormState("edit");
       setStreetDetail(editItem.streetDetail);
     }
-  }, [addressSelector, userSelector]);
+  }, [userSelector]);
 
   const handleSubmit = () => {
     if (formState === "create") {
@@ -167,12 +166,18 @@ export default function AddAndEditUserAddressModal({
           <div className="w-full h-[90%] overflow-auto flex flex-col gap-3 shadow-lg">
             {userSelector.userInfo.userAddresses.map((val, index) => {
               return (
-                <AddressItem
+                <div
+                  className="w-full cursor-pointer"
                   key={val.id}
-                  address={val}
-                  selectAddress={selectAddress}
-                  setSelectAddress={setSelectAddress}
-                />
+                  onClick={() => {
+                    if (setSelectAddress) {
+                      setSelectAddress(val);
+                      handleOnCloseModal();
+                    }
+                  }}
+                >
+                  <AddressItem address={val} />
+                </div>
               );
             })}
           </div>
@@ -213,7 +218,9 @@ export default function AddAndEditUserAddressModal({
         {/* BACk */}
         {formState !== "edit" && (
           <div
-            className="absolute top-[5%] left-[5%] cursor-pointer"
+            className={`${
+              formState === "selectAdress" && "hidden"
+            } absolute top-[5%] left-[5%] cursor-pointer`}
             onClick={() => setFormState("selectAdress")}
           >
             <svg

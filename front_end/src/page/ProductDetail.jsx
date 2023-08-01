@@ -13,6 +13,9 @@ import {
   renderAddress,
   handleRenderCurrentSelectAddress,
   getProductOptionById,
+  sortByIdASC,
+  sortAssetsProduct,
+  getParentBusiness,
 } from "../utils/Utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -128,7 +131,10 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product) {
       handleSelectFirstProductOptionHaveStock();
-      dispatch(get_product_by_business_id(product.business.id)).then((res) => {
+
+      dispatch(
+        get_product_by_business_id(getParentBusiness(product.business).id)
+      ).then((res) => {
         if (res) {
           setRecommendProducts(res);
         }
@@ -139,7 +145,7 @@ export default function ProductDetail() {
   const handleSelectFirstProductOptionHaveStock = () => {
     if (product) {
       const { productOptions } = product;
-      let productOption = productOptions.find((e) => e.stock > 0);
+      let productOption = sortByIdASC(productOptions).find((e) => e.stock > 0);
       if (productOption) {
         setSelectedProduct({
           quantity: 1,
@@ -193,12 +199,20 @@ export default function ProductDetail() {
 
   const handleRenderBusinessWithLink = () => {
     if (product) {
-      let currentBusiness = handleRenderBusiness(product.business);
-      let currentBusinessArr = currentBusiness.split(" > ");
-      return currentBusinessArr.map((val, index) => {
+      let businessArr = [product.business];
+      let temp = { ...product.business };
+      while (temp.business.length !== 0) {
+        businessArr.push(temp.business[0]);
+        temp = temp.business[0];
+      }
+      return businessArr.reverse().map((val, index) => {
         return (
-          <Link key={index} to={"/"} className="text-blue-600">
-            {`${val} >`}
+          <Link
+            key={index}
+            to={`/categories/${val.id}`}
+            className="text-blue-600"
+          >
+            {`${val.name} >`}
           </Link>
         );
       });
@@ -231,7 +245,6 @@ export default function ProductDetail() {
     } else {
       dispatch(post_create_room(shopId)).then((res) => {
         if (res) {
-          toast.success("Hello");
           dispatch(setToggle("chat"));
         }
       });
@@ -251,7 +264,9 @@ export default function ProductDetail() {
       <div className="w-full bg-white rounded-sm flex flex-col sm:flex-row gap-5">
         {/* PREVIEW  */}
         <div className="w-full sm:w-1/3 h-[80vh] border-solid border-r-[1px] border-slate-200">
-          {product && <PreviewImg previewArr={product.assets} />}
+          {product && (
+            <PreviewImg previewArr={sortAssetsProduct(product.assets)} />
+          )}
           {product && (
             <div className="h-[10%] flex justify-center items-center border-t-[1px] border-slate-200 border-solid text-red-500 gap-1">
               <div
@@ -263,7 +278,11 @@ export default function ProductDetail() {
                       duration: 2000,
                     });
                   }
-                  dispatch(post_save_favorites(product.id));
+                  dispatch(post_save_favorites(product.id)).then((res) => {
+                    if (res) {
+                      setProduct(res);
+                    }
+                  });
                 }}
               >
                 <svg
@@ -320,9 +339,13 @@ export default function ProductDetail() {
           </div>
           {/* PRICE */}
           <div className="w-full flex bg-[#FAFAFA] py-2">
-            <p className="text-2xl text-[#D0011B]">{`${getMinPrice(
-              product
-            )}$ - ${getMaxPrice(product)}$`}</p>
+            {product && (
+              <p className="text-2xl text-[#D0011B]">{`${
+                product.productOptions.find(
+                  (e) => e.id === selectedProduct.productOptionId
+                )?.price
+              } $`}</p>
+            )}
           </div>
           {/* DELIVER */}
           <div className="grid grid-cols-12">
@@ -374,30 +397,32 @@ export default function ProductDetail() {
           <div className="grid grid-cols-12">
             <div className="col-span-2 text-sm text-[#757575]">Option</div>
             <div className="col-span-10 grid grid-cols-3 gap-2">
-              {product?.productOptions.map((val, index) => {
-                return (
-                  <p
-                    key={val.id}
-                    className={` ${
-                      selectedProduct.productOptionId == val.id
-                        ? "text-[#D0011B] border-[#D0011B]"
-                        : "text-black border-slate-400"
-                    } text-sm border-solid border-[1px] p-1 hover:text-[#D0011B] cursor-pointer hover:border-[#D0011B] ${
-                      val.stock <= 0 && "opacity-50"
-                    }`}
-                    onClick={() => {
-                      if (val.stock > 0) {
-                        setSelectedProduct({
-                          ...selectedProduct,
-                          productOptionId: val.id,
-                        });
-                      }
-                    }}
-                  >
-                    {val.name}
-                  </p>
-                );
-              })}
+              {product &&
+                sortByIdASC(product.productOptions).map((val, index) => {
+                  return (
+                    <p
+                      key={val.id}
+                      className={` ${
+                        selectedProduct.productOptionId == val.id
+                          ? "text-[#D0011B] border-[#D0011B]"
+                          : "text-black border-slate-400"
+                      } text-sm border-solid border-[1px] p-1 ${
+                        val.stock > 0 &&
+                        "hover:text-[#D0011B] hover:border-[#D0011B]"
+                      }  cursor-pointer ${val.stock <= 0 && "opacity-50"}`}
+                      onClick={() => {
+                        if (val.stock > 0) {
+                          setSelectedProduct({
+                            ...selectedProduct,
+                            productOptionId: val.id,
+                          });
+                        }
+                      }}
+                    >
+                      {val.name}
+                    </p>
+                  );
+                })}
             </div>
           </div>
           {/* NUMBER */}
@@ -511,9 +536,16 @@ export default function ProductDetail() {
         </div>
         <div className="w-[20%] h-full flex flex-col justify-center items-center gap-2">
           <p>And more product</p>
-          <button className="bg-[#FFEEE8] text-[#EF5739] py-1 px-2 border-solid border-[#EF5739] border-[1px]">
+          <Link
+            to={
+              product
+                ? `/categories/${getParentBusiness(product.business).id}`
+                : ""
+            }
+            className="bg-[#FFEEE8] text-[#EF5739] py-1 px-2 border-solid border-[#EF5739] border-[1px]"
+          >
             See more...
-          </button>
+          </Link>
         </div>
       </div>
       {/* SHOP INFO */}
@@ -549,7 +581,10 @@ export default function ProductDetail() {
                 </svg>
                 <p>Chat</p>
               </button>
-              <button className="w-[50%] flex justify-center items-center border-black border-[1px] border-solid gap-2">
+              <Link
+                to={product ? `/shop/detail/${product.shop.id}` : ""}
+                className="w-[50%] flex justify-center items-center border-black border-[1px] border-solid gap-2"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -565,7 +600,7 @@ export default function ProductDetail() {
                   />
                 </svg>
                 <p>Shop</p>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -638,7 +673,9 @@ export default function ProductDetail() {
         <div className="w-full flex flex-col gap-3">
           <p className="text-xl bg-[#FAFAFA] py-1">DESCRIPTION</p>
           <div>
-            <p className="text-sm ">{`${product && product.description}`}</p>
+            <pre className="text-sm font-sans">{`${
+              product && product.description
+            }`}</pre>
           </div>
         </div>
       </div>

@@ -10,13 +10,14 @@ import {
 } from "../../../thunk/CollectionThunk";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
+import { sortByIdASC } from "../../../utils/Utils";
 
 export default function DshShopCollection() {
   const shopSelector = useSelector(SHOP_STATE_SELECTOR);
   const [isAddCollection, setAddCollection] = useState(false);
   const [inputNewCollectionName, setInputNewCollectionName] = useState("");
   const dispatch = useDispatch();
-  const [selectedCollection, setSellectedCollection] = useState(0);
+  const [selectedCollection, setSellectedCollection] = useState();
   const [collectionNav, setCollecionNav] = useState({
     searchingValue: "",
     sortBy: "default",
@@ -25,7 +26,14 @@ export default function DshShopCollection() {
     selectEditCollection: null,
   });
 
-  console.log(shopSelector);
+  useEffect(() => {
+    if (shopSelector && selectedCollection) {
+      let currentSelectCollection = shopSelector.collections.find(
+        (e) => e.id == selectedCollection.id
+      );
+      setSellectedCollection(currentSelectCollection);
+    }
+  }, [shopSelector]);
 
   const handleResetAll = () => {
     setAddCollection(false);
@@ -44,12 +52,19 @@ export default function DshShopCollection() {
   };
 
   const createNewCollection = () => {
+    let findExistInCollection = shopSelector.collections.find(
+      (e) => e.name.toLowerCase() == inputNewCollectionName.toLowerCase().trim()
+    );
+    if (findExistInCollection) {
+      return toast.error("OOP! You already have a collection with this name ");
+    }
+
     dispatch(post_save_new_collection(inputNewCollectionName.trim())).then(
       (res) => {
         if (res) {
           toast.success("Create new collection successfully!");
           handleResetAll();
-          setSellectedCollection(res.length - 1);
+          setSellectedCollection(sortByIdASC(res)[res.length - 1]);
         }
       }
     );
@@ -90,7 +105,9 @@ export default function DshShopCollection() {
       if (collectionNav.searchingValue !== "") {
         let currentproductArr = [...products];
         result = currentproductArr.filter((product) =>
-          product.name.includes(collectionNav.searchingValue)
+          product.name
+            .toLowerCase()
+            .includes(collectionNav.searchingValue.toLowerCase())
         );
       }
     }
@@ -101,10 +118,10 @@ export default function DshShopCollection() {
     let productArr = [];
     if (collectionNav.searchingValue !== "") {
       productArr = handleOnSearch();
-    } else if (shopSelector) {
+    } else if (shopSelector && selectedCollection) {
       const { collections } = shopSelector;
       if (collections.length !== 0) {
-        productArr = collections[selectedCollection].products;
+        productArr = selectedCollection.products;
         switch (collectionNav.sortBy) {
           case "name-asc":
             productArr.sort(function (a, b) {
@@ -185,10 +202,10 @@ export default function DshShopCollection() {
 
   const checkExistInCollection = (productId) => {
     let check = false;
-    if (shopSelector) {
+    if (shopSelector && selectedCollection) {
       const { collections } = shopSelector;
       if (collections.length !== 0) {
-        let productIndex = collections[selectedCollection].products.find(
+        let productIndex = selectedCollection.products.find(
           (product) => product.id == productId
         );
         if (productIndex) {
@@ -200,12 +217,9 @@ export default function DshShopCollection() {
   };
 
   const handleUpdateProductInCollection = (productId, action) => {
-    if (shopSelector) {
-      const { collections } = shopSelector;
+    if (shopSelector && selectedCollection) {
       let products = [];
-      collections[selectedCollection].products.map((product) =>
-        products.push(product.id)
-      );
+      selectedCollection.products.map((product) => products.push(product.id));
       if (action === "ADD") {
         products.push(productId);
       } else {
@@ -214,7 +228,7 @@ export default function DshShopCollection() {
       }
       dispatch(
         patch_update_collection({
-          collectionId: collections[selectedCollection].id,
+          collectionId: selectedCollection.id,
           updateCollectionForm: {
             products,
           },
@@ -241,13 +255,13 @@ export default function DshShopCollection() {
       const { collections } = shopSelector;
       if (
         collections.length !== 0 &&
-        collections[selectedCollection].products.length !== 0
+        selectedCollection &&
+        selectedCollection.products.length !== 0
       ) {
-        let productArrLength = collections[selectedCollection].products.length;
-        if (productArrLength < 6 || productArrLength % 6 == 0) {
-          totalPage = productArrLength;
-        } else if (productArrLength % 6 !== 0) {
-          totalPage = totalPage + productArrLength;
+        let productArrLength = selectedCollection.products.length;
+        if (productArrLength % 6 !== 0) {
+          totalPage =
+            totalPage + ((productArrLength - (productArrLength % 6)) % 6);
         }
       }
     }
@@ -352,14 +366,16 @@ export default function DshShopCollection() {
             </div>
             {/* ITEMS */}
             {shopSelector &&
-              shopSelector.collections.map((val, index) => {
+              sortByIdASC(shopSelector.collections).map((val, index) => {
                 return (
                   <div
                     key={val.id}
                     className={`${
-                      index === selectedCollection && "bg-slate-200"
+                      selectedCollection &&
+                      val.id === selectedCollection.id &&
+                      "bg-slate-200"
                     } w-full flex justify-between border-solid border-b-[1px]  border-slate-400 items-center py-2 px-2 duration-200 transition-all hover:bg-slate-200 group`}
-                    onClick={() => setSellectedCollection(index)}
+                    onClick={() => setSellectedCollection(val)}
                   >
                     <p className="text-sm text-slate-400 cursor-pointer w-[80%]">
                       {val.name}
@@ -473,7 +489,9 @@ export default function DshShopCollection() {
                     value={collectionNav.searchingValue}
                     onChange={handleOnChangeCollectionNav}
                     disabled={
-                      !shopSelector || shopSelector.collections.length == 0
+                      !shopSelector ||
+                      shopSelector.collections.length == 0 ||
+                      !selectedCollection
                     }
                   />
                 </div>
@@ -564,22 +582,23 @@ export default function DshShopCollection() {
               <div
                 className={`h-[90%] overflow-auto ${
                   shopSelector.collections.length !== 0 &&
-                  (shopSelector.collections[selectedCollection].products
-                    .length !== 0 ||
+                  selectedCollection &&
+                  (selectedCollection.products.length !== 0 ||
                     collectionNav.searchingValue !== "")
                     ? "grid grid-cols-1 sm:grid-cols-3 gap-2 "
                     : "flex justify-center items-center flex-col"
                 } p-2`}
               >
                 {(shopSelector.collections.length == 0 ||
-                  shopSelector.collections[selectedCollection].products
-                    .length == 0) &&
+                  (selectedCollection &&
+                    selectedCollection.products.length == 0)) &&
                 collectionNav.searchingValue === "" ? (
                   <>
                     <p
                       className={`${
-                        shopSelector?.collections[selectedCollection]?.products
-                          .length == 0 && "hidden"
+                        selectedCollection &&
+                        selectedCollection.products.length == 0 &&
+                        "hidden"
                       } text-[#EF5234] font-semibold text-xl`}
                     >
                       OOP! Nothing here! Please add new collection!

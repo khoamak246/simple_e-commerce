@@ -54,7 +54,7 @@ export default function DshShopProfile() {
         setShopProfile({ ...shopProfile, [name]: value });
       } else {
         console.log("in --> " + e.target.files);
-        setShopProfile({ ...shopProfile, [name]: e.target.files });
+        setShopProfile({ ...shopProfile, [name]: [...e.target.files] });
       }
     }
   };
@@ -107,7 +107,6 @@ export default function DshShopProfile() {
 
     const { name, description } = shopProfile;
     let udpateShopForm = { name, introduce, description, avatar, coverImg };
-    console.log(udpateShopForm);
     dispatch(patch_update_shop_profile(udpateShopForm)).then((res) => {
       if (res) {
         dispatch(resetToggle());
@@ -244,7 +243,10 @@ export default function DshShopProfile() {
             </div>
           </div>
           {/* SEE SHOP */}
-          <div className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200">
+          <Link
+            to={`/shop/detail/${shopSelector.id}`}
+            className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200"
+          >
             <p className="text-sm text-slate-400">See shop with role user</p>
             <div>
               <svg
@@ -262,9 +264,12 @@ export default function DshShopProfile() {
                 />
               </svg>
             </div>
-          </div>
+          </Link>
           {/* SEE PRODUCT  */}
-          <div className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200">
+          <Link
+            to={"/seller/dashboard/productMng/allProduct"}
+            className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200"
+          >
             <p className="text-sm text-slate-400">Product</p>
             <div className="flex gap-1 items-center">
               <p className="text-sm text-[#F04D2D]">
@@ -285,7 +290,7 @@ export default function DshShopProfile() {
                 />
               </svg>
             </div>
-          </div>
+          </Link>
           {/* ADDRESS */}
           <Link
             to={"/seller/dashboard/shopMng/shopAddress"}
@@ -401,7 +406,11 @@ export default function DshShopProfile() {
                 </svg>
 
                 <p className="text-sm text-[#EE4D2D]">{`Image ${
-                  shopSelector ? shopSelector.introduce.length : 0
+                  shopProfile.introduce && shopProfile.introduce.length !== 0
+                    ? shopProfile.introduce.length
+                    : shopSelector
+                    ? shopSelector.introduce.length
+                    : 0
                 }/5`}</p>
               </div>
             </div>

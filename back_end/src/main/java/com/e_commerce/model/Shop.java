@@ -104,7 +104,10 @@ public class Shop {
     @JsonIgnoreProperties({"shop"})
     private Set<Product> products;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "shop_payment",
+            joinColumns = {@JoinColumn(name = "shop_id")},
+            inverseJoinColumns = {@JoinColumn(name = "payment_id")})
     private Set<PaymentWay> paymentWays;
 
     @OneToMany(mappedBy = "shop")

@@ -10,7 +10,7 @@ import { handle_log_out } from "../../thunk/AuthThunk";
 import { handleAnimateToggle } from "../../utils/Utils";
 
 export default function ProfileModal() {
-  const currentUserAuth = useSelector(USER_STATE_SELECTOR);
+  const userSelector = useSelector(USER_STATE_SELECTOR);
   const shopSelector = useSelector(SHOP_STATE_SELECTOR);
   const dispatch = useDispatch();
   const [isActive, setActive] = useState(false);
@@ -35,13 +35,13 @@ export default function ProfileModal() {
         >
           <div className=" w-8 h-8 rounded-full overflow-hidden">
             <img
-              src={currentUserAuth ? currentUserAuth.userInfo.avatar : ""}
+              src={userSelector ? userSelector.userInfo.avatar : ""}
               alt="user-avatar"
               className="w-full h-full"
             />
           </div>
           <div>
-            <p className="text-lg font-semibold">Mai Anh Khoa</p>
+            <p className="text-lg font-semibold">{userSelector.fullName}</p>
             <div className="flex items-center">
               <p className="text-[0.8rem] text-slate-400">
                 Go to your profile{" "}

@@ -38,6 +38,7 @@ public class OrderController {
     private final IUserService userService;
     private final IProductOptionsService productOptionsService;
     private final IShopService shopService;
+    private final IProductService productService;
 
     @PatchMapping("/orderItem/{orderItemId}/status")
     public ResponseEntity<ResponseMessage> updateStatusOrderItem(@PathVariable Long orderItemId,
@@ -81,11 +82,15 @@ public class OrderController {
         Product product = orderItem.get().getProductOptions().getProduct();
         if (orderStatusFormStatusIndex == 2){
             product.setCancelNumber(product.getCancelNumber() + 1);
-        } else {
+        } else if (orderStatusFormStatusIndex == 4){
+            product.setSaleNumber(product.getSaleNumber() + 1);
+        } else if (orderStatusFormStatusIndex == 5) {
+            product.setSaleNumber(product.getSaleNumber() - 1);
             product.setReturnRefundNumber(product.getReturnRefundNumber() + 1);
         }
 
         OrderItems justSavedOrderItem = orderItemService.save(orderItem.get());
+        productService.save(product);
         return ResponseEntity.ok(Utils.buildSuccessMessage("Update order item successfully!", justSavedOrderItem));
     }
 

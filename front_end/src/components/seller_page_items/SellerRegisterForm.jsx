@@ -44,6 +44,7 @@ export default function SellerRegisterForm() {
         setRegiterStage((prev) => prev + 1);
       }
     } else {
+      console.log("in");
       const { shopName, streetDetail } = inputRegisterForm;
       dispatch(post_save_new_shop({ shopName, streetDetail })).then((res) => {
         if (res) {

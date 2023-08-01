@@ -266,7 +266,6 @@ public class ShopController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found ward with id = " + createShopForm.getWardId() + " in district id: " + createShopForm.getDistrictId()));
         }
 
-
         Shop newShop = Shop.builder()
                 .name(createShopForm.getName())
                 .createdDate(LocalDate.now().toString())
@@ -280,6 +279,11 @@ public class ShopController {
                 .ward(ward.get())
                 .paymentWays(new HashSet<>(paymentWayService.findAll()))
                 .user(user.get())
+                .introduce(new HashSet<>())
+                .orderItems(new HashSet<>())
+                .followers(new HashSet<>())
+                .products(new HashSet<>())
+                .collections(new HashSet<>())
                 .build();
 
         Shop justSavedShop = shopService.save(newShop);
@@ -294,11 +298,11 @@ public class ShopController {
         }
         Optional<User> user = userService.findById(userId);
         if (!user.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found user at id: " + userId));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found user at id: " + userId));
         }
-        Optional<Shop> shop = shopService.findById(userId);
+        Optional<Shop> shop = shopService.findById(shopId);
         if (!shop.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildSuccessMessage("Not found shop at id: " + shopId));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at id: " + shopId));
         }
 
         List<User> userList = new ArrayList<>(shop.get().getFollowers());

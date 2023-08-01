@@ -63,6 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/ws/**",
                         "/api/v1/product/{productId}",
                         "/api/v1/product/search/{searchValue}",
+                        "/api/v1/product/top-payment",
                         "/api/v1/shop/{shopId}",
                         "/api/v1/business",
                         "/api/v1/business/product/{businessId}",

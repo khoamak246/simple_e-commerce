@@ -95,6 +95,11 @@ public class ProductServiceIMPL implements IProductService {
     }
 
     @Override
+    public Set<ProductResponse> findTopPaymentProduct(int offsetNumber, int limitNumber) {
+        return productRepository.findTopPaymentProduct(offsetNumber, limitNumber);
+    }
+
+    @Override
     public Set<Product> findTop10ByShopIdOrderByVisitNumberDesc(Long shopId) {
         return productRepository.findTop10ByShopIdOrderByVisitNumberDesc(shopId);
     }

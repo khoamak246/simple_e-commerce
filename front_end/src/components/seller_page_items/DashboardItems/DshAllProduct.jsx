@@ -4,14 +4,18 @@ import { SHOP_STATE_SELECTOR } from "../../../redux/selectors/Selectors";
 import { useState } from "react";
 import { useEffect } from "react";
 import UpdateProducModal from "../../modal/UpdateProducModal";
-import { handleRenderBusiness } from "../../../utils/Utils";
+import {
+  getMaxPrice,
+  getMinPrice,
+  handleRenderBusiness,
+  sortByIdASC,
+} from "../../../utils/Utils";
 import { resetSelectBusiness } from "../../../redux/reducers/BusinessSlice";
 import SelectBusinessModal from "../../modal/SelectBusinessModal";
 
 export default function DshAllProduct() {
   const shopSelector = useSelector(SHOP_STATE_SELECTOR);
   const dispatch = useDispatch();
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [isToggleEditModal, setToggleEditModal] = useState("");
   const [editItem, setEditItem] = useState();
   const [productNav, setProductNav] = useState({
@@ -50,7 +54,7 @@ export default function DshAllProduct() {
     let result = [];
     if (shopSelector) {
       const { products } = shopSelector;
-      result = [...products];
+      result = sortByIdASC([...products]);
       const { name, minPrice, maxPrice, business, sortBy } = productNav;
       if (sortBy !== "default") {
         if (sortBy === "onSale") {
@@ -70,42 +74,33 @@ export default function DshAllProduct() {
         );
       }
 
-      if (minPrice !== null && maxPrice !== null) {
+      if (minPrice !== null) {
+        result = result.filter((e) => getMinPrice(e) >= minPrice);
         for (let i = 0; i < result.length; i++) {
           const { productOptions } = result[i];
 
           let newProductOption = productOptions.filter(
-            (e) => minPrice <= e.price && e.price <= maxPrice
+            (e) => minPrice <= e.price
+          );
+
+          result[i] = { ...result[i], productOptions: newProductOption };
+        }
+      }
+
+      if (maxPrice !== null) {
+        result = result.filter((e) => getMaxPrice(e) <= maxPrice);
+        for (let i = 0; i < result.length; i++) {
+          const { productOptions } = result[i];
+
+          let newProductOption = productOptions.filter(
+            (e) => e.price <= maxPrice
           );
 
           result[i] = { ...result[i], productOptions: newProductOption };
         }
       }
     }
-
     return result;
-  };
-
-  const handleSelectSpecificProduct = (productId) => {
-    let productIndex = selectedProducts.indexOf(productId);
-    if (productIndex < 0) {
-      setSelectedProducts([...selectedProducts, productId]);
-    } else {
-      let newSelectedProductArr = [...selectedProducts];
-      newSelectedProductArr.splice(productIndex, 1);
-      setSelectedProducts(newSelectedProductArr);
-    }
-  };
-
-  const handleSelectAllProduct = () => {
-    let productArr = renderProduct();
-    let newSelectedArr = [];
-    if (selectedProducts.length !== productArr.length) {
-      productArr.map((e) => newSelectedArr.push(e.id));
-      setSelectedProducts(newSelectedArr);
-    } else {
-      setSelectedProducts([]);
-    }
   };
 
   return (
@@ -210,25 +205,11 @@ export default function DshAllProduct() {
                   name="sortBy"
                   className="py-1 px-2 w-full border-solid border-[1px] border-slate-400 outline-none rounded-sm text-sm"
                   onChange={handleOnChangeProductNav}
+                  value={productNav.sortBy}
                 >
-                  <option
-                    value="default"
-                    selected={productNav.sortBy === "default"}
-                  >
-                    -- nothing --
-                  </option>
-                  <option
-                    value="onSale"
-                    selected={productNav.sortBy === "onSale"}
-                  >
-                    On Sale
-                  </option>
-                  <option
-                    value="notSale"
-                    selected={productNav.sortBy === "notSale"}
-                  >
-                    Not sale
-                  </option>
+                  <option value="default">-- nothing --</option>
+                  <option value="onSale">On Sale</option>
+                  <option value="notSale">Not sale</option>
                 </select>
               </div>
             </div>
@@ -246,84 +227,77 @@ export default function DshAllProduct() {
             </div>
           </div>
           <div className="h-7/12 lg:h-4/6 w-full">
-            {/* HEADER */}
-            <div className="lg:h-1/6 w-full border-solid border-slate-400 border-b-[1px] grid grid-cols-11">
-              <div className="col-span-3 flex gap-1 items-center border-slate-400 border-r-[1px] border-solid lg:px-2">
-                <input
-                  type="checkbox"
-                  onChange={handleSelectAllProduct}
-                  checked={
-                    renderProduct().length === selectedProducts.length &&
-                    renderProduct.length !== 0
-                  }
-                />
-                <p className="text-[0.7rem] lg:text-base">Product name</p>
-              </div>
-              <div className="col-span-2 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2">
-                <p className="text-[0.7rem] lg:text-base">Business</p>
-              </div>
-
-              <div className="col-span-4 grid grid-cols-4 border-slate-400 border-r-[1px] border-solid">
-                <div className="col-span-4 border-b-[1px] border-slate-400 border-solid">
-                  <p className="text-center">Option</p>
-                </div>
-                <div className="col-span-1 lg:px-2 border-r-[1px] border-slate-400 border-solid">
-                  <p className="text-[0.7rem] lg:text-base">Name</p>
-                </div>
-                <div className="col-span-1 lg:px-2 border-r-[1px] border-slate-400 border-solid">
-                  <p className="text-[0.7rem] lg:text-base">Price</p>
-                </div>
-                <div className="col-span-1 lg:px-2 border-r-[1px] border-slate-400 border-solid">
-                  <p className="text-[0.7rem] lg:text-base">Stock</p>
-                </div>
-                <div className="col-span-1 lg:px-2">
-                  <p className="text-[0.7rem] lg:text-base">Action</p>
-                </div>
-              </div>
-
-              <div className="col-span-1 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2">
-                <p className="text-[0.7rem] lg:text-base">On sale</p>
-              </div>
-
-              <div className="col-span-1 flex items-center lg:px-2 text-[0.7rem] lg:text-base">
-                Action
-              </div>
-            </div>
-            {/* BODY */}
+            {/* TABLE */}
             <div
-              className={`h-5/6 w-full flex flex-col overflow-auto ${
+              className={`h-full w-full flex flex-col overflow-auto ${
                 renderProduct().length === 0 && "justify-center items-center"
               }`}
             >
+              {/* HEADER */}
+              <div className="lg:h-1/6 w-full border-solid border-slate-400 border-b-[1px] grid grid-cols-11">
+                <div className="col-span-3 flex gap-1 items-center border-slate-400 border-r-[1px] border-solid lg:px-2">
+                  <p className="text-[0.7rem] lg:text-base">Product name</p>
+                </div>
+                <div className="col-span-2 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2">
+                  <p className="text-[0.7rem] lg:text-base">Business</p>
+                </div>
+
+                <div className="col-span-4 grid grid-cols-4 border-slate-400 border-r-[1px] border-solid">
+                  <div className="col-span-4 border-b-[1px] border-slate-400 border-solid">
+                    <p className="text-center">Option</p>
+                  </div>
+                  <div className="col-span-1 lg:px-2 border-r-[1px] border-slate-400 border-solid">
+                    <p className="text-[0.7rem] lg:text-base">Name</p>
+                  </div>
+                  <div className="col-span-1 lg:px-2 border-r-[1px] border-slate-400 border-solid">
+                    <p className="text-[0.7rem] lg:text-base">Price</p>
+                  </div>
+                  <div className="col-span-1 lg:px-2 border-r-[1px] border-slate-400 border-solid">
+                    <p className="text-[0.7rem] lg:text-base">Stock</p>
+                  </div>
+                  <div className="col-span-1 lg:px-2">
+                    <p className="text-[0.7rem] lg:text-base">Action</p>
+                  </div>
+                </div>
+
+                <div className="col-span-1 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2">
+                  <p className="text-[0.7rem] lg:text-base">On sale</p>
+                </div>
+
+                <div className="col-span-1 flex items-center lg:px-2 text-[0.7rem] lg:text-base">
+                  Action
+                </div>
+              </div>
+
+              {/* BODY */}
               {renderProduct().length === 0 ? (
                 <img
                   src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/page_img%2FsellerPage%2Fempty_state.png?alt=media&token=3e8e6738-c13f-48e7-809d-40d425854635"
                   alt=""
-                  className="w-[30%]"
+                  className="w-[44%]"
                 />
               ) : (
                 renderProduct().map((val, index, arr) => {
                   return (
                     <div
-                      className="lg:h-1/6 w-full border-solid border-slate-400 border-b-[1px] grid grid-cols-11"
+                      className={`${
+                        index % 2 === 0 && "bg-slate-200"
+                      } lg:h-auto w-full border-solid border-slate-400 border-b-[1px] grid grid-cols-11`}
                       key={val.id}
                     >
                       {/* PRODUCT NAME */}
                       <div
                         className={` col-span-3 flex gap-1 items-center border-slate-400 border-r-[1px] border-solid lg:px-2`}
                       >
-                        <input
-                          type="checkbox"
-                          onChange={() => handleSelectSpecificProduct(val.id)}
-                          checked={selectedProducts.includes(val.id)}
-                        />
-                        <p className="text-[0.7rem] lg:text-base">{val.name}</p>
+                        <p className="text-[0.7rem] lg:text-base text-ellipsis overflow-hidden whitespace-nowrap">
+                          {val.name}
+                        </p>
                       </div>
                       {/* PRODUCT BUSINESS */}
                       <div
                         className={`col-span-2 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2`}
                       >
-                        <p className="text-[0.7rem] lg:text-sm">
+                        <p className="text-[0.7rem] lg:text-sm ">
                           {shopSelector
                             ? handleRenderBusiness(val.business)
                             : ""}
@@ -331,65 +305,67 @@ export default function DshAllProduct() {
                       </div>
                       {/* OPTION */}
                       <div className="col-span-4 grid grid-cols-1 border-slate-400 border-r-[1px] border-solid">
-                        {arr[index].productOptions.map((val, index, arr) => {
-                          return (
-                            <div
-                              className={`${
-                                index !== arr.length - 1 && "border-b-[1px]"
-                              } border-slate-400 border-solid grid grid-cols-4`}
-                              key={val.id}
-                            >
-                              {/* OPTION NAME */}
-                              <div className="col-span-1 flex items-center lg:px-2 border-r-[1px] border-slate-400 border-solid">
-                                <p className="text-[0.7rem] lg:text-base">
-                                  {val.name}
-                                </p>
-                              </div>
-                              {/* OPTION PRICE */}
-                              <div className="col-span-1 flex items-center lg:px-2 border-r-[1px] border-slate-400 border-solid">
-                                <p className="text-[0.7rem] lg:text-base">
-                                  {val.price}
-                                </p>
-                              </div>
-                              {/* OPTION STOCK */}
-                              <div className="col-span-1 flex items-center lg:px-2 border-r-[1px] border-slate-400 border-solid">
-                                <p className="text-[0.7rem] lg:text-base">
-                                  {val.stock}
-                                </p>
-                              </div>
-                              {/* OPTION ACTION */}
-                              <div className="col-span-1 flex justify-center gap-1 lg:px-2 items-center">
-                                {/* EDIT */}
-                                <button
-                                  className="bg-orange-300 px-1 rounded-sm h-[80%]"
-                                  onClick={() => {
-                                    setEditItem(val);
-                                    setToggleEditModal("option");
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="w-3 h-3"
+                        {sortByIdASC(arr[index].productOptions).map(
+                          (val, index, arr) => {
+                            return (
+                              <div
+                                className={`${
+                                  index !== arr.length - 1 && "border-b-[1px]"
+                                } border-slate-400 border-solid grid grid-cols-4`}
+                                key={val.id}
+                              >
+                                {/* OPTION NAME */}
+                                <div className="col-span-1 flex items-center lg:px-2 border-r-[1px] border-slate-400 border-solid">
+                                  <p className="text-[0.7rem] lg:text-base text-ellipsis overflow-hidden whitespace-nowrap">
+                                    {val.name}
+                                  </p>
+                                </div>
+                                {/* OPTION PRICE */}
+                                <div className="col-span-1 flex items-center lg:px-2 border-r-[1px] border-slate-400 border-solid">
+                                  <p className="text-[0.7rem] lg:text-base">
+                                    {val.price}
+                                  </p>
+                                </div>
+                                {/* OPTION STOCK */}
+                                <div className="col-span-1 flex items-center lg:px-2 border-r-[1px] border-slate-400 border-solid">
+                                  <p className="text-[0.7rem] lg:text-base">
+                                    {val.stock}
+                                  </p>
+                                </div>
+                                {/* OPTION ACTION */}
+                                <div className="col-span-1 flex justify-center gap-1 lg:px-2 items-center">
+                                  {/* EDIT */}
+                                  <button
+                                    className="bg-orange-300 px-1 rounded-sm h-5"
+                                    onClick={() => {
+                                      setEditItem(val);
+                                      setToggleEditModal("option");
+                                    }}
                                   >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-                                    />
-                                  </svg>
-                                </button>
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth={1.5}
+                                      stroke="currentColor"
+                                      className="w-3 h-3"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          }
+                        )}
                       </div>
                       {/* PRODUCT ON SALE */}
                       <div
-                        className={`col-span-1 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2`}
+                        className={`col-span-1 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2 py-1`}
                       >
                         <p
                           className={` text-[0.7rem] lg:text-base rounded-md ${
@@ -403,7 +379,7 @@ export default function DshAllProduct() {
                       <div className="col-span-1 flex items-center justify-center lg:px-2 text-[0.7rem] lg:text-base gap-1">
                         {/* EDIT */}
                         <button
-                          className="bg-orange-300 px-1 rounded-sm h-[50%]"
+                          className="bg-orange-300 px-1 rounded-sm h-5"
                           onClick={() => {
                             setEditItem(val);
                             setToggleEditModal("product");

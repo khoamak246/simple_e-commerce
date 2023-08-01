@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { USER_STATE_SELECTOR } from "../redux/selectors/Selectors";
 import { useState } from "react";
 import { useEffect } from "react";
@@ -13,7 +13,12 @@ import {
 } from "../thunk/CartThunk";
 import { toast } from "react-hot-toast";
 import AddAndEditUserAddressModal from "../components/modal/AddAndEditUserAddressModal";
-import { handleRenderUserAddress } from "../utils/Utils";
+import {
+  getAvatar,
+  handleRenderUserAddress,
+  sortByIdASC,
+  formatTwoDecimalNumber,
+} from "../utils/Utils";
 import {
   ERROR_FULL_NAME_MESS,
   ERROR_PHONE_NUMBER_MESS,
@@ -25,6 +30,7 @@ import { post_create_new_order } from "../thunk/OrderThunk";
 
 export default function Cart() {
   const userSelector = useSelector(USER_STATE_SELECTOR);
+  const navigate = useNavigate();
   const [cart, setCart] = useState();
   const [selectCartItem, setSelecCartItem] = useState([]);
   const [toggleSelectAddressModdal, setToggleSelectAddressModal] =
@@ -35,6 +41,7 @@ export default function Cart() {
     phoneNumber: "",
     orderItems: [],
   });
+
   const dispatch = useDispatch();
   useEffect(() => {
     if (userSelector) {
@@ -43,6 +50,8 @@ export default function Cart() {
       if (userSelector.userInfo.userAddresses.length !== 0) {
         setSelectAddress(userSelector.userInfo.userAddresses[0]);
       }
+    } else {
+      navigate("/");
     }
   }, [userSelector]);
 
@@ -122,6 +131,9 @@ export default function Cart() {
   };
 
   const handleOrderSubmit = () => {
+    if (!selectAddress) {
+      toast.error("OOP! You forgot your address!");
+    }
     const { receiverName, phoneNumber, orderItems } = orderForm;
     if (!validationRegex(FULL_NAME_REGEX, receiverName)) {
       return toast.error(ERROR_FULL_NAME_MESS);
@@ -193,7 +205,11 @@ export default function Cart() {
               <div
                 className="flex gap-1 cursor-pointer"
                 onClick={() => {
-                  setToggleSelectAddressModal(true);
+                  if (selectAddress) {
+                    setToggleSelectAddressModal(true);
+                  } else {
+                    navigate("/profile");
+                  }
                 }}
               >
                 <svg
@@ -235,122 +251,134 @@ export default function Cart() {
                   Total
                 </h3>
               </div>
-              {cart?.cartItems?.map((val, index, arr) => {
-                return (
-                  <div
-                    key={index}
-                    className="flex flex-col sm:flex-row lg:flex-row items-center hover:bg-gray-100 -mx-8 px-6 py-5"
-                  >
-                    <div className="flex items-center w-full lg:w-2/5 ">
-                      {/* PRO NAV */}
-                      <div className="w-[10%] flex justify-center items-center">
-                        <input
-                          type="checkbox"
-                          onChange={() => {
-                            dispatch(patch_udpate_status_cart_item(val.id));
-                          }}
-                          checked={selectCartItem.includes(val)}
-                        />
-                      </div>
-                      <div className="flex w-[90%]">
-                        {/* AVATAR */}
-                        <div className="w-20">
-                          <img
-                            className="h-24"
-                            src="https://drive.google.com/uc?id=18KkAVkGFvaGNqPy2DIvTqmUH_nk39o3z"
-                            alt=""
+              {cart &&
+                sortByIdASC(cart.cartItems).map((val, index, arr) => {
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row lg:flex-row items-center hover:bg-gray-100 -mx-8 px-6 py-5"
+                    >
+                      <div className="flex items-center w-full lg:w-2/5 ">
+                        {/* PRO NAV */}
+                        <div className="w-[10%] flex justify-center items-center">
+                          <input
+                            type="checkbox"
+                            onChange={() => {
+                              dispatch(patch_udpate_status_cart_item(val.id));
+                            }}
+                            checked={selectCartItem.includes(val)}
                           />
                         </div>
-                        {/* ACTION */}
-                        <div className="flex flex-col justify-center items-start gap-1 ml-4">
-                          <p className="font-bold text-sm">
-                            {val.productOptions.product.name}
-                          </p>
-                          <p className="text-red-500 text-xs">
-                            {val.productOptions.name}
-                          </p>
-                          {val.status && (
-                            <select
-                              name="paymentWayId"
-                              className="w-full outline-none border-[1px] border-solid border-slate-300 rounded-sm text-sm"
-                              value={handleSelectPaymentWayEachOrderItem(
-                                "getValue",
-                                val
-                              )}
-                              onChange={(e) =>
-                                handleSelectPaymentWayEachOrderItem(
-                                  "onChange",
-                                  val,
-                                  e
-                                )
-                              }
-                            >
-                              {val.productOptions.product.shop.paymentWays.map(
-                                (val, index) => {
-                                  return (
-                                    <option key={val.id} value={val.id}>
-                                      {val.name}
-                                    </option>
-                                  );
+                        <div className="flex w-[90%]">
+                          {/* AVATAR */}
+                          <div className="w-32">
+                            <img
+                              className="h-24"
+                              src={getAvatar(val.productOptions.product)}
+                              alt=""
+                            />
+                          </div>
+                          {/* ACTION */}
+                          <div className="flex flex-col justify-center items-start gap-1 ml-4">
+                            <p className="font-bold text-sm">
+                              {val.productOptions.product.name}
+                            </p>
+                            <p className="text-red-500 text-xs">
+                              {val.productOptions.name}
+                            </p>
+                            {val.status && (
+                              <select
+                                name="paymentWayId"
+                                className="w-full outline-none border-[1px] border-solid border-slate-300 rounded-sm text-sm"
+                                value={handleSelectPaymentWayEachOrderItem(
+                                  "getValue",
+                                  val
+                                )}
+                                onChange={(e) =>
+                                  handleSelectPaymentWayEachOrderItem(
+                                    "onChange",
+                                    val,
+                                    e
+                                  )
                                 }
-                              )}
-                            </select>
-                          )}
+                              >
+                                {val.productOptions.product.shop.paymentWays.map(
+                                  (val, index) => {
+                                    return (
+                                      <option key={val.id} value={val.id}>
+                                        {val.name}
+                                      </option>
+                                    );
+                                  }
+                                )}
+                              </select>
+                            )}
 
-                          <button className="font-semibold hover:text-red-500 text-gray-500 text-xs">
-                            Remove
-                          </button>
+                            <button
+                              className="font-semibold hover:text-red-500 text-gray-500 text-xs"
+                              onClick={() => {
+                                dispatch(delete_cart_item(val.id)).then(
+                                  (res) => {
+                                    if (res) {
+                                      toast.success("Upadte cart sucessfully!");
+                                    }
+                                  }
+                                );
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {/* QUANTITY */}
-                    <div className="flex justify-center w-1/5">
-                      <button
-                        onClick={() => {
-                          handleChangeQuantity("down", null, val);
-                        }}
-                      >
-                        <svg
-                          className="fill-current text-gray-600 w-3"
-                          viewBox="0 0 448 512"
+                      {/* QUANTITY */}
+                      <div className="flex justify-center w-1/5">
+                        <button
+                          onClick={() => {
+                            handleChangeQuantity("down", null, val);
+                          }}
                         >
-                          <path d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z" />
-                        </svg>
-                      </button>
-                      <div className="mx-2 border text-center w-8 outline-none">
-                        <p>{val.quantity}</p>
+                          <svg
+                            className="fill-current text-gray-600 w-3"
+                            viewBox="0 0 448 512"
+                          >
+                            <path d="M416 208H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z" />
+                          </svg>
+                        </button>
+                        <div className="mx-2 border text-center w-8 outline-none">
+                          <p>{val.quantity}</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const { productOptions } = val;
+                            let createCartItemForm = {
+                              productOptionId: productOptions.id,
+                              quantity: 1,
+                            };
+                            handleChangeQuantity("up", createCartItemForm);
+                          }}
+                        >
+                          <svg
+                            className="fill-current text-gray-600 w-3"
+                            viewBox="0 0 448 512"
+                          >
+                            <path d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z" />
+                          </svg>
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          const { productOptions } = val;
-                          let createCartItemForm = {
-                            productOptionId: productOptions.id,
-                            quantity: 1,
-                          };
-                          handleChangeQuantity("up", createCartItemForm);
-                        }}
-                      >
-                        <svg
-                          className="fill-current text-gray-600 w-3"
-                          viewBox="0 0 448 512"
-                        >
-                          <path d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z" />
-                        </svg>
-                      </button>
+                      {/* PRICE */}
+                      <p className="text-center w-1/5 font-semibold text-sm flex justify-center gap-1">
+                        <span className="sm:hidden">Price: </span>{" "}
+                        {`$${val.price}`}
+                      </p>
+                      {/* TOTAL */}
+                      <p className="text-center w-1/5 font-semibold text-sm flex justify-center gap-1">
+                        <span className="sm:hidden">Total: </span>{" "}
+                        {`$${val.price * val.quantity}`}
+                      </p>
                     </div>
-                    {/* PRICE */}
-                    <p className="text-center w-1/5 font-semibold text-sm flex justify-center gap-1">
-                      <span className="sm:hidden">Price: </span>{" "}
-                      {`$${val.price}`}
-                    </p>
-                    {/* TOTAL */}
-                    <p className="text-center w-1/5 font-semibold text-sm flex justify-center gap-1">
-                      <span className="sm:hidden">Total: </span>{" "}
-                      {`$${val.price * val.quantity}`}
-                    </p>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
             {/* NAVIGATE */}
             <Link
@@ -402,20 +430,22 @@ export default function Cart() {
                 cart && cart.cartItems.length == 1 ? "Item" : "Items"
               }  ${cart && cart.cartItems.length}`}</span>
               <span className="font-semibold text-sm">{`${
-                cart && cart.total
+                cart && formatTwoDecimalNumber(cart.total)
               }$`}</span>
             </div>
             <div className="flex justify-between mt-10 mb-5">
               <span className="font-semibold text-sm uppercase">SHIPPING</span>
               <span className="font-semibold text-sm">{`${
-                cart && (cart.total / 100) * 10
+                cart && formatTwoDecimalNumber((cart.total / 100) * 10)
               }$`}</span>
             </div>
 
             <div className="border-t mt-8">
               <div className="flex font-semibold justify-between py-6 text-sm uppercase">
                 <span>Total cost</span>
-                <span>{`$${cart && (cart.total * 110) / 100}`}</span>
+                <span>{`$${
+                  cart && formatTwoDecimalNumber((cart.total * 110) / 100)
+                }`}</span>
               </div>
               <button
                 className="bg-indigo-500 font-semibold hover:bg-indigo-600 py-3 text-sm text-white uppercase w-full"

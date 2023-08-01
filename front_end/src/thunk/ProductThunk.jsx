@@ -1,12 +1,26 @@
 import {
+  GET_TOP_PRODUCT_BY_ID,
   PATCH_UPDATE_PRODUCT,
   PATCH_UPDATE_PRODUCT_OPTION,
   POST_ADD_PRODUCT,
   POST_SAVE_FAVORITES,
 } from "../api/service/ProductService";
-import { setShop } from "../redux/reducers/ShopSlice";
 import { get_shop_by_user_id } from "./ShopThunk";
 import { get_user_by_id } from "./UserThunk";
+
+export const get_top_payment_product = ({ offsetNumber, limitNumber }) => {
+  return async function get_top_payment_product_thunk(dispatch, getSate) {
+    console.log({ offsetNumber, limitNumber });
+    let response = await GET_TOP_PRODUCT_BY_ID(offsetNumber, limitNumber);
+    if (response.status === 200) {
+      console.log(response);
+      return response.data.data;
+    } else {
+      console.log(response);
+      return false;
+    }
+  };
+};
 
 export const post_create_new_product = (form) => {
   return async function post_create_new_product(dispatch, getState) {
@@ -35,9 +49,10 @@ export const post_create_new_product = (form) => {
     let response = await POST_ADD_PRODUCT(createProductForm);
     console.log(response);
     if (response.status === 200) {
-      dispatch(get_shop_by_user_id()).then((res) => {
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
         return true;
-      });
+      }
     } else {
       console.log(response);
       return false;
@@ -50,8 +65,10 @@ export const patch_update_product_option = (payload) => {
     const { shop } = getState();
     let response = await PATCH_UPDATE_PRODUCT_OPTION(payload);
     if (response.status === 200) {
-      dispatch(setShop({ ...shop, products: response.data.data }));
-      return true;
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
+        return true;
+      }
     } else {
       console.log(response);
       return false;
@@ -64,8 +81,10 @@ export const patch_update_product = (payload) => {
     const { shop } = getState();
     let response = await PATCH_UPDATE_PRODUCT(payload);
     if (response.status === 200) {
-      dispatch(setShop({ ...shop, products: response.data.data }));
-      return true;
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
+        return true;
+      }
     } else {
       console.log(response);
       return false;
@@ -81,7 +100,7 @@ export const post_save_favorites = (productId) => {
     if (response.status === 200) {
       let res = await dispatch(get_user_by_id());
       if (res) {
-        return true;
+        return response.data.data;
       }
     } else {
       console.log(response);

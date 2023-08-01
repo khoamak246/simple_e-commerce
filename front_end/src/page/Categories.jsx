@@ -16,7 +16,7 @@ import { NUMBER_FORMAT_REGEX, validationRegex } from "../utils/Validatation";
 import { toast } from "react-hot-toast";
 import { resetToggle, setToggle } from "../redux/reducers/ToggleSlice";
 import ProductCard from "../components/card/ProductCard";
-import { getMinPrice } from "../utils/Utils";
+import { getMinPrice, sortByIdASC } from "../utils/Utils";
 
 export default function Categories() {
   const dispatch = useDispatch();
@@ -63,6 +63,20 @@ export default function Categories() {
       }
     });
   }, [param]);
+
+  useEffect(() => {
+    if (location.search !== "") {
+      const pattern =
+        /^((buss|minPrice|maxPrice|ra|address)=[0-9]+|keyword=[a-zA-Z]+)$/;
+      let locationSearchArr = location.search.slice(1).split("&");
+      locationSearchArr.map((e) => {
+        if (!pattern.test(e)) {
+          return navigate("*");
+        }
+      });
+      locationSearchArr.map((e) => handleOnSelectValue(`&${e}`));
+    }
+  }, []);
 
   const handleRenderBusinessObject = useMemo(() => {
     let businessObject = { title: "Categories", option: [] };
@@ -153,8 +167,12 @@ export default function Categories() {
       }
     });
     if (index >= 0) {
-      newSearchArr.splice(index, 1);
-      newSearchArr = [...newSearchArr, value];
+      if (newSearchArr[index] === value) {
+        newSearchArr.splice(index, 1);
+      } else {
+        newSearchArr.splice(index, 1);
+        newSearchArr = [...newSearchArr, value];
+      }
       setSearchValue(newSearchArr);
     } else {
       setSearchValue([...searchValue, value]);
@@ -170,6 +188,7 @@ export default function Categories() {
     ) {
       return toast.error("OOP! Your price not correct!");
     }
+
     let newUrl = `${location.pathname}`;
     let searchUrl = "";
     searchValue.map((e) => (searchUrl = searchUrl + e));
@@ -182,8 +201,8 @@ export default function Categories() {
     }
     if (searchUrl !== "") {
       newUrl = newUrl + "?" + searchUrl.slice(1);
-      navigate(newUrl);
     }
+    navigate(newUrl);
   };
 
   useEffect(() => {
@@ -210,15 +229,7 @@ export default function Categories() {
     let rate = queryParameters.get("ra") && Number(queryParameters.get("ra"));
     let provinceCityId =
       queryParameters.get("add") && Number(queryParameters.get("add"));
-    console.log({
-      searchName,
-      businessId,
-      subBusinessId,
-      minPrice,
-      maxPrice,
-      rate,
-      provinceCityId,
-    });
+
     dispatch(
       get_categories_product({
         searchName,
@@ -240,7 +251,7 @@ export default function Categories() {
   }, [queryParameters]);
 
   const handleRenderProduct = useMemo(() => {
-    let renderProductArr = [...queryProduct];
+    let renderProductArr = [...sortByIdASC(queryProduct)];
     if (filterNav.type == "bestSeller") {
       renderProductArr.sort((a, b) => {
         if (a.saleNumber > b.saleNumber) {
@@ -264,21 +275,36 @@ export default function Categories() {
         }
       });
     }
+
+    if (filterNav.sort === "p-desc") {
+      renderProductArr.sort((a, b) => {
+        if (getMinPrice(a) > getMinPrice(b)) {
+          return -1;
+        } else if (getMinPrice(a) < getMinPrice(b)) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+    }
     let result = renderProductArr.filter(
       (e) =>
         (filterNav.page - 1) * 30 <= renderProductArr.indexOf(e) &&
         renderProductArr.indexOf(e) < (filterNav.page - 1) * 30 + 30
     );
     return result;
-  }, [queryProduct]);
+  }, [queryProduct, filterNav]);
 
   const handleTotalPage = () => {
     let displayProductLength = handleRenderProduct.length;
     let totalPage = 1;
-    if (displayProductLength !== 0 && displayProductLength % 30 !== 0) {
-      totalPage = totalPage - (totalPage % 30) + 1;
+
+    if (displayProductLength % 25 !== 0) {
+      totalPage =
+        totalPage + ((displayProductLength - (displayProductLength % 25)) % 25);
     }
-    return displayProductLength;
+
+    return totalPage;
   };
 
   return (
@@ -431,7 +457,7 @@ export default function Categories() {
             </button>
             <button
               className={` ${
-                filterNav.page === handleRenderProduct.length
+                filterNav.page === handleTotalPage()
                   ? " bg-slate-50 text-slate-400"
                   : "text-black bg-white"
               } rounded-r flex items-center justify-center`}
@@ -441,7 +467,7 @@ export default function Categories() {
                   page: filterNav.page + 1,
                 })
               }
-              disabled={filterNav.page === handleRenderProduct.length}
+              disabled={filterNav.page === handleTotalPage()}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -470,7 +496,7 @@ export default function Categories() {
             />
           </div>
         ) : (
-          <div className="h-[92%] w-full grid p-2 grid-cols-5">
+          <div className="h-[92%] w-full p-2 grid grid-cols-5 grid-rows-3 gap-2 gap-y-5">
             {handleRenderProduct.map((val, index) => {
               return <ProductCard key={val.id} product={val} />;
             })}

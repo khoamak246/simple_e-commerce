@@ -93,6 +93,24 @@ classes = @ConstructorResult(
         )
 )
 
+@NamedStoredProcedureQuery(name = "find_top_payment_product",
+        procedureName = "find_top_payment_product", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "offsetNumber", type = Integer.class),
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "limitNumber", type = Integer.class),
+},
+        resultSetMappings = "product_find_top_payment_product"
+)
+@SqlResultSetMapping(name = "product_find_top_payment_product",
+        classes = @ConstructorResult(
+                targetClass = ProductResponse.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "data", type = Double.class)
+                }
+        )
+)
+
 public class Product {
 
     @Id

@@ -11,6 +11,7 @@ import {
   handleAnimateToggle,
 } from "../../utils/Utils";
 import { post_save_favorites } from "../../thunk/ProductThunk";
+import { Link } from "react-router-dom";
 
 export default function FavoriteModal() {
   const dispatch = useDispatch();
@@ -65,7 +66,10 @@ export default function FavoriteModal() {
                 key={val.id}
                 className="w-full h-[10vh] flex cursor-pointer border-solid border-slate-400 border-[1px] rounded-md overflow-hidden group"
               >
-                <div className="w-full group-hover:w-[95%] flex duration-200 transition-all">
+                <Link
+                  to={`/product/detail/${val.id}`}
+                  className="w-full group-hover:w-[95%] flex duration-200 transition-all"
+                >
                   <div className="w-[20%]">
                     <img
                       src={handleFindFirstImgAssetInProduct(val)}
@@ -98,7 +102,7 @@ export default function FavoriteModal() {
                       {getMinPrice(val)}$
                     </div>
                   </div>
-                </div>
+                </Link>
                 {/* DISLIKE  */}
                 <div
                   className="w-0 group-hover:w-[5%] bg-slate-300 flex items-center duration-200 transition-all"

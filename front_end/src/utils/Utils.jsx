@@ -91,6 +91,27 @@ export const getMaxPrice = (product) => {
   }
 };
 
+export const getAvatar = (product) => {
+  if (product) {
+    const { assets } = product;
+    let assetList = sortByIdASC(assets);
+    let assetAvatar = assetList.find((e) => e.assetType === "image");
+    return assetAvatar.url;
+  } else {
+    return "";
+  }
+};
+
+export const sortAssetsProduct = (assets) => {
+  if (assets && Array.isArray(assets)) {
+    let imgArr = assets.filter((e) => e.assetType === "image");
+    let video = assets.filter((e) => e.assetType === "video");
+    return [...video, ...sortByIdASC(imgArr)];
+  }
+
+  return [];
+};
+
 export const renderAddress = (address) => {
   let result = "";
   if (address) {
@@ -201,4 +222,33 @@ export const handleFindSellerInUserRoom = (userRoom, type) => {
 export const handleFindUserInUserRoomById = (userRoom, userId) => {
   let tempUserRoom = userRoom.room.userRoom;
   return tempUserRoom.find((e) => e.userInfo.user.id === userId);
+};
+
+export const sortByIdASC = (arr) => {
+  if (arr && Array.isArray(arr)) {
+    let newArr = [...arr];
+    newArr.sort((a, b) => {
+      if (a.id > b.id) {
+        return 1;
+      } else if (a.id < b.id) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+    return newArr;
+  }
+  return [];
+};
+
+export const getParentBusiness = (bus) => {
+  let business = { ...bus };
+  while (business.business.length !== 0) {
+    business = business.business[0];
+  }
+  return business;
+};
+
+export const formatTwoDecimalNumber = (number) => {
+  return Math.round(number * 100) / 100;
 };

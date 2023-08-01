@@ -44,10 +44,8 @@ export const handle_log_out = () => {
     cookies.remove("password", { path: "/" });
     dispatch(resetAuth());
     dispatch(resetUser());
-    dispatch(resetAddress());
     dispatch(resetToggle());
     dispatch(resetShop());
-    dispatch(resetBusiness());
     dispatch(resetRoom());
 
     return true;

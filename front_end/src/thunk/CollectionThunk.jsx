@@ -17,7 +17,7 @@ export const post_save_new_collection = (name) => {
     if (response.status == 200) {
       let res = await dispatch(get_shop_by_user_id());
       if (res) {
-        return true;
+        return response.data.data;
       }
     } else {
       console.log(response);

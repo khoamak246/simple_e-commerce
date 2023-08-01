@@ -17,6 +17,7 @@ public interface IProductService extends IGenericService<Product> {
     Optional<ProductResponse> findProductHaveMaxCancelOrderPercent(@Param("shopId") Long shopId);
     Optional<ProductResponse> findProductHaveMaxReturnOrderPercent(Long shopId);
     Set<ProductResponse> findTopFiveProductHaveMaxRevenue(@Param("shopId") Long shopId);
+    Set<ProductResponse> findTopPaymentProduct(int offsetNumber, int limitNumber);
     Set<Product> findTop10ByShopIdOrderByVisitNumberDesc(Long shopId);
     int countByShopId(Long shopId);
 

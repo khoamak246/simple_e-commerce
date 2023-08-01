@@ -30,7 +30,10 @@ export default function OrderItemModal({ orderItem, closeModal }) {
           ];
 
         case "DONE_PREPARE":
-          return [{ status: "DELIVERY", message: "Delivered to shipper" }];
+          return [
+            { status: "DONE_PREPARE", message: "Done preparing" },
+            { status: "DELIVERY", message: "Delivered to shipper" },
+          ];
         default:
           return status;
       }
@@ -42,7 +45,6 @@ export default function OrderItemModal({ orderItem, closeModal }) {
 
   const handleOnSubmit = () => {
     if (orderItem.staus !== changeStatus) {
-      console.log(changeStatus);
       dispatch(
         patch_update_order_item_status({
           orderItemId: orderItem.id,

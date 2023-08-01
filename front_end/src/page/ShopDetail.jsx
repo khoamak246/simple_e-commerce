@@ -3,12 +3,21 @@ import ProductCard from "../components/card/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { get_shop_by_id, post_save_new_follower } from "../thunk/ShopThunk";
-import { getMinPrice } from "../utils/Utils";
-import { USER_STATE_SELECTOR } from "../redux/selectors/Selectors";
+import {
+  getMinPrice,
+  isExistRoomWithShopId,
+  sortByIdASC,
+} from "../utils/Utils";
+import {
+  ROOM_ROOM_LIST_STATE_SELECTOR,
+  USER_STATE_SELECTOR,
+} from "../redux/selectors/Selectors";
 import { toast } from "react-hot-toast";
 
 export default function ShopDetail() {
+  const dispatch = useDispatch();
   const userSelector = useSelector(USER_STATE_SELECTOR);
+  const roomListSelector = useSelector(ROOM_ROOM_LIST_STATE_SELECTOR);
   const dispath = useDispatch();
   const navigate = useNavigate();
   const param = useParams();
@@ -104,7 +113,7 @@ export default function ShopDetail() {
       data: shop ? shop.createdDate : 0,
     },
   ];
-  console.log(shop);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -174,6 +183,18 @@ export default function ShopDetail() {
         });
       }
 
+      if (filterNav.sort === "p-desc") {
+        renderProductArr.sort((a, b) => {
+          if (getMinPrice(a) > getMinPrice(b)) {
+            return -1;
+          } else if (getMinPrice(a) < getMinPrice(b)) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+      }
+
       let result = renderProductArr.filter(
         (e) =>
           (filterNav.page - 1) * 20 <= renderProductArr.indexOf(e) &&
@@ -185,6 +206,7 @@ export default function ShopDetail() {
       return [];
     }
   };
+
   const handleTotalPage = () => {
     if (displayProduct.length <= 20) {
       return 1;
@@ -193,6 +215,20 @@ export default function ShopDetail() {
         return displayProduct.length / 20;
       } else {
         return (displayProduct.length - (displayProduct.length % 20)) / 20 + 1;
+      }
+    }
+  };
+
+  const handleOnToggleChat = () => {
+    if (roomListSelector && shop) {
+      if (isExistRoomWithShopId(roomListSelector, shop.id)) {
+        dispatch(setToggle("chat"));
+      } else {
+        dispatch(post_create_room(shop.id)).then((res) => {
+          if (res) {
+            dispatch(setToggle("chat"));
+          }
+        });
       }
     }
   };
@@ -264,7 +300,10 @@ export default function ShopDetail() {
                           : "Follow"}
                       </p>
                     </button>
-                    <button className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2">
+                    <button
+                      className="w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2"
+                      onClick={handleOnToggleChat}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -342,7 +381,9 @@ export default function ShopDetail() {
                     } w-[10vw] cursor-pointer`}
                     onClick={() => handleSeclectTab(val)}
                   >
-                    <p className="text-center">{val.name}</p>
+                    <p className="text-center text-ellipsis overflow-hidden whitespace-nowrap">
+                      {val.name}
+                    </p>
                   </div>
                 );
               })}
@@ -390,9 +431,9 @@ export default function ShopDetail() {
 
       {/* INTRODUCE */}
       <div className="w-full overflow-hidden flex justify-center items-center cursor-pointer mt-5 ">
-        <div className="w-[95%] bg-white flex flex-col md:flex-row rounded-lg">
-          <div className="w-full md:w-[50%]">
-            <img src={shop ? shop.coverImg : ""} />
+        <div className="w-[95%] bg-white flex flex-col md:flex-row rounded-lg overflow-hidden">
+          <div className="w-full md:w-[50%] flex justify-center items-center">
+            <img src={shop ? shop.coverImg : ""} className="w-full" />
           </div>
           <div className="w-full md:w-[50%] flex flex-col justify-center items-center gap-2 ">
             <h1 className="text-[2.4rem] italic text-[#F3A847] font-serif">
@@ -414,24 +455,26 @@ export default function ShopDetail() {
           >
             {/* Carousel wrapper */}
             <div className="relative h-full overflow-hidden rounded-lg md:h-96">
-              {[...shop.introduce.map((e) => e.url)].map((val, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`${
-                      currentSlide === index ? "w-full h-full" : "w-0"
-                    } duration-700 ease-in-out overflow-hidden`}
-                    data-carousel-item="active"
-                  >
-                    <img
-                      src={val}
-                      className="absolute block w-full h-full"
-                      alt="..."
-                      draggable={false}
-                    />
-                  </div>
-                );
-              })}
+              {[...sortByIdASC(shop.introduce).map((e) => e.url)].map(
+                (val, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className={`${
+                        currentSlide === index ? "w-full h-full" : "w-0"
+                      } duration-700 ease-in-out overflow-hidden`}
+                      data-carousel-item="active"
+                    >
+                      <img
+                        src={val}
+                        className="absolute block w-full h-full"
+                        alt="..."
+                        draggable={false}
+                      />
+                    </div>
+                  );
+                }
+              )}
             </div>
 
             {/* Slider controls */}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { handleAnimateToggle } from "../../utils/Utils";
+import { handleAnimateToggle, handleDisableOVerflowY } from "../../utils/Utils";
 import { useDispatch } from "react-redux";
 import { get_relative_busines_by_name } from "../../thunk/BusinessThunk";
 import { Link } from "react-router-dom";
@@ -11,9 +11,10 @@ export default function SearchModal({ searchValue }) {
   const dispatch = useDispatch();
   useEffect(() => {
     if (searchValue !== "") {
-      setIsActive(true);
+      handleAnimateToggle(setIsActive);
     } else if (searchValue === "") {
       setIsActive(false);
+      handleDisableOVerflowY(false);
     }
   }, [searchValue]);
 
@@ -37,8 +38,10 @@ export default function SearchModal({ searchValue }) {
   return (
     <div
       className={`${
-        isActive ? "max-h-[50vh]" : "h-0"
-      } w-[50%] fixed top-[8vh] left-[20%] bg-white rounded overflow-auto border-slate-200 border-solid border-[1px] shadow-lg flex flex-col justify-center items-center duration-200 transition-all z-[50]`}
+        isActive
+          ? "max-h-[50vh] border-slate-200 border-solid border-[1px] shadow-lg"
+          : "h-0"
+      } w-[50%] fixed top-[8vh] left-[20%] bg-white rounded overflow-auto flex flex-col justify-center items-center duration-200 transition-all z-[50]`}
     >
       {!isWaiting &&
         data &&

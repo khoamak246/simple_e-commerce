@@ -1,6 +1,20 @@
 import { instance } from "../Axios";
 import Cookie from "universal-cookie";
 
+export const GET_FIND_PRODUCT_BY_ID = async (productId) => {
+  let response = instance(new Cookie().get("token")).get(
+    `/api/v1/product/${productId}`
+  );
+  return response;
+};
+
+export const GET_TOP_PRODUCT_BY_ID = async (offsetNumber, limitNumber) => {
+  let response = instance().get(
+    `/api/v1/product/top-payment?offsetNumber=${offsetNumber}&limitNumber=${limitNumber}`
+  );
+  return response;
+};
+
 export const POST_ADD_PRODUCT = async (createProductForm) => {
   let response = await instance(new Cookie().get("token")).post(
     "/api/v1/product",
@@ -27,13 +41,6 @@ export const PATCH_UPDATE_PRODUCT = async ({
   let response = instance(new Cookie().get("token")).patch(
     `/api/v1/product/${productId}`,
     updateProductForm
-  );
-  return response;
-};
-
-export const GET_FIND_PRODUCT_BY_ID = async (productId) => {
-  let response = instance(new Cookie().get("token")).get(
-    `/api/v1/product/${productId}`
   );
   return response;
 };

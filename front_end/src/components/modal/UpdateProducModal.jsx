@@ -98,7 +98,7 @@ export default function UpdateProducModal({
         </div>
 
         <div className="w-full flex flex-col justify-center items-center gap-1">
-          <h2 className="font-semibold w-[60%]">Stock:</h2>
+          <h2 className="font-semibold w-[60%]">On sale:</h2>
           <select
             name="onSale"
             className="w-[60%] borde-solid border-[1px] border-slate-500 rounded-sm px-2 py-1"
@@ -114,7 +114,7 @@ export default function UpdateProducModal({
         </div>
 
         <div className="w-full flex flex-col justify-center items-center gap-1">
-          <h2 className="font-semibold w-[60%]">Stock:</h2>
+          <h2 className="font-semibold w-[60%]">Description:</h2>
           <textarea
             name="description"
             cols="30"

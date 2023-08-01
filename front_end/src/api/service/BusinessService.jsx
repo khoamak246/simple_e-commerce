@@ -10,7 +10,6 @@ export const GET_CATEGORIES_PRODUCT = async (categoriesSearchForm) => {
 };
 
 export const GET_FIND_RELATIVE_BUSINESS_BY_NAME = async (keyword) => {
-  console.log(keyword);
   let response = await instance().get(
     `/api/v1/business/search?keyword=${keyword}`
   );

@@ -83,7 +83,9 @@ export default function Profile() {
                 className="w-full h-full"
               />
             </div>
-            <div className="text-white text-xl font-semibold">Anh Khoa</div>
+            <div className="text-white text-xl font-semibold">
+              {userSelector && userSelector.fullName}
+            </div>
             <button
               className={`${
                 !prewviewAvatar && "hidden"

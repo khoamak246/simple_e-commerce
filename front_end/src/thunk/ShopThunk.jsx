@@ -49,7 +49,10 @@ export const post_save_new_shop = (createInfoForm) => {
 
     let response = await POST_SAVE_NEW_SHOP(createShopForm);
     if (response.status === 200) {
-      return true;
+      let res = await dispatch(get_shop_by_user_id());
+      if (res) {
+        return true;
+      }
     } else {
       console.log(response);
       return false;

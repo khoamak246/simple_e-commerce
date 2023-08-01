@@ -91,10 +91,18 @@ public class ShopServiceIMPL implements IShopService {
         }
 
         double rate = 0;
+        int countHaveRateProduct = 0;
         int reviewNumber = 0;
         for (Product product : shop.getProducts()) {
+            if (product.getRate() != 0){
+                countHaveRateProduct = countHaveRateProduct + 1;
+            }
             rate = rate + product.getRate();
             reviewNumber = reviewNumber + product.getReviewNumber();
+        }
+
+        if (countHaveRateProduct == 0) {
+            countHaveRateProduct = 1;
         }
 
 
@@ -114,7 +122,7 @@ public class ShopServiceIMPL implements IShopService {
                 .district(shop.getDistrict())
                 .ward(shop.getWard())
                 .visitNumber(shop.getVisitNumber())
-                .rate(rate / shop.getProducts().size())
+                .rate(rate / countHaveRateProduct)
                 .reviewNumber(reviewNumber)
                 .orderItems(orderItems)
                 .cancelOrderItems(cancelOrderItems)
@@ -133,12 +141,14 @@ public class ShopServiceIMPL implements IShopService {
 
     @Override
     public int countNumberFollowerShop(Long shopId) {
-        return shopRepository.countNumberFollowerShop(shopId);
+        Integer count = shopRepository.countNumberFollowerShop(shopId);
+        return count == null ? 0: count;
     }
 
     @Override
     public double sumRevenueShop(Long shopId) {
-        return shopRepository.sumRevenueShop(shopId);
+        Double sum = shopRepository.sumRevenueShop(shopId);
+        return sum == null ? 0 : sum;
     }
 
     @Override

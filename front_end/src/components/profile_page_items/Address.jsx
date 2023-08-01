@@ -52,7 +52,10 @@ export default function Address() {
             </div>
           );
         })}
-      <button className="button-theme w-[28%] flex gap-1 justify-center items-center py-2">
+      <button
+        className="button-theme w-[28%] flex gap-1 justify-center items-center py-2"
+        onClick={() => setToggleCreateAndEditModal(true)}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -69,7 +72,7 @@ export default function Address() {
         </svg>
         New address
       </button>
-      {selectEditAddress && (
+      {(selectEditAddress || isToggleCreateAndEditAddressModal) && (
         <AddAndEditUserAddressModal
           editItem={selectEditAddress}
           closeModal={() => {
