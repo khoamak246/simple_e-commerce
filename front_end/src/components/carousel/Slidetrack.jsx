@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { getAvatar, getMinPrice } from "../../utils/Utils";
+import { Link } from "react-router-dom";
 
 export default function Slidetrack({ data }) {
   const [trackNumber, setTrackNumber] = useState(0);
@@ -36,7 +37,8 @@ export default function Slidetrack({ data }) {
         <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
           {handleRenderProduct.map((val, index) => {
             return (
-              <div
+              <Link
+                to={`/product/detail/${val.id}`}
                 className="w-full flex justify-center items-center"
                 key={val.id}
               >
@@ -78,7 +80,7 @@ export default function Slidetrack({ data }) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
