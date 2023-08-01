@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function PreviewImg({ previewArr }) {
   const [selectPreviewIndex, setPreviewIndex] = useState(0);
@@ -7,7 +7,7 @@ export default function PreviewImg({ previewArr }) {
       {/* PREVIEW */}
       <div className="w-full h-[90%]">
         <div className="h-[90%] w-full flex justify-center items-center">
-          {previewArr.map((val, index) => {
+          {previewArr?.map((val, index) => {
             return (
               <div
                 key={index}
@@ -15,7 +15,7 @@ export default function PreviewImg({ previewArr }) {
                   selectPreviewIndex === index ? "w-full" : "w-0"
                 } h-[95%] bg-black bg-opacity-70 flex items-center justify-center overflow-hidden duration-500 transition-all`}
               >
-                {val.assetType === "img" ? (
+                {val.assetType === "image" ? (
                   <img src={val.url} alt="" className="w-full" />
                 ) : (
                   <video
@@ -50,7 +50,7 @@ export default function PreviewImg({ previewArr }) {
                     strokeWidth={1.5}
                     stroke="currentColor"
                     className={`w-6 h-6 text-white ${
-                      val.assetType === "img" && "hidden"
+                      val.assetType === "image" && "hidden"
                     }`}
                   >
                     <path
@@ -65,7 +65,7 @@ export default function PreviewImg({ previewArr }) {
                     />
                   </svg>
                 </div>
-                {val.assetType === "img" ? (
+                {val.assetType === "image" ? (
                   <img src={val.url} alt="" className="h-full" />
                 ) : (
                   <video src={val.url} className="h-full z-0"></video>

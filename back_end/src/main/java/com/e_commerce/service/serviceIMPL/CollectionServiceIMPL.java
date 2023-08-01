@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +36,14 @@ public class CollectionServiceIMPL implements ICollectionService {
         collectionRepository.deleteById(id);
     }
 
+
     @Override
-    public boolean existsByName(String name) {
-        return collectionRepository.existsByName(name.trim());
+    public boolean existsByNameIgnoreCaseAndShopId(String name, Long shopId) {
+        return collectionRepository.existsByNameIgnoreCaseAndShopId(name.trim(), shopId);
+    }
+
+    @Override
+    public Set<Collection> findByShopId(Long shopId) {
+        return collectionRepository.findByShopId(shopId);
     }
 }

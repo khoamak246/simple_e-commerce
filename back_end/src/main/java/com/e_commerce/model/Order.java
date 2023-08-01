@@ -24,16 +24,10 @@ public class Order {
     @Column(columnDefinition = "date")
     private String createdDate;
 
-    private String status;
-
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_info_id")
     @JsonIgnoreProperties({"order"})
     private UserInfo userInfo;
-
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "payment_way_id")
-    private PaymentWay paymentWay;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonIgnoreProperties({"order"})

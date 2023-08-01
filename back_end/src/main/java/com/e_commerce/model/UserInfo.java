@@ -1,10 +1,12 @@
 package com.e_commerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -53,6 +55,18 @@ public class UserInfo {
     @OneToMany(mappedBy = "userInfo")
     @JsonIgnoreProperties({"userInfo"})
     private Set<Order> order;
+
+    @ManyToMany(mappedBy = "favorites")
+    @JsonIgnoreProperties({"favorites", "shop", "business", "reviews"})
+    private Set<Product> favoritesProduct;
+
+    @OneToMany(mappedBy = "userInfo")
+    @JsonIgnore
+    private List<UserRoom> userRoom;
+
+    @OneToMany(mappedBy = "userInfo")
+    @JsonIgnore
+    List<Chat> chat;
 
 
 }

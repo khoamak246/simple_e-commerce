@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function StarRated({ scale }) {
+export default function StarRated({ scale, fillStar }) {
   return (
     <div className="flex">
       {[1, 1, 1, 1, 1].map((val, index) => {
@@ -12,7 +12,9 @@ export default function StarRated({ scale }) {
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            className={`w-${3 * scale} h-${3 * scale}`}
+            className={`w-${3 * scale} h-${3 * scale} ${
+              fillStar && index <= fillStar && "fill-red-500 text-red-500"
+            }`}
           >
             <path
               strokeLinecap="round"

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +34,15 @@ public class OrderItemsServiceIMPL implements IOrderItemsService {
     @Override
     public void deleteById(Long id) {
         orderItemsRepository.deleteById(id);
+    }
+
+    @Override
+    public Set<OrderItems> findByShopId(Long shopId) {
+        return orderItemsRepository.findByShopId(shopId);
+    }
+
+    @Override
+    public Set<OrderItems> findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(Long shopId, String status) {
+        return orderItemsRepository.findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(shopId, status);
     }
 }

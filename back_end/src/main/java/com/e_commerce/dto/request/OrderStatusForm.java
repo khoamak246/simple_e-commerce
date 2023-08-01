@@ -13,4 +13,6 @@ public class OrderStatusForm {
     @Size(min = 1, max = 120)
     private String status;
 
+    private String notReceivingReason;
+
 }

@@ -10,6 +10,8 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,9 +29,6 @@ public class CreateOrderForm {
     private Long userId;
 
     @NotNull
-    private Long paymentWayId;
-
-    @NotNull
     private Long provinceCityId;
 
     @NotNull
@@ -40,5 +39,8 @@ public class CreateOrderForm {
 
     @NotNull
     private String streetDetail;
+
+    @Size(min = 1)
+    private Set<CreateOrderItemForm> orderItems;
 
 }

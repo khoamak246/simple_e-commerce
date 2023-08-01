@@ -1,15 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SellerDashboardItems,
   matcherUrlComponent,
 } from "../../assets/js/SellerDashboardNavBarItem";
 import { Link, useLocation } from "react-router-dom";
-import DshTodolist from "./DashboardItems/DshTodolist";
-import DshAddproduct from "./DashboardItems/DshAddproduct";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { resetSelectBusiness } from "../../redux/reducers/BusinessSlice";
-import DshShopProfile from "./DashboardItems/DshShopProfile";
-import DshPaymentSetting from "./DashboardItems/DshPaymentSetting";
 
 export default function SellerDashboard() {
   const location = useLocation();
@@ -26,6 +22,7 @@ export default function SellerDashboard() {
       }
     });
   };
+
   return (
     <div className="w-screen h-screen flex mt-2">
       <div className="w-1/5 bg-white border-r-[1px] border-solid border-slate-300 shadow-xl flex flex-col gap-5 p-3">
@@ -38,21 +35,23 @@ export default function SellerDashboard() {
               </div>
               <div className="w-5/6 h-full flex flex-col justify-center gap-1 cursor-pointer">
                 {val.subTab.map((subTab, index) => {
-                  return (
-                    <Link
-                      to={`/seller/dashboard/${val.url}/${subTab.url}`}
-                      className={`text-sm hover:font-semibold ${
-                        location.pathname ===
-                        "/seller/dashboard/" + val.url + "/" + subTab.url
-                          ? "font-semibold"
-                          : ""
-                      }`}
-                      onClick={() => dispatch(resetSelectBusiness())}
-                      key={index}
-                    >
-                      {subTab.name}
-                    </Link>
-                  );
+                  if (subTab.name !== "") {
+                    return (
+                      <Link
+                        to={`/seller/dashboard/${val.url}/${subTab.url}`}
+                        className={`text-sm hover:font-semibold ${
+                          location.pathname ===
+                          "/seller/dashboard/" + val.url + "/" + subTab.url
+                            ? "font-semibold"
+                            : ""
+                        }`}
+                        onClick={() => dispatch(resetSelectBusiness())}
+                        key={index}
+                      >
+                        {subTab.name}
+                      </Link>
+                    );
+                  }
                 })}
               </div>
             </div>

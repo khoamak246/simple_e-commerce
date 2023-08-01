@@ -19,8 +19,6 @@ public class CreateCollectionForm {
     @Size(min = 1, max = 120)
     private String name;
 
-    private Set<Long> products;
-
     @NotNull
     private Long shopId;
 }

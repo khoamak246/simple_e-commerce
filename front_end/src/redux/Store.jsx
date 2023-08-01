@@ -5,6 +5,7 @@ import ToggleSlice from "./reducers/ToggleSlice";
 import AddressSlice from "./reducers/AddressSlice";
 import ShopSlice from "./reducers/ShopSlice";
 import BusinessSlice from "./reducers/BusinessSlice";
+import RoomSlice from "./reducers/RoomSlice";
 
 const Store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const Store = configureStore({
     address: AddressSlice,
     shop: ShopSlice,
     business: BusinessSlice,
+    room: RoomSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

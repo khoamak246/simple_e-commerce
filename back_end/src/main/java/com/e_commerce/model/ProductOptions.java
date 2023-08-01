@@ -1,6 +1,7 @@
 package com.e_commerce.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
@@ -28,7 +29,7 @@ public class ProductOptions {
     private Product product;
 
     @OneToOne(mappedBy = "productOptions")
-    @JsonIgnoreProperties({"productOptions"})
+    @JsonIgnore
     private CartItems cartItem;
 
 }

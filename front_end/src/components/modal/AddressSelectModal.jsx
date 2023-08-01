@@ -7,6 +7,10 @@ import {
 import { toast } from "react-hot-toast";
 import { resetToggle, setToggle } from "../../redux/reducers/ToggleSlice";
 import { setNewAddressState } from "../../redux/reducers/AddressSlice";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+} from "../../utils/Utils";
 
 export default function AddressSelectModal() {
   const [isActive, setIsActive] = useState(false);
@@ -87,14 +91,12 @@ export default function AddressSelectModal() {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
+    handleAnimateToggle(setIsActive);
   }, []);
 
-  useEffect(() => {
-    console.log(selectAddress);
-  }, [selectAddress]);
+  const closeModal = () => {
+    dispatch(setToggle(null));
+  };
 
   return (
     <div
@@ -106,10 +108,7 @@ export default function AddressSelectModal() {
         <div
           className="absolute top-[-2.5%] right-[-2%] cursor-pointer"
           onClick={() => {
-            setIsActive(false);
-            setTimeout(() => {
-              dispatch(setToggle(null));
-            }, 400);
+            handleCloseAnimateToggle(setIsActive, closeModal);
           }}
         >
           <svg
@@ -128,13 +127,7 @@ export default function AddressSelectModal() {
         </div>
         <div className="w-[80%] h-[85%] bg-white flex flex-col items-center">
           <h1 className="text-2xl">Address</h1>
-          <div className="w-full py-5 flex justify-center items-center flex-col border-y-[1px] border-solid border-y-slate-300">
-            <h2>Please choose your address</h2>
-            <button className="bg-[#FDE05D] py-1 px-4 rounded-md">
-              Log in to choose address
-            </button>
-          </div>
-          <div className="w-[80%] flex flex-col gap-3 items-center">
+          <div className="w-[90%] flex flex-col gap-3 items-center">
             {/* Province City */}
             <div className="w-full">
               <label

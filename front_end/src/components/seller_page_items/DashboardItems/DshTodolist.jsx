@@ -1,27 +1,41 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { SHOP_STATE_SELECTOR } from "../../../redux/selectors/Selectors";
 
 export default function DshTodolist() {
+  const shopSelector = useSelector(SHOP_STATE_SELECTOR);
   const handleRenderOrderTodoList = () => {
-    const orderTodo = [
-      {
-        number: 0,
-        title: "Waitting confirmation",
-      },
-      {
-        number: 0,
-        title: "Goods watting",
-      },
-      {
-        number: 0,
-        title: "Done processing",
-      },
-    ];
-
+    let orderTodo = [];
+    if (shopSelector) {
+      const {
+        waitingConfirmations,
+        goodsWaitingConfirmations,
+        doneProcessingOrderItems,
+      } = shopSelector;
+      orderTodo = [
+        {
+          number: waitingConfirmations.length,
+          title: "Waiting confirmation",
+          url: "/waitingConfirm",
+        },
+        {
+          number: goodsWaitingConfirmations.length,
+          title: "Goods watting",
+          url: "/waitingShipper",
+        },
+        {
+          number: doneProcessingOrderItems.length,
+          title: "Done processing",
+          url: "/doneOrder",
+        },
+      ];
+    }
+    let baseUrl = "/seller/dashboard/orderMng";
     return orderTodo.map((val, index) => {
       return (
         <Link
-          to={"/seller/dashboard/orderMng/allOrder"}
+          to={`/seller/dashboard/orderMng${val.url}`}
           className={`${
             index !== 2 && "border-r-[1px] border-solid border-slate-400"
           } w-full flex justify-center flex-col items-center hover:bg-slate-100`}
@@ -35,16 +49,20 @@ export default function DshTodolist() {
   };
 
   const handleRenderBackOrder = () => {
-    const cancelOrder = [
-      {
-        number: 0,
-        title: "Cancellation form",
-      },
-      {
-        number: 0,
-        title: "Return/Refund form",
-      },
-    ];
+    let cancelOrder = [];
+    if (shopSelector) {
+      const { cancelOrderItems, returnOrderItems } = shopSelector;
+      cancelOrder = [
+        {
+          number: cancelOrderItems.length,
+          title: "Cancellation form",
+        },
+        {
+          number: returnOrderItems.length,
+          title: "Return/Refund form",
+        },
+      ];
+    }
 
     return cancelOrder.map((val, index) => {
       return (

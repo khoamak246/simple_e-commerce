@@ -1,5 +1,6 @@
 package com.e_commerce.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -19,13 +20,13 @@ public class Collection {
     private Long id;
     private String name;
 
-    @OneToMany(mappedBy = "collection")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnoreProperties({"shop"})
     private Set<Product> products;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "collection_shop")
-    @JsonIgnoreProperties({"collections"})
+    @JsonIgnore
     private Shop shop;
 
 }

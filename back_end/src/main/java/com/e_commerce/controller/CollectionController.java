@@ -18,6 +18,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,8 +42,11 @@ public class CollectionController {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with shop id: " + shopId));
         }
 
-        collectionService.deleteById(collectionId);
-        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Delete collection successfully!"));
+        collection.get().setProducts(new HashSet<>());
+        Collection justSavedCollection = collectionService.save(collection.get());
+        collectionService.deleteById(justSavedCollection.getId());
+        Set<Collection> shopCollection = collectionService.findByShopId(shopId);
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Delete collection successfully!", shopCollection));
     }
 
     @PatchMapping("/{collectionId}")
@@ -65,13 +69,19 @@ public class CollectionController {
             }
             collection.get().setName(name);
         }
-        Set<Product> products = productService.createSetProductFromDtoForm(updateCollectionForm.getProducts());
-        if (products != null){
-        collection.get().setProducts(products);
+
+        if (updateCollectionForm.getProducts() != null) {
+            Set<Product> products = productService.createSetProductFromDtoForm(updateCollectionForm.getProducts());
+            if (products == null){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Have not existing product!"));
+            }
+
+            collection.get().setProducts(products);
         }
 
-        Collection justSavedCollection = collectionService.save(collection.get());
-        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update collection successfully!", justSavedCollection));
+        collectionService.save(collection.get());
+        Set<Collection> shopCollection = collectionService.findByShopId(shopId);
+        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update collection successfully!", shopCollection));
     }
 
     @PostMapping("")
@@ -81,32 +91,23 @@ public class CollectionController {
             return ResponseEntity.badRequest().body(Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE));
         }
 
-        if (collectionService.existsByName(createCollectionForm.getName())){
-            return ResponseEntity.badRequest().body(Utils.buildSuccessMessage("Collection with name: " + createCollectionForm.getName() + " are already exist!"));
-        }
-
         Optional<Shop> shop = shopService.findById(createCollectionForm.getShopId());
         if (!shop.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at id: " + createCollectionForm.getShopId()));
         }
 
-
-        if (!shopService.isCurrentUserMatchShopUserid(createCollectionForm.getShopId())){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with shop id: " + createCollectionForm.getShopId()));
-        }
-
-        Set<Product> products = productService.createSetProductFromDtoForm(createCollectionForm.getProducts());
-        if (products == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Product array containing not exist productId"));
+        if (collectionService.existsByNameIgnoreCaseAndShopId(createCollectionForm.getName(), shop.get().getId())){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildSuccessMessage("Collection with name: " + createCollectionForm.getName() + " are already exist!"));
         }
 
         Collection collection = Collection.builder()
                 .name(createCollectionForm.getName())
-                .products(products)
+                .products(new HashSet<>())
                 .shop(shop.get())
                 .build();
 
-        Collection justSavedCollection = collectionService.save(collection);
-        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Create new collection successfully!", justSavedCollection));
+        collectionService.save(collection);
+        Set<Collection> shopCollection = collectionService.findByShopId(shop.get().getId());
+        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Create new collection successfully!", shopCollection));
     }
 }

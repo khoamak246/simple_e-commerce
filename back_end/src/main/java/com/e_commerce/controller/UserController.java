@@ -85,4 +85,15 @@ public class UserController {
 
     }
 
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<ResponseMessage> getUserById(@PathVariable Long userId) {
+        if (!userService.isUserIdEqualUserPrincipalId(userId)){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
+        }
+
+        Optional<User> user = userService.findById(userId);
+        return user.map(value -> ResponseEntity.ok().body(Utils.buildSuccessMessage("Query successfully!", value))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found user at id: " + userId)));
+
+    }
 }

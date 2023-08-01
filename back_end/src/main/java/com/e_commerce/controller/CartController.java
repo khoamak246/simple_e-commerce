@@ -2,10 +2,7 @@ package com.e_commerce.controller;
 
 import com.e_commerce.dto.request.CreateCartItemForm;
 import com.e_commerce.dto.response.ResponseMessage;
-import com.e_commerce.model.Cart;
-import com.e_commerce.model.CartItems;
-import com.e_commerce.model.ProductOptions;
-import com.e_commerce.model.User;
+import com.e_commerce.model.*;
 import com.e_commerce.service.ICartItemService;
 import com.e_commerce.service.ICartService;
 import com.e_commerce.service.IProductOptionsService;
@@ -72,7 +69,26 @@ public class CartController {
 
         cartItem.get().setStatus(!cartItem.get().isStatus());
         CartItems justSavedCartItem = cartItemService.save(cartItem.get());
-        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update cart item successfully!", justSavedCartItem));
+        return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Update cart item successfully!", cart));
+    }
+
+    @PatchMapping("/cartItems/{cartId}/all-status/{status}")
+    public ResponseEntity<ResponseMessage> updateStatusAllCartItem(@PathVariable Long cartId, @PathVariable boolean status) {
+        Optional<Cart> cart = cartService.findById(cartId);
+        if (!cart.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at id: " + cartId));
+        }
+
+        User user = cart.get().getUserInfo().getUser();
+        if (!userService.isUserIdEqualUserPrincipalId(user.getId())) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart"));
+        }
+
+        cart.get().getCartItems().forEach(cartItems -> cartItems.setStatus(status));
+        Set<CartItems> newSetCartItems = new HashSet<>(cart.get().getCartItems());
+        cart.get().setCartItems(newSetCartItems);
+        Cart justSavedCart = cartService.save(cart.get());
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Update cart successfully!", justSavedCart));
     }
 
     @DeleteMapping("/cartItems/{cartItemId}")
@@ -83,17 +99,17 @@ public class CartController {
         }
 
         Cart cart = cartItem.get().getCart();
-        if (!cartService.isMatchCartWithCurrentUser(cart)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart!"));
+            if (!cartService.isMatchCartWithCurrentUser(cart)){
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart!"));
         }
 
-       Set<CartItems> newSetCartItems =  cart.getCartItems();
+       Set<CartItems> newSetCartItems = cart.getCartItems();
         newSetCartItems.remove(cartItem.get());
         cart.setCartItems(newSetCartItems);
 
         cart.setTotal(cart.getTotal() - (cartItem.get().getPrice() * cartItem.get().getQuantity()));
-        Cart justSavedCart = cartService.save(cart);
         cartItemService.deleteById(cartItem.get().getId());
+        Cart justSavedCart = cartService.save(cart);
         return ResponseEntity.ok().body(Utils.buildSuccessMessage("Delete cart item successfully!", justSavedCart));
     }
 
@@ -147,7 +163,11 @@ public class CartController {
 
         CartItems cartItemInCart = cartService.findByCartItemInCart(cart.get(), createCartItemForm.getProductOptionId());
         if (cartItemInCart != null) {
-            cartItemInCart.setQuantity(cartItemInCart.getQuantity() + createCartItemForm.getQuantity());
+            int newCartItemQuantity = cartItemInCart.getQuantity() + createCartItemForm.getQuantity();
+            if (newCartItemQuantity > productOptions.get().getStock()) {
+                newCartItemQuantity = productOptions.get().getStock();
+            }
+            cartItemInCart.setQuantity(newCartItemQuantity);
             cartItemService.save(cartItemInCart);
         } else {
             Set<CartItems> newSetCartItems = cart.get().getCartItems();

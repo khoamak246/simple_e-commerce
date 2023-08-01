@@ -1,6 +1,121 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { SHOP_STATE_SELECTOR } from "../../../redux/selectors/Selectors";
+import { resetToggle, setToggle } from "../../../redux/reducers/ToggleSlice";
+import { useState } from "react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  firebase_multiple_upload,
+  firebase_single_upload,
+} from "../../../firebase/FirebaseService";
+import { patch_update_shop_profile } from "../../../thunk/ShopThunk";
+import { toast } from "react-hot-toast";
 
 export default function DshShopProfile() {
+  const shopSelector = useSelector(SHOP_STATE_SELECTOR);
+  const dispatch = useDispatch();
+  const [shopProfile, setShopProfile] = useState({
+    name: null,
+    introduce: null,
+    description: null,
+  });
+  const [previewImg, setPreviewImg] = useState({
+    avatar: "",
+    avatarFile: null,
+    coverImg: "",
+    coverImgFile: null,
+  });
+
+  const handleResetAll = () => {
+    setPreviewImg({
+      avatar: "",
+      avatarFile: null,
+      coverImg: "",
+      coverImgFile: null,
+    });
+  };
+
+  useEffect(() => {
+    if (shopSelector) {
+      setShopProfile({
+        ...shopProfile,
+        name: shopSelector.name,
+        description: shopSelector.description,
+      });
+    }
+  }, [shopSelector]);
+
+  const handleOnChangeProfile = (e) => {
+    const { name, value } = e.target;
+    console.log(name);
+    if (shopProfile) {
+      if (name !== "introduce") {
+        setShopProfile({ ...shopProfile, [name]: value });
+      } else {
+        console.log("in --> " + e.target.files);
+        setShopProfile({ ...shopProfile, [name]: [...e.target.files] });
+      }
+    }
+  };
+
+  const onPreviewImg = (e) => {
+    const { name, files } = e.target;
+    if (previewImg[name] !== "") {
+      URL.revokeObjectURL(previewImg[name]);
+    }
+
+    let previewURl = URL.createObjectURL(files[0]);
+    if (name === "avatar") {
+      setPreviewImg({
+        ...previewImg,
+        [name]: previewURl,
+        avatarFile: files[0],
+      });
+    } else {
+      setPreviewImg({
+        ...previewImg,
+        [name]: previewURl,
+        coverImgFile: files[0],
+      });
+    }
+  };
+
+  const handleOnSubmit = async () => {
+    dispatch(setToggle("loading"));
+    let avatar = null;
+    let coverImg = null;
+    let introduce = [];
+    if (previewImg.avatarFile) {
+      avatar = await firebase_single_upload(previewImg.avatarFile);
+    }
+
+    if (previewImg.coverImg) {
+      coverImg = await firebase_single_upload(previewImg.coverImgFile);
+    }
+
+    if (shopProfile.introduce !== null && shopProfile.introduce.length !== 0) {
+      let tempUrlArr = await firebase_multiple_upload(shopProfile.introduce);
+      for (let i = 0; i < tempUrlArr.length; i++) {
+        const element = tempUrlArr[i];
+        introduce.push({
+          url: element.split("_assetType:")[0],
+          assetType: "image",
+        });
+      }
+    }
+
+    const { name, description } = shopProfile;
+    let udpateShopForm = { name, introduce, description, avatar, coverImg };
+    dispatch(patch_update_shop_profile(udpateShopForm)).then((res) => {
+      if (res) {
+        dispatch(resetToggle());
+        toast.success("Update successfully!");
+      }
+    });
+    handleResetAll();
+  };
+
   return (
     <div className="w-full h-full flex flex-col gap-5">
       <div className="h-[5%] w-full">
@@ -14,15 +129,25 @@ export default function DshShopProfile() {
           {/* CHANGE IMG */}
           <div className="w-full h-72 relative">
             <img
-              src="https://media.newyorker.com/photos/62c4511e47222e61f46c2daa/4:3/w_2663,h_1997,c_limit/shouts-animals-watch-baby-hemingway.jpg"
+              src={
+                previewImg.coverImg !== ""
+                  ? previewImg.coverImg
+                  : shopSelector
+                  ? shopSelector.coverImg
+                  : ""
+              }
               alt=""
               className="w-full h-full"
             />
             <div className="absolute top-0 left-0 bg-black bg-opacity-40 w-full h-full flex items-center gap-3 px-5">
-              <div className="w-24 h-24 rounded-full cursor-pointer overflow-hidden relative group">
+              <div className="w-20 h-20 rounded-full cursor-pointer overflow-hidden relative group">
+                {/* AVATAR IMG CHANGE */}
                 <input
+                  name="avatar"
                   type="file"
                   className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
+                  onChange={onPreviewImg}
+                  accept="image/*"
                 />
                 <div className="absolute top-0 left-0 w-full group-hover:h-full h-0 duration-300 transition-all flex justify-center items-center bg-black bg-opacity-20 overflow-hidden">
                   <h2 className="text-sm text-center text-white">
@@ -30,13 +155,21 @@ export default function DshShopProfile() {
                   </h2>
                 </div>
                 <img
-                  src="https://firebasestorage.googleapis.com/v0/b/simple-e-commerce-8bfc6.appspot.com/o/userAssets%2F360_F_562993122_e7pGkeY8yMfXJcRmclsoIjtOoVDDgIlh.jpg7b6b140d-b22e-4a5f-a5ed-2829d1cd6fdd?alt=media&token=97140e93-1841-4a14-8172-180a7d4edced"
+                  src={
+                    previewImg.avatar !== ""
+                      ? previewImg.avatar
+                      : shopSelector
+                      ? shopSelector.avatar
+                      : ""
+                  }
                   alt=""
-                  className="w-full h-full"
+                  className="w-full h-full rounded-full"
                 />
               </div>
               <div className="flex flex-col justify-start items-start w-full gap-2">
-                <h2 className="text-white text-xl w-full">Anh khoa</h2>
+                <h2 className="text-white text-xl w-full">
+                  {shopSelector ? shopSelector.name : ""}
+                </h2>
                 <div className="w-full flex flex-col sm:flex-row gap-2">
                   <button className="w-ful md:w-[50%] text-white flex justify-center items-center border-white border-[1px] border-solid gap-2">
                     <svg
@@ -76,7 +209,15 @@ export default function DshShopProfile() {
                 </div>
               </div>
             </div>
-            <div className="absolute top-[2%] right-[2%] flex gap-2 bg-white bg-opacity-20 backdrop-blur-md rounded-md px-2 py-1">
+            <div className="absolute top-[2%] right-[2%] flex gap-2 bg-white bg-opacity-20 backdrop-blur-md rounded-md px-2 py-1 cursor-pointer">
+              {/* COVER IMG CHANGE */}
+              <input
+                name="coverImg"
+                type="file"
+                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-20"
+                onChange={onPreviewImg}
+                accept="image/*"
+              />
               <p className="text-white">Change cover image</p>
               <div className="cursor-pointer">
                 <svg
@@ -102,7 +243,10 @@ export default function DshShopProfile() {
             </div>
           </div>
           {/* SEE SHOP */}
-          <div className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200">
+          <Link
+            to={`/shop/detail/${shopSelector.id}`}
+            className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200"
+          >
             <p className="text-sm text-slate-400">See shop with role user</p>
             <div>
               <svg
@@ -120,12 +264,17 @@ export default function DshShopProfile() {
                 />
               </svg>
             </div>
-          </div>
+          </Link>
           {/* SEE PRODUCT  */}
-          <div className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200">
+          <Link
+            to={"/seller/dashboard/productMng/allProduct"}
+            className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200"
+          >
             <p className="text-sm text-slate-400">Product</p>
             <div className="flex gap-1 items-center">
-              <p className="text-sm text-[#F04D2D]">9</p>
+              <p className="text-sm text-[#F04D2D]">
+                {shopSelector ? shopSelector.products.length : 0}
+              </p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -141,11 +290,16 @@ export default function DshShopProfile() {
                 />
               </svg>
             </div>
-          </div>
+          </Link>
           {/* ADDRESS */}
-          <div className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200">
+          <Link
+            to={"/seller/dashboard/shopMng/shopAddress"}
+            className="w-full flex justify-between cursor-pointer border-solid border-[1px] items-center py-2 px-5 duration-200 transition-all hover:bg-slate-200"
+          >
             <p className="text-sm text-slate-400">
-              Thon bau Kim Chung, Dong Anh, Ha Noi
+              {shopSelector
+                ? `${shopSelector.streetDetail} - ${shopSelector.ward.name} - ${shopSelector.district.name} - ${shopSelector.provinceCity.name}`
+                : ""}
             </p>
             <div>
               <svg
@@ -168,7 +322,7 @@ export default function DshShopProfile() {
                 />
               </svg>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* INFO */}
@@ -194,13 +348,15 @@ export default function DshShopProfile() {
               <h2 className="font-semibold">Shop name:</h2>
             </div>
             <input
-              name="fullName"
+              name="name"
               type="text"
               placeholder="Shop name..."
               className="w-[80%] border-solid border-[1px] border-slate-500 rounded-sm px-2 py-1 text-sm"
+              value={shopProfile.name ? shopProfile.name : ""}
+              onChange={handleOnChangeProfile}
             />
           </div>
-          {/* CHOOSE IMG */}
+          {/* CHOOSE INTRODUCE */}
           <div className="w-full flex flex-col gap-2">
             <div className="flex gap-1 items-start">
               <svg
@@ -227,11 +383,12 @@ export default function DshShopProfile() {
             <div className="w-[86%] pl-6">
               <div className="border-[1px] border-dashed border-slate-400 w-20 h-20 cursor-pointer hover:bg-[#FDF3F1] flex flex-col justify-center items-center rounded-md relative">
                 <input
-                  id="inputImg"
+                  name="introduce"
                   type="file"
                   className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
                   multiple={true}
                   accept="image/*"
+                  onChange={handleOnChangeProfile}
                 />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -248,7 +405,13 @@ export default function DshShopProfile() {
                   />
                 </svg>
 
-                <p className="text-sm text-[#EE4D2D]">{`Image 0/5`}</p>
+                <p className="text-sm text-[#EE4D2D]">{`Image ${
+                  shopProfile.introduce && shopProfile.introduce.length !== 0
+                    ? shopProfile.introduce.length
+                    : shopSelector
+                    ? shopSelector.introduce.length
+                    : 0
+                }/5`}</p>
               </div>
             </div>
           </div>
@@ -280,12 +443,17 @@ export default function DshShopProfile() {
                 className="w-[80%] resize-none text-sm outline-none p-2 border-[1px] border-solid border-slate-400  rounded-md"
                 placeholder="Product description..."
                 maxLength={255}
+                value={shopProfile.description ? shopProfile.description : ""}
+                onChange={handleOnChangeProfile}
               ></textarea>
             </div>
           </div>
           {/* BUTTON SUBMIT */}
           <div className="w-full flex gap-2 mb-2">
-            <button className="bg-orange-400 py-1 px-10 rounded-lg text-white">
+            <button
+              className="bg-orange-400 py-1 px-10 rounded-lg text-white"
+              onClick={handleOnSubmit}
+            >
               Save
             </button>
           </div>

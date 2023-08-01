@@ -4,6 +4,10 @@ import DshAddproduct from "../../components/seller_page_items/DashboardItems/Dsh
 import DshTodolist from "../../components/seller_page_items/DashboardItems/DshTodolist";
 import DshShopCollection from "../../components/seller_page_items/DashboardItems/DshShopCollection";
 import DshAllProduct from "../../components/seller_page_items/DashboardItems/DshAllProduct";
+import DshShopAddress from "../../components/seller_page_items/DashboardItems/DshShopAddress";
+import DshAllOrder from "../../components/seller_page_items/DashboardItems/DshAllOrder";
+import DshSaleAnalysis from "../../components/seller_page_items/DashboardItems/DshSaleAnalysis";
+import DshRevenue from "../../components/seller_page_items/DashboardItems/DshRevenue";
 
 export const SellerDashboardItems = [
   {
@@ -13,6 +17,22 @@ export const SellerDashboardItems = [
       {
         name: "All order",
         url: "allOrder",
+      },
+      {
+        name: "",
+        url: "waitingConfirm",
+      },
+      {
+        name: "",
+        url: "waitingShipper",
+      },
+      {
+        name: "",
+        url: "delivery",
+      },
+      {
+        name: "",
+        url: "doneOrder",
       },
       {
         name: "Cancellation form",
@@ -79,10 +99,6 @@ export const SellerDashboardItems = [
         url: "revenue",
       },
       {
-        name: "EON account balance",
-        url: "accountBalance",
-      },
-      {
         name: "Payment settings",
         url: "paymentSettings",
       },
@@ -142,6 +158,10 @@ export const SellerDashboardItems = [
         name: "Shop profile",
         url: "shopProfile",
       },
+      {
+        name: "Shop address",
+        url: "shopAddress",
+      },
     ],
     icon: (
       <svg
@@ -168,6 +188,34 @@ export const matcherUrlComponent = [
     component: <DshTodolist />,
   },
   {
+    url: "/orderMng/allOrder",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/waitingConfirm",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/waitingShipper",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/delivery",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/doneOrder",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/cancellationForm",
+    component: <DshAllOrder />,
+  },
+  {
+    url: "/orderMng/return-refund",
+    component: <DshAllOrder />,
+  },
+  {
     url: "/productMng/allProduct",
     component: <DshAllProduct />,
   },
@@ -179,6 +227,15 @@ export const matcherUrlComponent = [
     url: "/finance/paymentSettings",
     component: <DshPaymentSetting />,
   },
+  {
+    url: "/finance/revenue",
+    component: <DshRevenue />,
+  },
+  {
+    url: "/data/salesAnalysis",
+    component: <DshSaleAnalysis />,
+  },
   { url: "/shopMng/shopCollection", component: <DshShopCollection /> },
   { url: "/shopMng/shopProfile", component: <DshShopProfile /> },
+  { url: "/shopMng/shopAddress", component: <DshShopAddress /> },
 ];

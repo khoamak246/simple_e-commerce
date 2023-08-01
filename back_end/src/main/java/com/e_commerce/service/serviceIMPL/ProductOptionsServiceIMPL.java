@@ -1,6 +1,7 @@
 package com.e_commerce.service.serviceIMPL;
 
 import com.e_commerce.dto.request.ProductOptionDTO;
+import com.e_commerce.model.Product;
 import com.e_commerce.model.ProductOptions;
 import com.e_commerce.repository.IProductOptionsRepository;
 import com.e_commerce.service.IProductOptionsService;
@@ -39,16 +40,17 @@ public class ProductOptionsServiceIMPL implements IProductOptionsService {
     }
 
     @Override
-    public Set<ProductOptions> createByProductOptionsForm(Set<ProductOptionDTO> productOptionList) {
+    public Set<ProductOptions> createByProductOptionsForm(Set<ProductOptionDTO> productOptionList, Product product) {
         Set<ProductOptions> productOptions = new HashSet<>();
         productOptionList.forEach(productOption -> {
             ProductOptions newProductOption = ProductOptions.builder()
                     .name(productOption.getName())
                     .price(productOption.getPrice())
                     .stock(productOption.getStock())
+                    .product(product)
                     .build();
 
-            productOptions.add(newProductOption);
+            productOptions.add(save(newProductOption));
         });
         return productOptions;
     }

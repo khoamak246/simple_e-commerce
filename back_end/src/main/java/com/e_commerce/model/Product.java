@@ -1,8 +1,7 @@
 package com.e_commerce.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.e_commerce.dto.response.ProductResponse;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,6 +13,104 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@NamedStoredProcedureQuery(name = "find_top_ten_product_have_max_number_order",
+        procedureName = "find_top_ten_product_have_max_number_order", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class)},
+        resultSetMappings = "product_response_top_ten_product_have_max_number_order"
+)
+@SqlResultSetMapping(name = "product_response_top_ten_product_have_max_number_order",
+classes = @ConstructorResult(
+        targetClass = ProductResponse.class,
+        columns = {
+                @ColumnResult(name = "id", type = Long.class),
+                @ColumnResult(name = "name", type = String.class),
+                @ColumnResult(name = "data", type = Double.class)
+        }
+)
+)
+
+@NamedStoredProcedureQuery(name = "find_top_ten_favorites_product",
+        procedureName = "find_top_ten_favorites_product", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class)},
+        resultSetMappings = "product_response_top_ten_favorites_product"
+)
+@SqlResultSetMapping(name = "product_response_top_ten_favorites_product",
+        classes = @ConstructorResult(
+                targetClass = ProductResponse.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "data", type = Double.class)
+                }
+        )
+)
+
+@NamedStoredProcedureQuery(name = "find_product_have_max_cancel_order_percent",
+        procedureName = "find_product_have_max_cancel_order_percent", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shop_id", type = Long.class)},
+        resultSetMappings = "product_product_have_max_cancel_order_percent"
+)
+@SqlResultSetMapping(name = "product_product_have_max_cancel_order_percent",
+        classes = @ConstructorResult(
+                targetClass = ProductResponse.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "data", type = Double.class)
+                }
+        )
+)
+
+@NamedStoredProcedureQuery(name = "find_product_have_max_return_order_percent",
+        procedureName = "find_product_have_max_return_order_percent", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class)},
+        resultSetMappings = "product_product_have_max_return_order_percent"
+)
+@SqlResultSetMapping(name = "product_product_have_max_return_order_percent",
+        classes = @ConstructorResult(
+                targetClass = ProductResponse.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "data", type = Double.class)
+                }
+        )
+)
+
+@NamedStoredProcedureQuery(name = "find_top_five_product_have_max_revenue",
+        procedureName = "find_top_five_product_have_max_revenue", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "shopId", type = Long.class)},
+        resultSetMappings = "product_product_top_five_product_have_max_revenue"
+)
+@SqlResultSetMapping(name = "product_product_top_five_product_have_max_revenue",
+        classes = @ConstructorResult(
+                targetClass = ProductResponse.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "data", type = Double.class)
+                }
+        )
+)
+
+@NamedStoredProcedureQuery(name = "find_top_payment_product",
+        procedureName = "find_top_payment_product", parameters = {
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "offsetNumber", type = Integer.class),
+        @StoredProcedureParameter(mode = ParameterMode.IN, name = "limitNumber", type = Integer.class),
+},
+        resultSetMappings = "product_find_top_payment_product"
+)
+@SqlResultSetMapping(name = "product_find_top_payment_product",
+        classes = @ConstructorResult(
+                targetClass = ProductResponse.class,
+                columns = {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name", type = String.class),
+                        @ColumnResult(name = "data", type = Double.class)
+                }
+        )
+)
+
 public class Product {
 
     @Id
@@ -33,9 +130,10 @@ public class Product {
 
     private int visitNumber;
     private int reviewNumber;
-    private int rate;
+    private double rate;
     private int returnRefundNumber;
     private int cancelNumber;
+    private int saleNumber;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "shop_id")
@@ -54,8 +152,14 @@ public class Product {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Assets> assets;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_collection")
-    @JsonIgnore
-    private Collection collection;
+    @OneToMany(mappedBy = "product")
+    @JsonIgnoreProperties({"product"})
+    private Set<Review> reviews;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "favorites",
+            joinColumns = {@JoinColumn(name = "product_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_info_id")})
+    @JsonIgnoreProperties({"order", "cart", "notifications", "userAddresses", "favoritesProduct"})
+    private Set<UserInfo> favorites;
 }

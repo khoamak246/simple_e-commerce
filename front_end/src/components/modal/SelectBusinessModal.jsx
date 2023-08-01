@@ -12,24 +12,26 @@ import {
   setChildrenBusinessIndex,
   setSubinessIndex,
 } from "../../redux/reducers/BusinessSlice";
+import {
+  handleAnimateToggle,
+  handleCloseAnimateToggle,
+} from "../../utils/Utils";
 
-export default function SelectBusinessModal({ toggleModal }) {
+export default function SelectBusinessModal({
+  closeModal,
+  selectBusinessMethod,
+}) {
   const [isActive, setIsActive] = useState(false);
   const dispatch = useDispatch();
   const businessSelector = useSelector(BUSINESS_LIST_SELECTOR);
   const selectBusiness = useSelector(BUSINESS_SELECTED_SELECTOR);
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsActive(true);
-    }, 50);
+    handleAnimateToggle(setIsActive);
   }, []);
 
   const handleOnCloseModal = () => {
-    setIsActive(false);
-    setTimeout(() => {
-      toggleModal(false);
-    }, 400);
+    handleCloseAnimateToggle(setIsActive, closeModal);
   };
 
   const handleRenderResultSelectBusiness = () => {
@@ -131,7 +133,13 @@ export default function SelectBusinessModal({ toggleModal }) {
                     return (
                       <div
                         key={index}
-                        onClick={() => dispatch(setSubinessIndex(index))}
+                        onClick={() => {
+                          dispatch(setSubinessIndex(index));
+                          if (selectBusinessMethod) {
+                            console.log("in");
+                            selectBusinessMethod(val);
+                          }
+                        }}
                         className={`${
                           selectBusiness.subBusinessIndex !== null &&
                           selectBusiness.subBusinessIndex === index &&
@@ -154,7 +162,13 @@ export default function SelectBusinessModal({ toggleModal }) {
                   return (
                     <div
                       key={index}
-                      onClick={() => dispatch(setChildrenBusinessIndex(index))}
+                      onClick={() => {
+                        dispatch(setChildrenBusinessIndex(index));
+
+                        if (selectBusinessMethod) {
+                          selectBusinessMethod(val);
+                        }
+                      }}
                       className={`${
                         selectBusiness.childrenBusinessIndex !== null &&
                         selectBusiness.childrenBusinessIndex === index &&

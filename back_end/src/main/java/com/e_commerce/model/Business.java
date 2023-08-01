@@ -1,6 +1,5 @@
 package com.e_commerce.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -23,7 +22,7 @@ public class Business {
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "sub_business",
             joinColumns = @JoinColumn(name = "business_id"),
-            inverseJoinColumns = @JoinColumn(name = "subBusiness_id"))
+            inverseJoinColumns = @JoinColumn(name = "sub_business_id"))
    private Set<Business> subBusiness;
 
     @ManyToMany(mappedBy = "subBusiness")

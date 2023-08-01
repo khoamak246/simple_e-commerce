@@ -2,6 +2,7 @@ import { POST_LOGIN, POST_REGISTER } from "../api/service/AuthService";
 import { resetAddress } from "../redux/reducers/AddressSlice";
 import { resetAuth, setAuth } from "../redux/reducers/AuthSlice";
 import { resetBusiness } from "../redux/reducers/BusinessSlice";
+import { resetRoom } from "../redux/reducers/RoomSlice";
 import { resetShop } from "../redux/reducers/ShopSlice";
 import { resetToggle } from "../redux/reducers/ToggleSlice";
 import { resetUser, setUser } from "../redux/reducers/UserSlice";
@@ -38,15 +39,14 @@ export const post_login = (loginForm) => {
 export const handle_log_out = () => {
   return async function handle_log_out_thunk(dispatch) {
     const cookies = new Cookie();
-    cookies.remove("token");
-    cookies.remove("username");
-    cookies.remove("password");
+    cookies.remove("token", { path: "/" });
+    cookies.remove("username", { path: "/" });
+    cookies.remove("password", { path: "/" });
     dispatch(resetAuth());
     dispatch(resetUser());
-    dispatch(resetAddress());
     dispatch(resetToggle());
     dispatch(resetShop());
-    dispatch(resetBusiness());
+    dispatch(resetRoom());
 
     return true;
   };
