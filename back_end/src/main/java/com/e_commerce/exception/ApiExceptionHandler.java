@@ -1,5 +1,6 @@
 package com.e_commerce.exception;
 
+import com.e_commerce.utils.constant.ValidationRegex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolationException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -32,8 +34,7 @@ public class ApiExceptionHandler {
 
         return ResponseEntity.status(e.getStatus()).body(exception);
     }
-
-
+    
 
     @ExceptionHandler(NoHandlerFoundException.class)
     @ResponseStatus(value = HttpStatus.NOT_FOUND )
@@ -45,8 +46,6 @@ public class ApiExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception);
     }
-
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handle(Exception ex,

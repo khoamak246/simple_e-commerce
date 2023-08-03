@@ -1,10 +1,12 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Role;
 import com.e_commerce.model.RoleName;
 import com.e_commerce.repository.IRoleRepository;
 import com.e_commerce.service.IRoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -19,8 +21,12 @@ public class RoleServiceIMPL implements IRoleService {
 
 
     @Override
-    public Optional<Role> findByName(RoleName name) {
-        return roleRepository.findByName(name);
+    public Role findByName(RoleName name) {
+        Optional<Role> role = roleRepository.findByName(name);
+        if (!role.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "FAILED -> NOT EXIST ROLE IN DB");
+        }
+        return role.get();
     }
 
     @Override
@@ -33,13 +39,13 @@ public class RoleServiceIMPL implements IRoleService {
             for (String role : registerFormRole) {
                 switch (role) {
                     case "ADMIN":
-                        Role adminRole = roleRepository.findByName(RoleName.ADMIN).orElseThrow(() -> new RuntimeException("FAILED -> NOT EXIST ROLE IN DB"));
+                        Role adminRole = findByName(RoleName.ADMIN);
                         roles.add(adminRole);
                     case "PM":
-                        Role pmRole = roleRepository.findByName(RoleName.PM).orElseThrow(() -> new RuntimeException("FAILED -> NOT EXIST ROLE IN DB"));
+                        Role pmRole = findByName(RoleName.PM);
                         roles.add(pmRole);
                     case "USER":
-                        Role userRole = roleRepository.findByName(RoleName.USER).orElseThrow(() -> new RuntimeException("FAILED -> NOT EXIST ROLE IN DB"));
+                        Role userRole = findByName(RoleName.USER);
                         roles.add(userRole);
                 }
             }

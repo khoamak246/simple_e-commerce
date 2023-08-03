@@ -1,9 +1,12 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.District;
+import com.e_commerce.model.Ward;
 import com.e_commerce.repository.IDistrictRepository;
 import com.e_commerce.service.IDistrictService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +24,12 @@ public class DistrictServiceIMPL implements IDistrictService {
     }
 
     @Override
-    public Optional<District> findById(Long id) {
-        return districtRepository.findById(id);
+    public District findById(Long id) {
+        Optional<District> district = districtRepository.findById(id);
+        if (!district.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found district at id: " + id);
+        }
+        return district.get();
     }
 
     @Override
@@ -33,5 +40,13 @@ public class DistrictServiceIMPL implements IDistrictService {
     @Override
     public void deleteById(Long id) {
         districtRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean isWardInDistrict(District district, Ward ward) {
+        if (!district.getWard().contains(ward)) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found ward with id = " + ward.getId() + " in district id: " + district.getId());
+        }
+        return true;
     }
 }

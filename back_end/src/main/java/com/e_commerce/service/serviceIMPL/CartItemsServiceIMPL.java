@@ -1,9 +1,11 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.CartItems;
 import com.e_commerce.repository.ICartItemsRepository;
 import com.e_commerce.service.ICartItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +23,12 @@ public class CartItemsServiceIMPL implements ICartItemService {
     }
 
     @Override
-    public Optional<CartItems> findById(Long id) {
-        return cartItemsRepository.findById(id);
+    public CartItems findById(Long id) {
+        Optional<CartItems> cartItems = cartItemsRepository.findById(id);
+        if (!cartItems.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found cartItems at id: " + id);
+        }
+        return cartItems.get();
     }
 
     @Override

@@ -10,11 +10,9 @@ import com.e_commerce.service.IProductService;
 import com.e_commerce.service.IShopService;
 import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -29,30 +27,11 @@ public class ProductOptionsController {
     @PatchMapping("/{productOptionId}")
     public ResponseEntity<ResponseMessage> patchUpdateProductOption(@PathVariable Long productOptionId, @RequestBody UpdateProductOptionForm updateProductOptionForm) {
 
-        Optional<ProductOptions> productOption = productOptionsService.findById(productOptionId);
-        if (!productOption.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found product option at id: " + productOptionId));
-        }
-
-        Shop shop = productOption.get().getProduct().getShop();
-        if (!shopService.isCurrentUserMatchShopUserid(shop.getId())) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with shop"));
-        }
-
-        if (updateProductOptionForm.getName() != null) {
-            productOption.get().setName(updateProductOptionForm.getName());
-        }
-
-
-         if (updateProductOptionForm.getPrice() != null) {
-            productOption.get().setPrice(updateProductOptionForm.getPrice());
-        }
-
-         if (updateProductOptionForm.getStock() != null) {
-            productOption.get().setStock(updateProductOptionForm.getStock());
-        }
-
-        productOptionsService.save(productOption.get());
+        ProductOptions productOption = productOptionsService.findById(productOptionId);
+        Shop shop = productOption.getProduct().getShop();
+        shopService.isCurrentUserMatchShopUserid(shop.getId());
+        ProductOptions afterUpdateProductOption = productOptionsService.updateProductOptionsByForm(productOption, updateProductOptionForm);
+        productOptionsService.save(afterUpdateProductOption);
         Set<Product> newProductSet = productService.findByShopId(shop.getId());
         return ResponseEntity.ok(Utils.buildSuccessMessage("Update product option successfully!", newProductSet));
 
