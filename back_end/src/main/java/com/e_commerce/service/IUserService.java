@@ -21,7 +21,6 @@ public interface IUserService extends IGenericService<User> {
     void registerNewUser(RegisterForm registerForm);
     JwtResponse loginUser(LoginForm loginForm);
     boolean isUserIdEqualUserPrincipalId(Long userId);
-
     boolean isMatcherWithCurrentPassword(Long userId, String currentPassword);
 
 }

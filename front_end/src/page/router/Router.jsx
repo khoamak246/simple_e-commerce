@@ -120,7 +120,7 @@ export default function Router() {
         <Route path="*" Component={UnknowPage} />
       </Routes>
       <Footer />
-      {userSelector && <Chat />}
+      {userSelector && cookies.token && <Chat />}
     </>
   );
 }

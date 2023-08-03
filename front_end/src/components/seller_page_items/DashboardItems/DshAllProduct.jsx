@@ -9,9 +9,11 @@ import {
   getMinPrice,
   handleRenderBusiness,
   sortByIdASC,
+  sortByIdDESC,
 } from "../../../utils/Utils";
 import { resetSelectBusiness } from "../../../redux/reducers/BusinessSlice";
 import SelectBusinessModal from "../../modal/SelectBusinessModal";
+import { Link } from "react-router-dom";
 
 export default function DshAllProduct() {
   const shopSelector = useSelector(SHOP_STATE_SELECTOR);
@@ -54,7 +56,7 @@ export default function DshAllProduct() {
     let result = [];
     if (shopSelector) {
       const { products } = shopSelector;
-      result = sortByIdASC([...products]);
+      result = sortByIdDESC([...products]);
       const { name, minPrice, maxPrice, business, sortBy } = productNav;
       if (sortBy !== "default") {
         if (sortBy === "onSale") {
@@ -286,13 +288,14 @@ export default function DshAllProduct() {
                       key={val.id}
                     >
                       {/* PRODUCT NAME */}
-                      <div
+                      <Link
+                        to={`/product/detail/${val.id}`}
                         className={` col-span-3 flex gap-1 items-center border-slate-400 border-r-[1px] border-solid lg:px-2`}
                       >
                         <p className="text-[0.7rem] lg:text-base text-ellipsis overflow-hidden whitespace-nowrap">
                           {val.name}
                         </p>
-                      </div>
+                      </Link>
                       {/* PRODUCT BUSINESS */}
                       <div
                         className={`col-span-2 flex items-center border-slate-400 border-r-[1px] border-solid lg:px-2`}

@@ -2,6 +2,7 @@ package com.e_commerce.controller;
 
 import com.e_commerce.dto.request.CreateCartItemForm;
 import com.e_commerce.dto.response.ResponseMessage;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.*;
 import com.e_commerce.service.ICartItemService;
 import com.e_commerce.service.ICartService;
@@ -32,13 +33,14 @@ public class CartController {
 
     @GetMapping("/cartItems/user/{userId}/over-stock-cart-items")
     public ResponseEntity<ResponseMessage> findOverStockCartItems(@PathVariable Long userId) {
+
         if (!userService.isUserIdEqualUserPrincipalId(userId)) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match current user with cart!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user request!");
         }
 
         Optional<User> user = userService.findById(userId);
         if (!user.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found user at id: " + userId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "OOP! Not found user at id: " + userId);
         }
 
         Set<CartItems> cartItems = user.get().getUserInfo().getCart().getCartItems();
@@ -59,12 +61,12 @@ public class CartController {
     public ResponseEntity<ResponseMessage> updateStatusCartItem(@PathVariable Long cartItemId) {
         Optional<CartItems> cartItem = cartItemService.findById(cartItemId);
         if (!cartItem.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found cart item with id: " + cartItemId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found cart item with id: " + cartItemId);
         }
 
         Cart cart = cartItem.get().getCart();
         if (!cartService.isMatchCartWithCurrentUser(cart)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user with cart!");
         }
 
         cartItem.get().setStatus(!cartItem.get().isStatus());
@@ -76,12 +78,12 @@ public class CartController {
     public ResponseEntity<ResponseMessage> updateStatusAllCartItem(@PathVariable Long cartId, @PathVariable boolean status) {
         Optional<Cart> cart = cartService.findById(cartId);
         if (!cart.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found shop at id: " + cartId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found shop at id: " + cartId);
         }
 
         User user = cart.get().getUserInfo().getUser();
         if (!userService.isUserIdEqualUserPrincipalId(user.getId())) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user with cart");
         }
 
         cart.get().getCartItems().forEach(cartItems -> cartItems.setStatus(status));
@@ -95,12 +97,12 @@ public class CartController {
     public ResponseEntity<ResponseMessage> deleteCartItems(@PathVariable Long cartItemId) {
         Optional<CartItems> cartItem = cartItemService.findById(cartItemId);
         if (!cartItem.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found cart item with id: " + cartItemId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found cart item with id: " + cartItemId);
         }
 
         Cart cart = cartItem.get().getCart();
             if (!cartService.isMatchCartWithCurrentUser(cart)){
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart!"));
+                throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user with cart!");
         }
 
        Set<CartItems> newSetCartItems = cart.getCartItems();
@@ -117,12 +119,12 @@ public class CartController {
     public ResponseEntity<ResponseMessage> minusCartItemsQuantity(@PathVariable Long cartItemId) {
         Optional<CartItems> cartItem = cartItemService.findById(cartItemId);
         if (!cartItem.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found cart item with id: " + cartItemId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found cart item with id: " + cartItemId);
         }
 
         Cart cart = cartItem.get().getCart();
         if (!cartService.isMatchCartWithCurrentUser(cart)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user with cart!");
         }
 
         if (cartItem.get().getQuantity() > 1) {
@@ -134,31 +136,30 @@ public class CartController {
         cartService.save(cart);
         Cart justSavedCart = cartService.save(cart);
         return ResponseEntity.ok().body(Utils.buildSuccessMessage("Update cart item successfully!", justSavedCart));
-
     }
 
     @PostMapping("/{cartId}/cartItems")
     public ResponseEntity<ResponseMessage> saveNewCartItem(@PathVariable Long cartId, @Validated @RequestBody CreateCartItemForm createCartItemForm, BindingResult result){
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE));
+            throw new ApiRequestException(HttpStatus.BAD_REQUEST, ValidationRegex.INVALID_MESSAGE);
         }
 
         Optional<Cart> cart = cartService.findById(cartId);
         if (!cart.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found cart at id: " + cartId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found cart at id: " + cartId);
         }
 
         if (!cartService.isMatchCartWithCurrentUser(cart.get())){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user with cart!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user with cart!");
         }
 
         Optional<ProductOptions> productOptions = productOptionsService.findById(createCartItemForm.getProductOptionId());
         if (!productOptions.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found product option at id: " + createCartItemForm.getProductOptionId()));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found product option at id: " + createCartItemForm.getProductOptionId());
         }
 
         if (productOptions.get().getStock() < createCartItemForm.getQuantity()) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not enough products in stock"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not enough products in stock");
         }
 
         CartItems cartItemInCart = cartService.findByCartItemInCart(cart.get(), createCartItemForm.getProductOptionId());

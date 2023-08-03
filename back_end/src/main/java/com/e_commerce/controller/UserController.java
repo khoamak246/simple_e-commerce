@@ -2,6 +2,7 @@ package com.e_commerce.controller;
 
 import com.e_commerce.dto.request.UpdateUserForm;
 import com.e_commerce.dto.response.ResponseMessage;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.User;
 import com.e_commerce.service.IUserService;
 import com.e_commerce.utils.constant.ValidationRegex;
@@ -28,7 +29,7 @@ public class UserController {
     public ResponseEntity<ResponseMessage> putUpdateUser(@PathVariable Long userId, @RequestBody User user){
 
         if (!userService.isUserIdEqualUserPrincipalId(userId)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user request!");
         }
         return ResponseEntity.ok(Utils.buildSuccessMessage("Update user successfully!", userService.save(user)));
     }
@@ -37,16 +38,16 @@ public class UserController {
     public ResponseEntity<ResponseMessage> patchUpdateUser(@PathVariable Long userId, @Validated @RequestBody UpdateUserForm updateUserForm, BindingResult result){
 
         if(result.hasErrors()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE));
+            throw new ApiRequestException(HttpStatus.BAD_REQUEST, ValidationRegex.INVALID_MESSAGE);
         }
 
         if (!userService.isUserIdEqualUserPrincipalId(userId)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user request!");
         }
 
         Optional<User> user = userService.findById(userId);
         if (!user.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found user at id: " + userId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "OOP! Not found user at id: " + userId);
         }
 
         if (updateUserForm.getFullName() != null){
@@ -89,11 +90,14 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<ResponseMessage> getUserById(@PathVariable Long userId) {
         if (!userService.isUserIdEqualUserPrincipalId(userId)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(Utils.buildFailMessage("Not match user request!"));
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user request!");
         }
 
         Optional<User> user = userService.findById(userId);
-        return user.map(value -> ResponseEntity.ok().body(Utils.buildSuccessMessage("Query successfully!", value))).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found user at id: " + userId)));
-
+        if (user.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK).body(Utils.buildSuccessMessage("Query successfully!", user.get()));
+        } else {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "OOP! Not found user at id: " + userId);
+        }
     }
 }

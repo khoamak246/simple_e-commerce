@@ -4,10 +4,12 @@ import com.e_commerce.dto.request.CategoriesSearchForm;
 import com.e_commerce.dto.request.CreateBusinessForm;
 import com.e_commerce.dto.response.ResponseMessage;
 import com.e_commerce.dto.response.SearchBusinessResponse;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Business;
 import com.e_commerce.model.Product;
 import com.e_commerce.service.IBusinessService;
 import com.e_commerce.service.IProductService;
+import com.e_commerce.utils.constant.ValidationRegex;
 import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,7 +44,7 @@ public class BusinessController {
     public ResponseEntity<ResponseMessage> findProductByBusinessId(@PathVariable Long businessId) {
         Optional<Business> businesses = businessService.findById(businessId);
         if (!businesses.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found business at id: " + businessId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "OOP! Not found business at id: " + businessId);
         }
 
         Set<Business> allRelativeBusiness = new HashSet<>();
@@ -68,7 +70,7 @@ public class BusinessController {
     public ResponseEntity<ResponseMessage> searchValueByBusiness(@RequestBody CategoriesSearchForm categoriesSearchForm) {
         Optional<Business> business = businessService.findById(categoriesSearchForm.getBusinessId());
         if (!business.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found business at id: " + categoriesSearchForm.getBusinessId()));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found business at id: " + categoriesSearchForm.getBusinessId());
         }
 
 
@@ -86,11 +88,12 @@ public class BusinessController {
         if (categoriesSearchForm.getSubBusinessId() != null) {
             Optional<Business> subBusiness = businessService.findById(categoriesSearchForm.getSubBusinessId());
             if (!subBusiness.isPresent()) {
-                return ResponseEntity.badRequest().body(Utils.buildFailMessage("Not found sub business at id: " + categoriesSearchForm.getSubBusinessId()));
+                throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found sub business at id: " + categoriesSearchForm.getSubBusinessId());
             }
             if (!business.get().getSubBusiness().contains(subBusiness.get())) {
-                return ResponseEntity.badRequest().body(Utils.buildFailMessage("Business not contain sub business id: " + categoriesSearchForm.getSubBusinessId()));
+                throw new ApiRequestException(HttpStatus.NOT_FOUND, "Business not contain sub business id: " + categoriesSearchForm.getSubBusinessId());
             }
+
             products.addAll(subBusiness.get().getProduct());
             if (subBusiness.get().getSubBusiness().size() != 0) {
                 subBusiness.get().getSubBusiness().forEach(bus ->
@@ -125,9 +128,10 @@ public class BusinessController {
     @GetMapping("/{businessId}")
     public ResponseEntity<ResponseMessage> findBusinessById(@PathVariable Long businessId) {
         Optional<Business> business = businessService.findById(businessId);
-        return business.map(value -> ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", value)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found business at id: " + businessId)));
-
+        if (!business.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found business at id: " + businessId);
+        }
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully!", business.get()));
     }
 
 
@@ -147,7 +151,7 @@ public class BusinessController {
                                                            @RequestBody CreateBusinessForm createBusinessForm) {
         Optional<Business> business = businessService.findById(businessId);
         if (!business.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Utils.buildFailMessage("Not found business at id: " + businessId));
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found business at id: " + businessId);
         }
 
         Set<Business> subBusiness = new HashSet<>();

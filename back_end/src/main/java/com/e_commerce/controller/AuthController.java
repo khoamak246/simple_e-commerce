@@ -4,6 +4,7 @@ import com.e_commerce.dto.request.LoginForm;
 import com.e_commerce.dto.request.RegisterForm;
 import com.e_commerce.dto.response.JwtResponse;
 import com.e_commerce.dto.response.ResponseMessage;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.User;
 import com.e_commerce.service.IRoleService;
 import com.e_commerce.service.IUserService;
@@ -33,31 +34,23 @@ public class AuthController {
             @Validated @RequestBody RegisterForm registerForm,
             BindingResult result){
         if (result.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(
-                    Utils.buildFailMessage(ValidationRegex.INVALID_MESSAGE)
-            );
+            throw new ApiRequestException(HttpStatus.BAD_REQUEST, ValidationRegex.INVALID_MESSAGE);
         }
 
         boolean isExistUserName = userService.existsByUsername(registerForm.getUsername());
         if (isExistUserName) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(
-                 Utils.buildFailMessage("Username are already exist!")
-            );
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Username are already exist!");
         }
 
 
         boolean isExistEmail = userService.existsByEmail(registerForm.getEmail());
         if (isExistEmail) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(
-                 Utils.buildFailMessage("Email are already exist!")
-            );
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Email are already exist!");
         }
 
         boolean isExistPhoneNumber = userService.existsByPhoneNumber(registerForm.getPhoneNumber());
         if (isExistPhoneNumber) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(
-                   Utils.buildFailMessage("Phone Number are already exist!")
-            );
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Phone Number are already exist!");
         }
 
         userService.registerNewUser(registerForm);
@@ -77,7 +70,7 @@ public class AuthController {
         if (jwtResponse != null){
             return new ResponseEntity<>(jwtResponse, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(Utils.buildFailMessage("Wrong username or password!"), HttpStatus.UNAUTHORIZED);
+            throw new ApiRequestException(HttpStatus.UNAUTHORIZED, "Wrong username or password!");
         }
     }
 }

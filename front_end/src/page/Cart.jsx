@@ -132,7 +132,7 @@ export default function Cart() {
 
   const handleOrderSubmit = () => {
     if (!selectAddress) {
-      toast.error("OOP! You forgot your address!");
+      return toast.error("OOP! You forgot your address!");
     }
     const { receiverName, phoneNumber, orderItems } = orderForm;
     if (!validationRegex(FULL_NAME_REGEX, receiverName)) {
