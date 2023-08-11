@@ -4,6 +4,7 @@ import OrderItem from "./dshSubItems/OrderItem";
 import { useSelector } from "react-redux";
 import { SHOP_STATE_SELECTOR } from "../../../redux/selectors/Selectors";
 import OrderItemModal from "../../modal/OrderItemModal";
+import { sortByIdDESC } from "../../../utils/Utils";
 
 export default function DshAllOrder() {
   const shopSelector = useSelector(SHOP_STATE_SELECTOR);
@@ -109,7 +110,7 @@ export default function DshAllOrder() {
       const { fromDate, toDate } = filterDate;
       let fromDateTime = new Date(fromDate).getTime();
       let toDateTime = new Date(toDate).getTime();
-      let data = displayTab[activeTab].data;
+      let data = sortByIdDESC([...displayTab[activeTab].data]);
       if (fromDate !== "" && toDate === "") {
         let newData = data.filter((e) => {
           let orderTime = new Date(e.order.createdDate).getTime();
@@ -126,7 +127,7 @@ export default function DshAllOrder() {
           let orderTime = new Date(e.order.createdDate).getTime();
           return fromDateTime <= orderTime && orderTime <= toDateTime;
         });
-        console.log(newData);
+
         return newData;
       } else {
         return data;
@@ -137,14 +138,12 @@ export default function DshAllOrder() {
   return (
     <div className="w-full h-full flex flex-col gap-2 pb-2">
       <div className="h-[5%] w-full">
-        <h1 className="w-full text-xl font-semibold p-2 h-[5%]">
-          All product:
-        </h1>
+        <h1 className="w-full text-xl font-semibold p-2 h-[5%]">All order:</h1>
       </div>
       <div className="pl-2 h-[95%] w-full justify-center items-center">
         <div className="w-[98%] h-[98%] shadow-lg border-solid border-slate-400 border-[1px] flex flex-col">
           {/* NAV */}
-          <div className="w-full h-[15%] flex justify-center items-center border-solid border-slate-400 border-b-[1px]">
+          <div className="w-full h-[15%] flex justify-center items-center border-solid border-[#EE4D2D] border-b-[1px]">
             <div className="flex flex-col gap-1 w-[50%]">
               <p className="w-full text-center font-semibold">Date</p>
               <div className="flex gap-2 w-full">
@@ -195,15 +194,16 @@ export default function DshAllOrder() {
           {/* TABLE */}
           <div className="w-full h-[85%] flex flex-col justify-center items-center">
             <div className="w-full h-[20%] border-solid border-slate-400 border-b-[1px] flex flex-col gap-1">
-              <div className="w-full h-[50%] grid grid-cols-7 border-solid border-slate-400 border-b-[1px]">
+              <div className="w-full h-[50%] grid grid-cols-7 border-solid border-[#EE4D2D] border-b-[1px]">
                 {displayTab?.map((val, index) => {
                   return (
                     <Link
                       to={val.url}
                       key={index}
                       className={`${
-                        activeTab + 1 === val.id && "bg-slate-200"
-                      } flex justify-center items-center cursor-pointer border-solid border-slate-400 border-r-[1px]`}
+                        activeTab + 1 === val.id &&
+                        "bg-[#EE4D2D] text-white font-semibold"
+                      } flex justify-center items-center cursor-pointer border-solid border-[#EE4D2D] border-x-[1px] text-[#EE4D2D]`}
                     >
                       {val.tabName}
                     </Link>

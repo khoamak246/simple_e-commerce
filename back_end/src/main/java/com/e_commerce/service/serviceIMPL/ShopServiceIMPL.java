@@ -1,29 +1,36 @@
 package com.e_commerce.service.serviceIMPL;
 
-import com.e_commerce.dto.response.ShopResponse;
-import com.e_commerce.dto.response.ShopRevenueResponse;
-import com.e_commerce.model.OrderItems;
-import com.e_commerce.model.Product;
-import com.e_commerce.model.Shop;
+import com.e_commerce.dto.request.AssetCreateForm;
+import com.e_commerce.dto.request.UpdateShopForm;
+import com.e_commerce.dto.response.*;
+import com.e_commerce.exception.ApiRequestException;
+import com.e_commerce.model.*;
+import com.e_commerce.repository.IOrderItemsRepository;
 import com.e_commerce.repository.IShopRepository;
 import com.e_commerce.security.userPrincipal.UserPrincipal;
-import com.e_commerce.service.IOrderItemsService;
-import com.e_commerce.service.IShopService;
+import com.e_commerce.service.*;
+import com.e_commerce.utils.constant.ValidationRegex;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ShopServiceIMPL implements IShopService {
 
     private final IShopRepository shopRepository;
-    private final IOrderItemsService orderItemsService;
+    private final IOrderItemsRepository orderItemsRepository;
+    private final IProductService productService;
+    private final IAssetService assetService;
+    private final IPaymentWayService paymentWayService;
+    private final IProvinceCityService provinceCityService;
+    private final IDistrictService districtService;
+    private final IWardService wardService;
 
     @Override
     public List<Shop> findAll() {
@@ -31,8 +38,12 @@ public class ShopServiceIMPL implements IShopService {
     }
 
     @Override
-    public Optional<Shop> findById(Long id) {
-        return shopRepository.findById(id);
+    public Shop findById(Long id) {
+        Optional<Shop> shop = shopRepository.findById(id);
+        if (!shop.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found shop at id: " + id);
+        }
+        return shop.get();
     }
 
     @Override
@@ -46,21 +57,27 @@ public class ShopServiceIMPL implements IShopService {
     }
 
     @Override
-    public Optional<Shop> findByUserId(Long userId) {
-        return shopRepository.findByUserId(userId);
+    public Shop findByUserId(Long userId) {
+        Optional<Shop> shop = shopRepository.findByUserId(userId);
+        if (!shop.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found shop at user id: " + userId);
+        }
+        return shop.get();
     }
 
     @Override
     public boolean isCurrentUserMatchShopUserid(Long shopId) {
         UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Shop> shop = findById(shopId);
-        return shop.map(value -> value.getUser().getId().equals(currentUser.getId())).orElse(false);
-
+        Shop shop = findById(shopId);
+        if (!shop.getUser().getId().equals(currentUser.getId())) {
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user with shop id: " + shopId);
+        }
+        return true;
     }
 
     @Override
     public ShopResponse createShopResponse(Shop shop) {
-        Set<OrderItems> orderItems = orderItemsService.findByShopId(shop.getId());
+        Set<OrderItems> orderItems = orderItemsRepository.findByShopId(shop.getId());
         Set<OrderItems> waitingConfirmations = new HashSet<>();
         Set<OrderItems> goodsWaitingConfirmations = new HashSet<>();
         Set<OrderItems> doneProcessingOrderItems = new HashSet<>();
@@ -154,6 +171,150 @@ public class ShopServiceIMPL implements IShopService {
     @Override
     public Set<ShopRevenueResponse> sumRevenueEachMonthShop(Long shopId, int year) {
         return shopRepository.sumRevenueEachMonthShop(shopId, year);
+    }
+
+    @Override
+    @Transactional
+    public SaleManagementResponse getSaleManagementByShopId(Long shopId) {
+        isCurrentUserMatchShopUserid(shopId);
+        ProductResponse defaultProductResponse = ProductResponse.builder()
+                .id(-1L)
+                .data(0)
+                .name("")
+                .build();
+        int productNumber = productService.countByShopId(shopId);
+        ProductResponse maxCancelOrderPercentProduct = productService.findProductHaveMaxCancelOrderPercent(shopId).orElse(defaultProductResponse);
+        ProductResponse maxReturnOrderPercentProduct = productService.findProductHaveMaxReturnOrderPercent(shopId).orElse(defaultProductResponse);
+        int FollowerNumber = countNumberFollowerShop(shopId);
+        Set<ProductResponse> top10ProductMaxOrder = productService.findTop10ProductHaveMaxNumberOrder(shopId);
+        Set<ProductResponse> top10ProductMaxFavorites = productService.findTop10ProductHaveMaxFavorites(shopId);
+        Set<ProductResponse> top10ProductMaxVisitNumber = productService.findTop10ByShopIdOrderByVisitNumberDesc(shopId).stream()
+                .map(e ->
+                        ProductResponse.builder()
+                                .id(e.getId())
+                                .name(e.getName())
+                                .data(e.getVisitNumber())
+                                .build()).collect(Collectors.toSet());
+        Set<ProductResponse> top5ProductMaxRevenue = productService.findTopFiveProductHaveMaxRevenue(shopId);
+        return SaleManagementResponse.builder()
+                .productNumber(productNumber)
+                .maxCancelOrderPercentProduct(maxCancelOrderPercentProduct)
+                .maxReturnOrderPercentProduct(maxReturnOrderPercentProduct)
+                .FollowerNumber(FollowerNumber)
+                .top10ProductMaxOrder(top10ProductMaxOrder)
+                .top10ProductMaxFavorites(top10ProductMaxFavorites)
+                .top10ProductMaxVisitNumber(top10ProductMaxVisitNumber)
+                .top5ProductMaxRevenue(top5ProductMaxRevenue)
+                .type("saleMng")
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public RevenueManagementResponse getRevenueManagementShop(Long shopId, int year) {
+        isCurrentUserMatchShopUserid(shopId);
+        double totalRevenue = sumRevenueShop(shopId);
+        Set<OrderItems> top10Revenue = orderItemsRepository.findTop10ByShopIdAndStatusOrderByOrderCreatedDateDesc(shopId, "PAYMENT_SUCCESS");
+        Set<ShopRevenueResponse> sumRevenueEachMonthShop = sumRevenueEachMonthShop(shopId, year);
+        return RevenueManagementResponse.builder()
+                .totalRevenue(totalRevenue)
+                .top10Revenue(top10Revenue)
+                .sumRevenueEachMonthShop(sumRevenueEachMonthShop)
+                .type("revenueMng")
+                .build();
+    }
+
+    @Override
+    public Shop updateShopFromFormAndShopId(Long shopId, UpdateShopForm updateShopForm) {
+        Shop shop = findById(shopId);
+
+        if (updateShopForm.getName() != null) {
+            if (!ValidationRegex.isMatcherRegex(ValidationRegex.SHOP_NAME_REGEX, updateShopForm.getName())) {
+                throw new ApiRequestException(HttpStatus.BAD_REQUEST, "Not match name");
+            }
+            shop.setName(updateShopForm.getName());
+        }
+
+        if (updateShopForm.getStatus() != null) {
+            shop.setStatus(updateShopForm.getStatus());
+        }
+
+        if (updateShopForm.getAvatar() != null) {
+            shop.setAvatar(updateShopForm.getAvatar());
+        }
+
+        if (updateShopForm.getCoverImg() != null) {
+            shop.setCoverImg(updateShopForm.getCoverImg());
+        }
+
+        if (updateShopForm.getIntroduce() != null && updateShopForm.getIntroduce().size() != 0) {
+            Set<Assets> introduce = new HashSet<>();
+            for (AssetCreateForm asset : updateShopForm.getIntroduce()) {
+                Assets newAsset = Assets.builder()
+                        .url(asset.getUrl())
+                        .assetType(asset.getAssetType())
+                        .build();
+
+                Assets justSavedAsset = assetService.save(newAsset);
+                introduce.add(justSavedAsset);
+            }
+            shop.setIntroduce(introduce);
+        }
+
+        if (updateShopForm.getDescription() != null) {
+            if (updateShopForm.getDescription().length() > 255) {
+                throw new ApiRequestException(HttpStatus.BAD_REQUEST, "Description size can not over 255 letter!");
+            }
+            shop.setDescription(updateShopForm.getDescription());
+        }
+
+        if (updateShopForm.getStreetDetail() != null) {
+            if (updateShopForm.getStreetDetail().length() > 255) {
+                throw new ApiRequestException(HttpStatus.BAD_REQUEST, "Street detail size can not over 255 letter!");
+            }
+            shop.setDescription(updateShopForm.getStreetDetail());
+        }
+
+
+        if (updateShopForm.getPaymentWays() != null) {
+            Set<PaymentWay> paymentWays = new HashSet<>();
+            for (Long paymentWayId : updateShopForm.getPaymentWays()) {
+                PaymentWay paymentWay = paymentWayService.findById(paymentWayId);
+                paymentWays.add(paymentWay);
+            }
+            shop.setPaymentWays(paymentWays);
+        }
+
+        Long provinceId = updateShopForm.getProvinceCityId();
+        Long districtId = updateShopForm.getDistrictId();
+        Long wardId = updateShopForm.getWardId();
+        if (provinceId != null || districtId != null || wardId != null) {
+            if (!(provinceId != null && districtId != null && wardId != null)) {
+                throw new ApiRequestException(HttpStatus.BAD_REQUEST, "Province id or district id or ward id is null");
+            }
+            ProvinceCity provinceCity = provinceCityService.findById(provinceId);
+            District district = districtService.findById(districtId);
+            Ward ward = wardService.findById(wardId);
+            provinceCityService.isDistrictInProvinceCity(provinceCity, district);
+            districtService.isWardInDistrict(district, ward);
+            shop.setProvinceCity(provinceCity);
+            shop.setDistrict(district);
+            shop.setWard(ward);
+        }
+
+       return shop;
+    }
+
+    @Override
+    public Set<User> updateFollower(User user, Shop shop) {
+        List<User> userList = new ArrayList<>(shop.getFollowers());
+        if (userList.contains(user)) {
+            userList.remove(user);
+        } else {
+            userList.add(user);
+        }
+
+        return new HashSet<>(userList);
     }
 
 }

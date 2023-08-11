@@ -1,11 +1,14 @@
 package com.e_commerce.service.serviceIMPL;
 
 import com.e_commerce.dto.request.ProductOptionDTO;
+import com.e_commerce.dto.request.UpdateProductOptionForm;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Product;
 import com.e_commerce.model.ProductOptions;
 import com.e_commerce.repository.IProductOptionsRepository;
 import com.e_commerce.service.IProductOptionsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -25,8 +28,12 @@ public class ProductOptionsServiceIMPL implements IProductOptionsService {
     }
 
     @Override
-    public Optional<ProductOptions> findById(Long id) {
-        return productOptionsRepository.findById(id);
+    public ProductOptions findById(Long id) {
+        Optional<ProductOptions> productOptions = productOptionsRepository.findById(id);
+        if (!productOptions.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found productOptions at id: " + id);
+        }
+        return productOptions.get();
     }
 
     @Override
@@ -67,6 +74,27 @@ public class ProductOptionsServiceIMPL implements IProductOptionsService {
             }
 
         }
-        return check;
+        if (!check) {
+            throw new ApiRequestException(HttpStatus.BAD_REQUEST, "Not match product option form!");
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public ProductOptions updateProductOptionsByForm(ProductOptions productOption, UpdateProductOptionForm updateProductOptionForm) {
+        if (updateProductOptionForm.getName() != null) {
+            productOption.setName(updateProductOptionForm.getName());
+        }
+
+
+        if (updateProductOptionForm.getPrice() != null) {
+            productOption.setPrice(updateProductOptionForm.getPrice());
+        }
+
+        if (updateProductOptionForm.getStock() != null) {
+            productOption.setStock(updateProductOptionForm.getStock());
+        }
+        return productOption;
     }
 }

@@ -1,10 +1,12 @@
 package com.e_commerce.service.serviceIMPL;
 
 import com.e_commerce.dto.request.AssetCreateForm;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Assets;
 import com.e_commerce.repository.IAssetsRepository;
 import com.e_commerce.service.IAssetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -24,8 +26,12 @@ public class AssetsServiceIMPL implements IAssetService {
     }
 
     @Override
-    public Optional<Assets> findById(Long id) {
-        return assetsRepository.findById(id);
+    public Assets findById(Long id) {
+        Optional<Assets> assets = assetsRepository.findById(id);
+        if (!assets.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found assets at id: " + id);
+        }
+        return assets.get();
     }
 
     @Override

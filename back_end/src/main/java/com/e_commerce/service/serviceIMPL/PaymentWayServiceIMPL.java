@@ -1,9 +1,11 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.PaymentWay;
 import com.e_commerce.repository.IPaymentWayRepository;
 import com.e_commerce.service.IPaymentWayService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +23,12 @@ public class PaymentWayServiceIMPL implements IPaymentWayService {
     }
 
     @Override
-    public Optional<PaymentWay> findById(Long id) {
-        return paymentWayRepository.findById(id);
+    public PaymentWay findById(Long id) {
+        Optional<PaymentWay> paymentWay = paymentWayRepository.findById(id);
+        if (!paymentWay.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found paymentWay at id: " + id);
+        }
+        return paymentWay.get();
     }
 
     @Override

@@ -30,6 +30,7 @@ export default function ShopDetail() {
     sort: "p-asc",
     page: 1,
   });
+  console.log(shop);
 
   const firstInfoBar = [
     {

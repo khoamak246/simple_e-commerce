@@ -1,14 +1,14 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.dto.request.UpdateProductForm;
 import com.e_commerce.dto.response.ProductResponse;
-import com.e_commerce.model.Product;
-import com.e_commerce.model.ProductOptions;
+import com.e_commerce.exception.ApiRequestException;
+import com.e_commerce.model.*;
+import com.e_commerce.repository.IBusinessRepository;
 import com.e_commerce.repository.IProductRepository;
 import com.e_commerce.service.IProductService;
-import com.e_commerce.utils.util.Utils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,6 +18,7 @@ import java.util.*;
 public class ProductServiceIMPL implements IProductService {
 
     private final IProductRepository productRepository;
+    private final IBusinessRepository businessRepository;
 
     @Override
     public List<Product> findAll() {
@@ -25,8 +26,12 @@ public class ProductServiceIMPL implements IProductService {
     }
 
     @Override
-    public Optional<Product> findById(Long id) {
-        return productRepository.findById(id);
+    public Product findById(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (!product.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found product at id: " + id);
+        }
+        return product.get();
     }
 
     @Override
@@ -54,12 +59,8 @@ public class ProductServiceIMPL implements IProductService {
         }
 
         for (Long productId : productsDtoForm) {
-            Optional<Product> product = findById(productId);
-            if (!product.isPresent()) {
-                return null;
-            } else {
-                products.add(product.get());
-            }
+            Product product  = findById(productId);
+            products.add(product);
         }
         return products;
     }
@@ -112,5 +113,48 @@ public class ProductServiceIMPL implements IProductService {
     @Override
     public double getMinPriceProductOption(Product product) {
         return product.getProductOptions().stream().mapToDouble(ProductOptions::getPrice).min().orElseThrow(NoSuchElementException::new);
+    }
+
+    @Override
+    public Product updateProductByFrom(Product product, UpdateProductForm updateProductForm) {
+        if (updateProductForm.getName() != null) {
+            product.setName(updateProductForm.getName());
+        }
+
+        if (updateProductForm.getDescription() != null) {
+            product.setDescription(updateProductForm.getDescription());
+        }
+
+        if (updateProductForm.getOnSale() != null) {
+            product.setOnSale(updateProductForm.getOnSale());
+        }
+
+        if (updateProductForm.getBlock() != null) {
+            product.setBlock(updateProductForm.getBlock());
+        }
+
+        if (updateProductForm.getVisitNumber() != null) {
+            product.setVisitNumber(updateProductForm.getVisitNumber());
+        }
+
+        if (updateProductForm.getBusinessId() != null) {
+            Optional<Business> business = businessRepository.findById(updateProductForm.getBusinessId());
+            if (!business.isPresent()) {
+                throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found business at id: " + updateProductForm.getBusinessId());
+            }
+            product.setBusiness(business.get());
+        }
+        return product;
+    }
+
+    @Override
+    public Set<UserInfo> addProductFavorites(User user, Product product) {
+        List<UserInfo> currentFavorites = new ArrayList<>(product.getFavorites());
+        if (currentFavorites.contains(user.getUserInfo())) {
+            currentFavorites.remove(user.getUserInfo());
+        } else {
+            currentFavorites.add(user.getUserInfo());
+        }
+        return new HashSet<>(currentFavorites);
     }
 }

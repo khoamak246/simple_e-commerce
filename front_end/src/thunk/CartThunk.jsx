@@ -1,11 +1,31 @@
 import {
   DELETE_CART_ITEM,
+  GET_INVALID_CART_ITEMS,
   PATCH_MINUS_QUANTITY_CART_ITEM_QUANTITY,
   PATCH_UPDATE_ALL_CART_ITEM_STATUS,
   PATCH_UPDATE_CART_ITEM_STATUS,
   POST_CREATE_NEW_CART_ITEM,
 } from "../api/service/CartService";
 import { setUser } from "../redux/reducers/UserSlice";
+import { get_user_by_id } from "./UserThunk";
+
+export const get_invalid_cart_items = () => {
+  return async function get_invalid_cart_items_thunk(dispatch, getState) {
+    const { user } = getState();
+    let response = await GET_INVALID_CART_ITEMS(user.id);
+    if (response.status === 200 || response.status === 204) {
+      if (response.data.data.length !== 0) {
+        dispatch(get_user_by_id());
+        return response.data.data;
+      } else {
+        return response.data.data;
+      }
+    } else {
+      console.log(response);
+      return false;
+    }
+  };
+};
 
 export const post_create_new_cart_item = (createCartItemForm) => {
   return async function post_create_new_cart_item_thunk(dispatch, getState) {

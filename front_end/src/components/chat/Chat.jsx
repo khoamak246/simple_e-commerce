@@ -25,6 +25,7 @@ import { iconList } from "../../assets/js/IconList";
 import { toast } from "react-hot-toast";
 import { firebase_multiple_upload } from "../../firebase/FirebaseService";
 import ChatVideo from "./ChatVideo";
+import { useCookies } from "react-cookie";
 let stompClient = null;
 export default function Chat() {
   const fileInputRef = useRef(null);
@@ -41,12 +42,15 @@ export default function Chat() {
     files: [],
   });
   const dispatch = useDispatch();
+  const [cookies, setCookies] = useCookies();
 
   // CONNECT WS AND QUERY ROOM
   useEffect(() => {
-    dispatch(get_room_by_user_id());
-    connect();
-  }, []);
+    if (cookies.token) {
+      dispatch(get_room_by_user_id());
+      connect();
+    }
+  }, [cookies]);
 
   // CONNECT SOCKET
   const connect = () => {

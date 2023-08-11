@@ -23,12 +23,4 @@ public class Utils {
 
     }
 
-    public static ResponseMessage buildFailMessage(String message) {
-        return ResponseMessage.builder()
-                .status("FAILED")
-                .message(message)
-                .data("")
-                .build();
-    }
-
 }
