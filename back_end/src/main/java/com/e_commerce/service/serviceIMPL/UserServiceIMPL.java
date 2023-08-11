@@ -2,7 +2,9 @@ package com.e_commerce.service.serviceIMPL;
 
 import com.e_commerce.dto.request.LoginForm;
 import com.e_commerce.dto.request.RegisterForm;
+import com.e_commerce.dto.request.UpdateUserForm;
 import com.e_commerce.dto.response.JwtResponse;
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Cart;
 import com.e_commerce.model.Role;
 import com.e_commerce.model.User;
@@ -12,7 +14,9 @@ import com.e_commerce.security.jwt.JwtProvider;
 import com.e_commerce.security.userPrincipal.UserPrincipal;
 import com.e_commerce.service.IRoleService;
 import com.e_commerce.service.IUserService;
+import com.e_commerce.service.IValidateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +40,7 @@ public class UserServiceIMPL implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final IValidateService validateRegex;
 
     @Override
     public Optional<User> findByUsername(String username) {
@@ -84,8 +90,12 @@ public class UserServiceIMPL implements IUserService {
     }
 
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public User findById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (!user.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found user at id: " + id);
+        }
+        return user.get();
     }
 
     @Override
@@ -124,8 +134,9 @@ public class UserServiceIMPL implements IUserService {
     public JwtResponse loginUser(LoginForm loginForm) {
         Optional<User> user = findByUsernameOrEmailOrPhoneNumber(loginForm.getUsername());
 
+
         if (!user.isPresent()) {
-            return null;
+            throw new ApiRequestException(HttpStatus.UNAUTHORIZED, "Wrong username or password!");
         } else {
             try {
                 Authentication authentication = authenticationManager.authenticate(
@@ -146,7 +157,7 @@ public class UserServiceIMPL implements IUserService {
                         .roles(userPrincipal.getRoles())
                         .build();
             } catch (AuthenticationException e) {
-                return null;
+                throw new ApiRequestException(HttpStatus.UNAUTHORIZED, "Wrong username or password!");
             }
         }
     }
@@ -154,12 +165,77 @@ public class UserServiceIMPL implements IUserService {
     @Override
     public boolean isUserIdEqualUserPrincipalId(Long userId) {
         UserPrincipal currentUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return currentUser.getId().equals(userId);
+        if (!currentUser.getId().equals(userId)) {
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Not match user request!");
+        }
+        return true;
     }
 
     @Override
     public boolean isMatcherWithCurrentPassword(Long userId, String currentPassword) {
-        User user = findById(userId).orElseThrow(() -> new IllegalArgumentException("Not found user at id: " + userId));
+        User user = findById(userId);
         return passwordEncoder.matches(currentPassword,user.getPassword());
     }
+
+    @Override
+    public boolean isValidRegisterForm(RegisterForm registerForm, BindingResult result) {
+        validateRegex.isValidForm(result);
+
+        boolean isExistUserName = existsByUsername(registerForm.getUsername());
+        if (isExistUserName) {
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Username are already exist!");
+        }
+
+
+        boolean isExistEmail = existsByEmail(registerForm.getEmail());
+        if (isExistEmail) {
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Email are already exist!");
+        }
+
+        boolean isExistPhoneNumber = existsByPhoneNumber(registerForm.getPhoneNumber());
+        if (isExistPhoneNumber) {
+            throw new ApiRequestException(HttpStatus.NOT_ACCEPTABLE, "Phone Number are already exist!");
+        }
+        return true;
+    }
+
+    @Override
+    public User updateUserFromForm(User user, UpdateUserForm updateUserForm) {
+
+
+        if (updateUserForm.getFullName() != null){
+            user.setFullName(updateUserForm.getFullName());
+        }
+
+        if (updateUserForm.getCurrentPassword() != null
+                && updateUserForm.getNewPassword() != null
+                && isMatcherWithCurrentPassword(user.getId(), updateUserForm.getCurrentPassword())){
+            user.setPassword(passwordEncoder.encode(updateUserForm.getNewPassword()));
+        }
+
+        if (updateUserForm.getEmail() != null) {
+            user.setEmail(updateUserForm.getEmail());
+        }
+
+        if (updateUserForm.getPhoneNumber() != null) {
+            user.setPhoneNumber(updateUserForm.getPhoneNumber());
+        }
+
+        user.getUserInfo().setGender(updateUserForm.getGender());
+
+        if (updateUserForm.getDateOfBirth() != null){
+            user.getUserInfo().setDateOfBirth(updateUserForm.getDateOfBirth());
+        }
+
+        if (updateUserForm.getAvatar() != null){
+            user.getUserInfo().setAvatar(updateUserForm.getAvatar());
+        }
+
+        if (updateUserForm.getUserAddresses() != null){
+            user.getUserInfo().setUserAddresses(updateUserForm.getUserAddresses());
+        }
+
+        return user;
+    }
+
 }

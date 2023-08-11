@@ -1,7 +1,10 @@
 package com.e_commerce.service;
 
+import com.e_commerce.dto.request.UpdateProductForm;
 import com.e_commerce.dto.response.ProductResponse;
 import com.e_commerce.model.Product;
+import com.e_commerce.model.User;
+import com.e_commerce.model.UserInfo;
 import com.e_commerce.service.design.IGenericService;
 import org.springframework.data.repository.query.Param;
 
@@ -21,4 +24,6 @@ public interface IProductService extends IGenericService<Product> {
     Set<Product> findTop10ByShopIdOrderByVisitNumberDesc(Long shopId);
     int countByShopId(Long shopId);
     double getMinPriceProductOption(Product product);
+    Product updateProductByFrom(Product product, UpdateProductForm updateProductForm);
+    Set<UserInfo> addProductFavorites(User user, Product product);
 }

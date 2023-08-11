@@ -1,6 +1,14 @@
 import { v1 } from "uuid";
 import { instance } from "../Axios";
 import Cookie from "universal-cookie";
+
+export const GET_INVALID_CART_ITEMS = async (userId) => {
+  let response = await instance(new Cookie().get("token")).get(
+    `/api/v1/cart/cartItems/user/${userId}/over-stock-cart-items`
+  );
+  return response;
+};
+
 export const POST_CREATE_NEW_CART_ITEM = async ({
   cartId,
   createCartItemForm,

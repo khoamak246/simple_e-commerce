@@ -1,9 +1,11 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Room;
 import com.e_commerce.repository.IRoomRepository;
 import com.e_commerce.service.IRoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +23,12 @@ public class RoomServiceIMPL implements IRoomService {
     }
 
     @Override
-    public Optional<Room> findById(Long id) {
-        return roomRepository.findById(id);
+    public Room findById(Long id) {
+        Optional<Room> room = roomRepository.findById(id);
+        if (!room.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found at id: " + id);
+        }
+        return room.get();
     }
 
     @Override

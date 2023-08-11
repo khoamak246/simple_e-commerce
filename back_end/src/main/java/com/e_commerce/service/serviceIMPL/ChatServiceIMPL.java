@@ -1,9 +1,11 @@
 package com.e_commerce.service.serviceIMPL;
 
+import com.e_commerce.exception.ApiRequestException;
 import com.e_commerce.model.Chat;
 import com.e_commerce.repository.IChatRepository;
 import com.e_commerce.service.IChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,8 +23,12 @@ public class ChatServiceIMPL implements IChatService {
     }
 
     @Override
-    public Optional<Chat> findById(Long id) {
-        return chatRepository.findById(id);
+    public Chat findById(Long id) {
+        Optional<Chat> chat = chatRepository.findById(id);
+        if (!chat.isPresent()) {
+            throw new ApiRequestException(HttpStatus.NOT_FOUND, "Not found chat at id: " + id);
+        }
+        return chat.get();
     }
 
     @Override

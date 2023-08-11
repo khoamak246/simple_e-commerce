@@ -131,14 +131,15 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product) {
       handleSelectFirstProductOptionHaveStock();
-
-      dispatch(
-        get_product_by_business_id(getParentBusiness(product.business).id)
-      ).then((res) => {
-        if (res) {
-          setRecommendProducts(res);
-        }
-      });
+      if (recommnendProducts.length === 0) {
+        dispatch(
+          get_product_by_business_id(getParentBusiness(product.business).id)
+        ).then((res) => {
+          if (res) {
+            setRecommendProducts(res);
+          }
+        });
+      }
     }
   }, [product]);
 

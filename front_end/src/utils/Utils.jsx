@@ -246,6 +246,23 @@ export const sortByIdASC = (arr) => {
   return [];
 };
 
+export const sortByIdDESC = (arr) => {
+  if (arr && Array.isArray(arr)) {
+    let newArr = [...arr];
+    newArr.sort((a, b) => {
+      if (a.id > b.id) {
+        return -1;
+      } else if (a.id < b.id) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    return newArr;
+  }
+  return [];
+};
+
 export const getParentBusiness = (bus) => {
   let business = { ...bus };
   while (business.business.length !== 0) {

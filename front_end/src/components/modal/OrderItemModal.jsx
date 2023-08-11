@@ -35,7 +35,10 @@ export default function OrderItemModal({ orderItem, closeModal }) {
             { status: "DELIVERY", message: "Delivered to shipper" },
           ];
         default:
-          return status;
+          return [
+            { status, message: status },
+            { status: "PAYMENT_SUCCESS", message: "Delivered successfully!" },
+          ];
       }
     }
   };
