@@ -35,7 +35,8 @@ public class ShopController {
     @GetMapping("/{shopId}")
     public ResponseEntity<ResponseMessage> findShopById(@PathVariable Long shopId) {
         Shop shop = shopService.findById(shopId);
-        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Query successfully!", shop));
+        ShopResponse shopResponse = shopService.createShopResponse(shop);
+        return ResponseEntity.ok().body(Utils.buildSuccessMessage("Query successfully!", shopResponse));
     }
     @GetMapping("/user/{userId}")
     public ResponseEntity<ResponseMessage> findShopByUserId(@PathVariable Long userId) {

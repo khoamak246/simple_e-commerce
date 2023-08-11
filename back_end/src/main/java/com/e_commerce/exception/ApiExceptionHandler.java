@@ -56,6 +56,7 @@ public class ApiExceptionHandler {
             status = HttpStatus.BAD_REQUEST;
             message = "Miss match value: [" + ((MethodArgumentTypeMismatchException) ex).getValue() + "] with parameter: [" + ((MethodArgumentTypeMismatchException) ex).getName() + "]";
         } else {
+            ex.printStackTrace();
             status = HttpStatus.INTERNAL_SERVER_ERROR;
             message = "Unknown error";
         }

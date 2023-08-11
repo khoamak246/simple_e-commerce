@@ -16,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class CreateReviewForm {
 
-    @Size(min = 20, max = 255)
+    @Size(min = 10, max = 255)
     private String content;
 
     @Min(1)

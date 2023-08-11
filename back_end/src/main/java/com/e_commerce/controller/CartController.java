@@ -14,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @RestController
@@ -30,8 +31,9 @@ public class CartController {
     public ResponseEntity<ResponseMessage> findOverStockCartItems(@PathVariable Long userId) {
         userService.isUserIdEqualUserPrincipalId(userId);
         User user = userService.findById(userId);
-        Set<CartItems> cartItems = cartService.removeOverStockCartItems(user.getUserInfo().getCart().getCartItems());
-        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully", cartItems));
+        Cart cart = user.getUserInfo().getCart();
+        Set<CartItems> inValidCartItems = cartService.removeOverStockCartItems(cart);
+        return ResponseEntity.ok(Utils.buildSuccessMessage("Query successfully", inValidCartItems));
     }
 
     @PatchMapping("/cartItems/{cartItemId}/status")
@@ -67,7 +69,7 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}/cartItems")
-    public ResponseEntity<ResponseMessage> saveNewCartItem(@PathVariable Long cartId, @Validated @RequestBody CreateCartItemForm createCartItemForm, BindingResult result){
+    public ResponseEntity<ResponseMessage> saveNewCartItem(@PathVariable Long cartId, @Validated @RequestBody CreateCartItemForm createCartItemForm, BindingResult result) {
         validateRegex.isValidForm(result);
         Cart justSavedCart = cartService.saveNewCartItemToCartFromForm(cartId, createCartItemForm);
         return ResponseEntity.ok().body(Utils.buildSuccessMessage("Add new cart item successfully!", justSavedCart));

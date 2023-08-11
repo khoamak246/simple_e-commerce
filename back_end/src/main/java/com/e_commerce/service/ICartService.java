@@ -10,7 +10,7 @@ import java.util.Set;
 public interface ICartService extends IGenericService<Cart> {
     boolean isMatchCartWithCurrentUser(Cart cart);
     CartItems findByCartItemInCart(Cart cart ,Long productOptionsId);
-    Set<CartItems> removeOverStockCartItems(Set<CartItems> cartItems);
+    Set<CartItems> removeOverStockCartItems(Cart cartItems);
     Cart updateStatusAllCartItem(Cart cart, boolean status);
     Cart deleteCartItemsAndUpdateCartTotal(Long cartItemId);
     Cart minusQuantityCartItemInCart(Long cartItemId);

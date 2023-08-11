@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useEffect } from "react";
 import {
   delete_cart_item,
+  get_invalid_cart_items,
   patch_minus_quantity_cart_item,
   patch_udpate_status_all_cart_item,
   patch_udpate_status_cart_item,
@@ -146,18 +147,29 @@ export default function Cart() {
     if (orderItems.length === 0) {
       return toast.error("OOP! Not have select cart item!");
     }
-    let { district, provinceCity, streetDetail, ward } = selectAddress;
-    let createOrderForm = {
-      ...orderForm,
-      provinceCityId: provinceCity.id,
-      districtId: district.id,
-      wardId: ward.id,
-      streetDetail,
-    };
 
-    dispatch(post_create_new_order(createOrderForm)).then((res) => {
+    dispatch(get_invalid_cart_items()).then((res) => {
       if (res) {
-        toast.success("Order successfully!");
+        if (res.length !== 0) {
+          return toast.error(
+            "OOP! Some product over stock please order again!"
+          );
+        } else {
+          let { district, provinceCity, streetDetail, ward } = selectAddress;
+          let createOrderForm = {
+            ...orderForm,
+            provinceCityId: provinceCity.id,
+            districtId: district.id,
+            wardId: ward.id,
+            streetDetail,
+          };
+
+          dispatch(post_create_new_order(createOrderForm)).then((response) => {
+            if (response) {
+              toast.success("Order successfully!");
+            }
+          });
+        }
       }
     });
   };

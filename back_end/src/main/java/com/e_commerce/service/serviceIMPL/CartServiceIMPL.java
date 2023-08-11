@@ -72,17 +72,23 @@ public class CartServiceIMPL implements ICartService {
     }
 
     @Override
-    public Set<CartItems> removeOverStockCartItems(Set<CartItems> cartItems) {
-        Set<CartItems> overStockCartItems = new HashSet<>();
+    public Set<CartItems> removeOverStockCartItems(Cart cart) {
+        Set<CartItems> cartItems = cart.getCartItems();
+        Set<CartItems> inValidCartItems = new HashSet<>();
         for (CartItems cartItem : cartItems) {
             int stock = cartItem.getProductOptions().getStock();
-            if (cartItem.getQuantity() > stock) {
+            boolean onSale = cartItem.getProductOptions().getProduct().getOnSale();
+            boolean isBlock = cartItem.getProductOptions().getProduct().isBlock();
+            if (stock <= 0 || !onSale || isBlock) {
+                cartItems.remove(cartItem);
+                inValidCartItems.add(cartItem);
+            } else if (cartItem.getQuantity() > stock) {
                 cartItem.setQuantity(stock);
-                CartItems justSavedCartItem = cartItemService.save(cartItem);
-                overStockCartItems.add(justSavedCartItem);
+                inValidCartItems.add(cartItem);
             }
         }
-        return overStockCartItems;
+        save(cart);
+        return inValidCartItems;
     }
 
     @Override

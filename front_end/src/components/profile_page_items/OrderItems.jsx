@@ -4,14 +4,15 @@ import CancelAndReturnOrderItemModal from "../modal/CancelAndReturnOrderItemModa
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import ReviewModal from "../modal/ReviewModal";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { USER_STATE_SELECTOR } from "../../redux/selectors/Selectors";
+import { patch_update_order_item_status } from "../../thunk/OrderThunk";
 
 export default function OrderItems({ orderItem }) {
-  console.log(orderItem);
   const userSelector = useSelector(USER_STATE_SELECTOR);
   const [toggleAction, setToggleAction] = useState();
   const [toggleReviewForm, setToggleReviewModal] = useState(false);
+  const dispatch = useDispatch();
   const handleRenderOrderItemStatus = () => {
     switch (orderItem.status) {
       case "PREPARE":
@@ -127,6 +128,7 @@ export default function OrderItems({ orderItem }) {
             </svg>
           </button>
         )}
+       
         {/* REVIEW */}
         {orderItem.status === "PAYMENT_SUCCESS" &&
           isInReturnTerm(orderItem.createdDate) && (
